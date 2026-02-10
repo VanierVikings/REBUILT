@@ -1,7 +1,7 @@
 {
   "imu": {
     "type": "pigeon2",
-    "id": null,
+    "id": 0,
     "canbus": null
   },
   "invertedIMU": false,
@@ -10,10 +10,5 @@
     "frontright.json",
     "backleft.json",
     "backright.json"
-  ],
-  "encoder": {
-    "type": "attached",
-    "id": "0",
-    "canbus": "true"
-  }
+  ]
 }
