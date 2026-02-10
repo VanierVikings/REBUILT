@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.SwerveConstants;
+import frc.robot.Constants.limelight; 
 
 import java.io.File;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -19,6 +20,10 @@ import swervelib.SwerveDrive;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.util.Units;
+
+import edu.wpi.first.math.geometry.Pose2d; 
+import edu.wpi.first.math.geometry.Translation2d; 
+import edu.wpifirst.math.geometry.Rotation2d; 
 
 
 public class SwerveSubsystem extends SubsystemBase {
@@ -36,6 +41,15 @@ public class SwerveSubsystem extends SubsystemBase {
 
   
   public SwerveSubsystem(File directory) {
+    
+    boolean blueAlliance = false;
+    Pose2d startingPose = blueAlliance ? new Pose2d(new Translation2d(Meter.of(1),
+                                                                      Meter.of(4)),
+                                                    Rotation2d.fromDegrees(0))
+                                       : new Pose2d(new Translation2d(Meter.of(16),
+                                                                      Meter.of(4)),
+                                                    Rotation2d.fromDegrees(180));
+    // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary objects being created.
     
     SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH; // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary objects being created.
     
@@ -59,17 +73,77 @@ public class SwerveSubsystem extends SubsystemBase {
       swerveDrive.stopOdometryThread(); //self explanatory
      }
 
-     setupPathPlanner();
-
-  }
+    setupPathPlanner();
+    generatePoseArray();
+  } 
 
   //Construct the swerve
   public SwerveSubsystem(SwerveDriveConfiguration driveCfg, SwerveDriveConfiguration controllerCfg)
   {
-    swerveDrive = new SwerveDrive(driveCfg, controllerCfg, SwerveConstants.MAX_SPEED, new )
+    swerveDrive = new SwerveDrive(driveCfg, controllerCfg, SwerveConstants.MAX_SPEED, new ) 
+    new pose2d = new Translation2d(Meter.of(2), Meter.of(0)),Rotation2d.fromDegrees(0);
   }
 
 
+  private void M1headingupdate(){
+     boolean doRejectUpdate = false;
+    LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
+    LimelightHelpers.SetRobotOrientation(
+        "limelight", getHeading().getDegrees(), 0, 0, 0, 0, 0);
+    if (mt1 !=null ){
+      if(mt1.tagCount == 1 && mt1.rawFiducials.length == 1)
+      {
+        if(mt1.rawFiducials[0].ambiguity > .7)
+        {
+          doRejectUpdate = true;
+        }
+        if(mt1.rawFiducials[0].distToCamera > 3)
+        {
+          doRejectUpdate = true;
+        }
+      }
+      if(mt1.tagCount == 0)
+      {
+        doRejectUpdate = true;
+      }
+
+      if(!doRejectUpdate)
+      {
+        swerveDrive.setVisionMeasurementStdDevs(VecBuilder.fill(9999999,9999999,0.7));
+        swerveDrive.addVisionMeasurement(
+            mt1.pose,
+            mt1.timestampSeconds);
+      }
+    }
+  }
+  }
+
+  public void updateVision() {
+    LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
+    LimelightHelpers.SetIMUMode("limelight", 0);
+    boolean doRejectUpdate = false;
+    swerveDrive.updateOdometry();
+    LimelightHelpers.SetRobotOrientation(
+
+        "limelight", getHeading().getDegrees(), 0, 0, 0, 0, 0);
+
+    // if our angular velocity is greater than 360 degrees per second, ignore vision
+    // updates
+    if (mt2 != null) {
+      if (Math.abs(swerveDrive.getGyro().getYawAngularVelocity().in(DegreesPerSecond)) > 360) {
+        doRejectUpdate = true;
+      }
+      if (mt2.tagCount == 0) {
+        doRejectUpdate = true;
+      }
+      if (!doRejectUpdate) {
+        swerveDrive.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
+        swerveDrive.addVisionMeasurement(
+            mt2.pose,
+            mt2.timestampSeconds);
+      }
+    }
+  }
 
     
 
@@ -101,6 +175,12 @@ public class SwerveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+     if (DriverStation.isAutonomous() || DriverStation.isDisabled()){
+      mt1HeadingUpdate();
+    }
+    if (visionEnabled){
+      updateVision();
+    }
   }
 
   @Override
@@ -111,4 +191,4 @@ public class SwerveSubsystem extends SubsystemBase {
   public SwerveDrive getSwerveDrive() {
       return swerveDrive;
   }
-}
+

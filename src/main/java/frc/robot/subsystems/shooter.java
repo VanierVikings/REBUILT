@@ -22,6 +22,8 @@ public class shooter extends SubsystemBase {
 
         shooterMotorTopSlave.setControl(new Follower(ShooterConstants.shooterMotorTopMasterID, MotorAlignmentValue.Opposed));
 
+        
+
 
 
         
