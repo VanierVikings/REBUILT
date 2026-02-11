@@ -4,7 +4,10 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.config.PIDConstants;
+
 import edu.wpi.first.math.util.Units;
+import frc.robot.subsystems.shooter;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -19,6 +22,15 @@ public final class Constants {
 
   public static class SwerveConstants{
     public static final double MAX_SPEED = Units.feetToMeters(4.5); 
+    public static final double kP = 4;
+    public static final double kI = 0.0;
+    public static final double kD = 0.01;
+    public static final PIDConstants autoDrivePID = new PIDConstants(0,0,0);
+    public static final PIDConstants autoRotationPID = new PIDConstants(0,0,0);
+
+
+
+
   }
   
   public static class ShooterConstants {
