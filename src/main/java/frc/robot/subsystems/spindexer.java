@@ -6,6 +6,7 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.TimedRobot;
+import frc.robot.Constants.SpindexerConstants; 
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;

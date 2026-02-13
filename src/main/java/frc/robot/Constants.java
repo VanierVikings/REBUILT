@@ -58,7 +58,11 @@ public final class Constants {
 
   }
 
-
+    public static class SpindexerConstants {
+      public static final double kspinS = 0.0; 
+      public static final double kspinV = 0.0; 
+      public static final double kspinA = 0.0; 
+  }
 
   public static class OperatorConstants {
 
