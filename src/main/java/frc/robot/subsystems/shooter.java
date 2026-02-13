@@ -5,16 +5,25 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import frc.robot.Constants.ShooterConstants;
 import edu.wpi.first.wpilibj2.command.Command;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
+<<<<<<< HEAD
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.config.ClosedLoopConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+=======
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.DutyCycleOut;
+>>>>>>> 0413e1e87370fd217a2e9ff0b670d4329b815d8a
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -30,12 +39,18 @@ public class shooter extends SubsystemBase {
     private final TalonFX shooterMotorTopSlave;
     private final SparkMax hoodMotor;
     private final TalonFXConfiguration shooterConfig;
+<<<<<<< HEAD
     private final VelocityVoltage m_request;
     private final InterpolatingDoubleTreeMap rpmMap;
     private final InterpolatingDoubleTreeMap angleMap;
     private final SparkMaxConfig hoodMotorConfig;
     private final RelativeEncoder hoodEncoder;
     private final SparkClosedLoopController hoodClosedLoopController;
+=======
+    private final SparkMaxConfig bottomConfig;
+
+
+>>>>>>> 0413e1e87370fd217a2e9ff0b670d4329b815d8a
     
     public shooter(){
         shooterMotorTopMaster = new TalonFX(ShooterConstants.shooterMotorTopMasterID);
@@ -64,10 +79,17 @@ public class shooter extends SubsystemBase {
         shooterConfig = new TalonFXConfiguration();
         shooterConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
         shooterConfig.CurrentLimits.SupplyCurrentLimit = ShooterConstants.SHOOTER_CURRENT_LIMIT;
+        shooterConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive; // TO BE CHANGED
+
+        bottomConfig = new SparkMaxConfig();
+        bottomConfig
+        .smartCurrentLimit(ShooterConstants.SHOOTER_CURRENT_LIMIT)
+        .idleMode(IdleMode.kBrake);
 
         rpmMap = new InterpolatingDoubleTreeMap();
         angleMap = new InterpolatingDoubleTreeMap();
 
+<<<<<<< HEAD
         rpmMap.put(0.0, 0.0); //exmaples, we will add them later when testing
         angleMap.put(0.0, 0.0);
 
@@ -108,4 +130,18 @@ public class shooter extends SubsystemBase {
         setHoodAngle(angle); // NEO position PID
     }    
     
+=======
+    }
+
+    public void spinTop(double direciton){
+        shooterMotorTop.setControl(new DutyCycleOut(direciton));
+    }
+
+    public Command spinBottom(double direction){
+            return this.runEnd(()-> shooterMotorBottom.set(direction), () -> shooterMotorBottom.set(0));
+        }
+
+
+
+>>>>>>> 0413e1e87370fd217a2e9ff0b670d4329b815d8a
 }

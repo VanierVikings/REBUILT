@@ -34,7 +34,7 @@ import swervelib.SwerveController;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  final SwerveSubsystem drivetrain = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swere"));
+  final SwerveSubsystem drivetrain = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"));
   private final SendableChooser<Command> autoChooser;
 
 
