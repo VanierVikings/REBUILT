@@ -45,7 +45,7 @@ public class shooter extends SubsystemBase {
     private final RelativeEncoder hoodEncoder;
     private final SparkClosedLoopController hoodClosedLoopController;
 
-    
+
     public shooter(){
         shooterMotorTopMaster = new TalonFX(ShooterConstants.shooterMotorTopMasterID);
         shooterMotorTopSlave = new TalonFX(ShooterConstants.shooterMotorTopSlaveID);
@@ -119,9 +119,6 @@ public class shooter extends SubsystemBase {
         setHoodAngle(angle); // NEO position PID
     }    
     
-
-    }
-
     public void spinTop(double direciton){
         shooterMotorTopMaster.setControl(new DutyCycleOut(direciton));
     }
