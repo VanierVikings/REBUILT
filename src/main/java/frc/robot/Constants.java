@@ -43,10 +43,21 @@ public final class Constants {
     public static final double kShooterD = 0.0;
     public static final double kShooterFF = 0.0;
 
-    public static final int SHOOTER_CURRENT_LIMIT = 40; //amps;
+    public static final double kHoodP = 0.0;
+    public static final double kHoodI = 0.0;
+    public static final double kHoodD = 0.0;
+  
 
+    public static final int SHOOTER_CURRENT_LIMIT = 40; //amps;
+    public static final int HOOD_CURRENT_LIMIT = 40; //made this up
+
+    public static final int maxDistance = 10; // I put random values for these, used to make sure hood does not kill itself 
+    public static final int minDistance = 1;
+
+    public static final int degreesPerRotation = 365/30*360; //no clue how to do this, probabaly wrong
 
   }
+
 
 
   public static class OperatorConstants {
