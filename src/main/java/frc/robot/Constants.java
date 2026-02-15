@@ -59,9 +59,13 @@ public final class Constants {
   }
 
     public static class SpindexerConstants {
-      public static final double kspinS = 0.0; 
-      public static final double kspinV = 0.0; 
-      public static final double kspinA = 0.0; 
+      public static final int SPINDEXER_MOTOR_ID = 0;
+      public static final int SPINDEXER_CURRENT_LIMIT = 40;
+
+      public static final double kP = 0.0;
+      public static final double kI = 0.0;
+      public static final double kD = 0.0;
+
   }
 
   public static class OperatorConstants {

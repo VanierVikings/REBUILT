@@ -46,12 +46,12 @@ public class RobotContainer {
 
   //Cnvert driver input into field-relative ChassisSpeeds - controlled by angular velocity
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivetrain.getSwerveDrive(),
-    () -> -driver.getLeftY(),
-    () -> -driver.getLeftX()) // Axis which give the desired translational angle and speed.
-    .withControllerRotationAxis(() -> -driver.getRightX()) // Axis which give the desired angular velocity.
-    .deadband(0.05)                  // Controller deadband
-    .scaleTranslation(0.8)           // Scaled controller translation axis
-    .allianceRelativeControl(true);  // Alliance relative controls.
+            () -> -driver.getLeftY(),
+            () -> -driver.getLeftX()) // Axis which give the desired translational angle and speed.
+            .withControllerRotationAxis(() -> -driver.getRightX()) // Axis which give the desired angular velocity.
+            .deadband(0.05)                  // Controller deadband
+            .scaleTranslation(0.8)           // Scaled controller translation axis
+            .allianceRelativeControl(true);  // Alliance relative controls.
 
 
   //Clones angular velocity input steam, converts to a fieldRelative input stream
@@ -66,10 +66,10 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
+    configureBindings();
+    
     autoChooser = AutoBuilder.buildAutoChooser();
 
-
-    configureBindings();
   }
 
   /**

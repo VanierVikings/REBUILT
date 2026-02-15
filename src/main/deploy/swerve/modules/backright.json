@@ -15,7 +15,7 @@
     "canbus": null
   },
   "encoder": {
-    "type": "analog",
+    "type": "thrifty",
     "id": 2,
     "canbus": null
   },
