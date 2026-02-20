@@ -8,7 +8,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 
-public class SwerveController {
+public class AlectronaSwerveController {
     private final PIDController translationController;
     private final PIDController rotationController;
     private final double maxSpeed;
@@ -19,7 +19,7 @@ public class SwerveController {
     // Added Limiters
     private final OPRSlewRateLimiter translationLimiter;
     
-    public SwerveController(
+    public AlectronaSwerveController(
         PIDController translationController, 
         PIDController rotationController, 
         double maxSpeed, 

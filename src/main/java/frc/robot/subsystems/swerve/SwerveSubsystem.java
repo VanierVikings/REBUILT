@@ -52,6 +52,13 @@ import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 
+import frc.AlectronaLib.EstimatePose;
+import frc.AlectronaLib.AlectronaSwerveController;
+import frc.AlectronaLib.LimelightHelpers;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import swervelib.SwerveDrive.setVisionMeasurementStdDevs;
+
+
 
 
 public class SwerveSubsystem extends SubsystemBase {
@@ -64,6 +71,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
   //Disable vision when simulating
   public boolean visionEnabled = !SwerveDriveTelemetry.isSimulation;
+
+  private final EstimatePose m_EstimatePose = new EstimatePose("limelight");
 
   public SwerveController controller;
 
@@ -106,6 +115,14 @@ public class SwerveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+    var currentState = new EstimatePose.RobotState(getFieldVelocity(), getPose());
+
+    m_EstimatePose.update(currentState, (visionPose, timestamp, stdDevs) -> {
+      this.setVisionMeasurementStdDevs(stdDevs);
+      this.addVisionMeasurement(visionPose, timestamp);
+    }); 
+
+
     // This method will be called once per scheduler run
     //  if (DriverStation.isAutonomous() || DriverStation.isDisabled()){
     //   mt1HeadingUpdate();
@@ -427,7 +444,9 @@ public class SwerveSubsystem extends SubsystemBase {
       return swerveDrive;
   }
 
-
+  public void addVisionMeasurement(Pose2d visionRobotPoseMeters, double timestampSeconds){
+    swerveDrive.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds);
+  }
 
 
 
