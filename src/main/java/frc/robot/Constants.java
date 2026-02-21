@@ -22,7 +22,7 @@ public final class Constants {
   public static final double ROBOT_MASS = 0.0; // kg
 
   public static class SwerveConstants{
-    public static final double MAX_SPEED = Units.feetToMeters(4.5); 
+    public static final double MAX_SPEED = Units.feetToMeters(9); 
     public static final double kP = 4;
     public static final double kI = 0.0;
     public static final double kD = 0.01;

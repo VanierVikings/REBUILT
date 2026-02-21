@@ -56,7 +56,7 @@ import frc.AlectronaLib.EstimatePose;
 import frc.AlectronaLib.AlectronaSwerveController;
 import frc.AlectronaLib.LimelightHelpers;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import swervelib.SwerveDrive.setVisionMeasurementStdDevs;
+
 
 
 
@@ -117,10 +117,10 @@ public class SwerveSubsystem extends SubsystemBase {
   public void periodic() {
     var currentState = new EstimatePose.RobotState(getFieldVelocity(), getPose());
 
-    m_EstimatePose.update(currentState, (visionPose, timestamp, stdDevs) -> {
-      this.setVisionMeasurementStdDevs(stdDevs);
-      this.addVisionMeasurement(visionPose, timestamp);
-    }); 
+    // m_EstimatePose.update(currentState, (visionPose, timestamp, stdDevs) -> {
+    //   this.setVisionMeasurementStdDevs(stdDevs);
+    //   this.addVisionMeasurement(visionPose, timestamp);
+    // }); 
 
 
     // This method will be called once per scheduler run
