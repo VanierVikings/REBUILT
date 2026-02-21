@@ -7,7 +7,11 @@ package frc.robot;
 
 import com.pathplanner.lib.config.PIDConstants;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.util.Units;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;;
+
 import frc.robot.subsystems.shooter;
 
 /**
@@ -22,16 +26,18 @@ public final class Constants {
   public static final double ROBOT_MASS = 0.0; // kg
 
   public static class SwerveConstants{
-    public static final double MAX_SPEED = Units.feetToMeters(9); 
+    public static final double maxSpeed = Units.feetToMeters(9); 
     public static final double kP = 4;
     public static final double kI = 0.0;
     public static final double kD = 0.01;
+    public static final PIDController translationController = new PIDController(4, 0, 0.15);  //OP ROBOTICS PID : 4, 0, 0.15
+    public static final PIDController rotationController = new PIDController(4,0,0.15);
+    public static final double jerkRateLimit = 45;
+    public static final double slewRateLimit = 20;
+    public static final double maxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond);
+
     public static final PIDConstants autoDrivePID = new PIDConstants(0,0,0);
     public static final PIDConstants autoRotationPID = new PIDConstants(0,0,0);
-
-
-
-
   }
   
   public static class ShooterConstants {
@@ -69,8 +75,7 @@ public final class Constants {
   }
 
   public static class OperatorConstants {
-
-
     public static final int DriverPort = 0;
+    public static final double deadband = 0.01;
   }
 }

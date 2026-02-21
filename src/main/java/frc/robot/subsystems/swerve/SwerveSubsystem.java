@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.SwerveConstants;
 // import frc.robot.Constants.limelight; 
 
@@ -72,10 +73,18 @@ public class SwerveSubsystem extends SubsystemBase {
   //Disable vision when simulating
   public boolean visionEnabled = !SwerveDriveTelemetry.isSimulation;
 
-  private final EstimatePose m_EstimatePose = new EstimatePose("limelight");
-
   public SwerveController controller;
 
+  private final EstimatePose m_EstimatePose = new EstimatePose("limelight");
+  private final AlectronaSwerveController m_SwerveController = new AlectronaSwerveController(
+    SwerveConstants.translationController, 
+    SwerveConstants.rotationController, 
+    SwerveConstants.maxSpeed, 
+    SwerveConstants.maxAngularRate, false,false, 
+    SwerveConstants.slewRateLimit, 
+    SwerveConstants.jerkRateLimit);
+  private Rotation2d lastHeldPosition = Rotation2d.fromDegrees(0);
+  private boolean wasRotating = false;
   
   public SwerveSubsystem(File directory) {
     
@@ -83,7 +92,7 @@ public class SwerveSubsystem extends SubsystemBase {
     
     try
     {
-      swerveDrive = new SwerveParser(directory).createSwerveDrive(SwerveConstants.MAX_SPEED);
+      swerveDrive = new SwerveParser(directory).createSwerveDrive(SwerveConstants.maxSpeed);
       // Alternative method if you don't want to supply the conversion factor via JSON files.
       // swerveDrive = new SwerveParser(directory).createSwerveDrive(maximumSpeed, angleConversionFactor, driveConversionFactor);
     } 
@@ -110,17 +119,17 @@ public class SwerveSubsystem extends SubsystemBase {
   //Construct the swerve
   public SwerveSubsystem(SwerveDriveConfiguration driveCfg, SwerveControllerConfiguration controllerCfg)
   {
-    swerveDrive = new SwerveDrive(driveCfg,controllerCfg, SwerveConstants.MAX_SPEED, new Pose2d(new Translation2d(Meter.of(2), Meter.of(0)), Rotation2d.fromDegrees(0)));
+    swerveDrive = new SwerveDrive(driveCfg,controllerCfg, SwerveConstants.maxSpeed, new Pose2d(new Translation2d(Meter.of(2), Meter.of(0)), Rotation2d.fromDegrees(0)));
   }
 
   @Override
   public void periodic() {
     var currentState = new EstimatePose.RobotState(getFieldVelocity(), getPose());
 
-    // m_EstimatePose.update(currentState, (visionPose, timestamp, stdDevs) -> {
-    //   this.setVisionMeasurementStdDevs(stdDevs);
-    //   this.addVisionMeasurement(visionPose, timestamp);
-    // }); 
+    m_EstimatePose.update(currentState, (visionPose, timestamp, stdDevs) -> {
+      swerveDrive.setVisionMeasurementStdDevs(stdDevs);
+      swerveDrive.addVisionMeasurement(visionPose, timestamp);
+    }); 
 
 
     // This method will be called once per scheduler run
@@ -397,7 +406,7 @@ public class SwerveSubsystem extends SubsystemBase {
         headingX,
         headingY,
         getHeading().getRadians(),
-        SwerveConstants.MAX_SPEED);
+        SwerveConstants.maxSpeed);
   }
 
   public ChassisSpeeds getTargetSpeeds(double xInput, double yInput, Rotation2d angle) {
@@ -407,7 +416,7 @@ public class SwerveSubsystem extends SubsystemBase {
         scaledInputs.getY(),
         angle.getRadians(),
         getHeading().getRadians(),
-        SwerveConstants.MAX_SPEED);
+        SwerveConstants.maxSpeed);
   }
 
   //Get current field-relative velocity (x, y, omega) of robot
@@ -448,6 +457,77 @@ public class SwerveSubsystem extends SubsystemBase {
     swerveDrive.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds);
   }
 
+  public double getTimeSinceLastTagSeen(){
+    return Timer.getFPGATimestamp() - m_EstimatePose.getLastTagTimestamp();
+  };
 
+
+  public Command SwerveControllerDrive(Supplier<Pose2d> targetSupplier, 
+        DoubleSupplier xInput, 
+        DoubleSupplier yInput, 
+        Supplier<Rotation2d> rotSupplier, 
+        DoubleSupplier vR
+    ){
+      return this.run(() -> {
+        Rotation2d currentHeading = swerveDrive.getPose().getRotation();
+        boolean hasManualRotation = false;
+        double manualRot = 0.0;
+
+        if (DriverStation.isAutonomous()) {
+            lastHeldPosition = swerveDrive.getPose().getRotation();
+        } else {
+            if (vR != null) {
+                manualRot = vR.getAsDouble();
+
+                boolean isRotating = Math.abs(manualRot) > OperatorConstants.deadband;
+                if (!isRotating && wasRotating) {
+                    double rotationRate = Units.radiansToDegrees(
+                        swerveDrive.getRobotVelocity().omegaRadiansPerSecond
+                    );
+                    double kP = 0.15;
+                    double compensation = kP * rotationRate;
+                    lastHeldPosition = currentHeading.plus(Rotation2d.fromDegrees(compensation));
+                    System.out.println(
+                        "Applying rotational compensation of " + compensation +
+                        " degrees to counteract rotation rate of " + rotationRate + " degrees/s"
+                    );
+                }
+                wasRotating = isRotating;
+                if (isRotating) {
+                    lastHeldPosition = currentHeading;
+                    hasManualRotation = true;
+                }
+            }
+
+            if (!hasManualRotation && rotSupplier != null) {
+                Rotation2d target = rotSupplier.get();
+                if (target != null) {
+                    double errorDeg = target.minus(currentHeading).getDegrees();
+                    if (Math.abs(errorDeg) > 0.5) {
+                        lastHeldPosition = target;
+                    }
+                }
+            }
+        }
+
+        var speeds = m_SwerveController.calculate(
+            () -> swerveDrive.getPose(),
+            targetSupplier,
+            xInput,
+            yInput,
+            rotSupplier,
+            vR
+        );
+
+        // YAGSL drive call — field-relative
+        swerveDrive.driveFieldOriented(
+            new ChassisSpeeds(
+                speeds.vx().getAsDouble(),
+                speeds.vy().getAsDouble(),
+                speeds.vr().getAsDouble()
+            )
+        );
+    }).withName("SwerveControllerDrive");
+}
 
 }
