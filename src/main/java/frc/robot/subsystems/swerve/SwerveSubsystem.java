@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.OperatorConstants;
+import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.SwerveConstants;
 // import frc.robot.Constants.limelight; 
 
@@ -100,6 +100,9 @@ public class SwerveSubsystem extends SubsystemBase {
     {
       throw new RuntimeException(e);
     }
+
+  
+    swerveDrive.setChassisDiscretization(true, 0.02); //Skew reduction
 
     swerveDrive.setHeadingCorrection(false);// Heading correction should only be used while controlling the robot via angle.
 
@@ -479,7 +482,7 @@ public class SwerveSubsystem extends SubsystemBase {
             if (vR != null) {
                 manualRot = vR.getAsDouble();
 
-                boolean isRotating = Math.abs(manualRot) > OperatorConstants.deadband;
+                boolean isRotating = Math.abs(manualRot) > DriveConstants.deadband;
                 if (!isRotating && wasRotating) {
                     double rotationRate = Units.radiansToDegrees(
                         swerveDrive.getRobotVelocity().omegaRadiansPerSecond
@@ -528,6 +531,18 @@ public class SwerveSubsystem extends SubsystemBase {
             )
         );
     }).withName("SwerveControllerDrive");
-}
+  }
+
+  public double getDistanceError(){
+    return m_SwerveController.getDistanceError();
+  }
+
+  public double getRotationalError(){
+    return m_SwerveController.getRotationalError();
+  }
+
+  public Rotation2d getLastHeldRotation() {
+        return lastHeldPosition;
+    }
 
 }

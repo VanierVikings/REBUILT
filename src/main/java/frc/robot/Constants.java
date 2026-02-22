@@ -10,7 +10,7 @@ import com.pathplanner.lib.config.PIDConstants;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.util.Units;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecond;;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 import frc.robot.subsystems.shooter;
 
@@ -27,9 +27,6 @@ public final class Constants {
 
   public static class SwerveConstants{
     public static final double maxSpeed = Units.feetToMeters(9); 
-    public static final double kP = 4;
-    public static final double kI = 0.0;
-    public static final double kD = 0.01;
     public static final PIDController translationController = new PIDController(4, 0, 0.15);  //OP ROBOTICS PID : 4, 0, 0.15
     public static final PIDController rotationController = new PIDController(4,0,0.15);
     public static final double jerkRateLimit = 45;
@@ -74,7 +71,7 @@ public final class Constants {
 
   }
 
-  public static class OperatorConstants {
+  public static class DriveConstants {
     public static final int DriverPort = 0;
     public static final double deadband = 0.01;
   }

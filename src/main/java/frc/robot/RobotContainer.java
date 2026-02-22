@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import frc.AlectronaLib.SwerveDriveInput;
+import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
@@ -16,6 +18,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import choreo.auto.AutoChooser;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -34,14 +37,20 @@ import swervelib.SwerveController;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  final SwerveSubsystem drivetrain = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"));
+  private final SwerveSubsystem drivetrain = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"));
+  
+
   private final SendableChooser<Command> autoChooser;
-
-
    
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController driver =
-      new CommandXboxController(OperatorConstants.DriverPort);
+      new CommandXboxController(DriveConstants.DriverPort);
+
+  private SwerveDriveInput m_DriveInput = new SwerveDriveInput();
+  private SwerveDriveInput m_RotInput = new SwerveDriveInput();
+
+  private Translation2d modifiedDriveInput = new Translation2d(0,0);
+  private Translation2d modifiedRotInput = new Translation2d(0,0);
 
 
   //Cnvert driver input into field-relative ChassisSpeeds - controlled by angular velocity
@@ -72,6 +81,12 @@ public class RobotContainer {
 
   }
 
+  public void updateDriveInput(){
+    modifiedDriveInput = m_DriveInput.getShapedInput(()-> driver.getLeftX(), ()-> driver.getLeftY());
+    modifiedRotInput = m_RotInput.getShapedInput(()-> driver.getRightX(), ()-> driver.getRightY());
+
+  }
+
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
    * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
@@ -87,6 +102,31 @@ public class RobotContainer {
     Command driveFieldOrientedDirectAngle = drivetrain.driveFieldOriented(driveDirectAngle);
     Command driveRobotOrientedAngularVelocity = drivetrain.driveFieldOriented(driveRobotOriented);
     Command driveSetpointGen = drivetrain.driveWithSetpointGeneratorFieldRelative(driveDirectAngle);
+
+    drivetrain.SwerveControllerDrive(
+            null,
+            () -> modifiedDriveInput.getX(),
+            () -> modifiedDriveInput.getY(),
+            () -> {
+                if (Math.abs(driver.getRightX()) > DriveConstants.deadband) {
+                    return null;
+                } else {
+                    return drivetrain.getLastHeldRotation();
+                }
+            },
+            () -> {
+                if (Math.abs(driver.getRightX()) > DriveConstants.deadband) {
+                    return modifiedRotInput.getX();
+                } else {
+                    return 0.0;
+                }
+            }
+        )
+    ;
+
+
+
+
 
      if (RobotBase.isSimulation()) {
       drivetrain.setDefaultCommand(driveFieldOrientedAnglularVelocity);
