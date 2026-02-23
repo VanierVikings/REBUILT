@@ -6,7 +6,6 @@ package frc.robot;
 
 import frc.AlectronaLib.SwerveDriveInput;
 import frc.robot.Constants.DriveConstants;
-import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
@@ -52,12 +51,17 @@ public class RobotContainer {
   private Translation2d modifiedDriveInput = new Translation2d(0,0);
   private Translation2d modifiedRotInput = new Translation2d(0,0);
 
+public void updateDriveInput(){
+    modifiedDriveInput = m_DriveInput.getShapedInput(()-> driver.getLeftX(), ()-> driver.getLeftY());
+    modifiedRotInput = m_RotInput.getShapedInput(()-> driver.getRightX(), ()-> driver.getRightY());
 
+  }
+  
   //Cnvert driver input into field-relative ChassisSpeeds - controlled by angular velocity
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivetrain.getSwerveDrive(),
-            () -> -driver.getLeftY(),
-            () -> -driver.getLeftX()) // Axis which give the desired translational angle and speed.
-            .withControllerRotationAxis(() -> -driver.getRightX()) // Axis which give the desired angular velocity.
+            () -> -modifiedDriveInput.getY(),
+            () -> -modifiedDriveInput.getX()) // Axis which give the desired translational angle and speed.
+            .withControllerRotationAxis(() -> -modifiedRotInput.getX()) // Axis which give the desired angular velocity.
             .deadband(0.05)                  // Controller deadband
             .scaleTranslation(0.8)           // Scaled controller translation axis
             .allianceRelativeControl(true);  // Alliance relative controls.
@@ -81,11 +85,7 @@ public class RobotContainer {
 
   }
 
-  public void updateDriveInput(){
-    modifiedDriveInput = m_DriveInput.getShapedInput(()-> driver.getLeftX(), ()-> driver.getLeftY());
-    modifiedRotInput = m_RotInput.getShapedInput(()-> driver.getRightX(), ()-> driver.getRightY());
-
-  }
+  
 
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
@@ -124,10 +124,6 @@ public class RobotContainer {
         )
     ;
 
-
-
-
-
      if (RobotBase.isSimulation()) {
       drivetrain.setDefaultCommand(driveFieldOrientedAnglularVelocity);
       drivetrain.resetOdometry(new Pose2d(3,3,new Rotation2d()));
@@ -136,6 +132,11 @@ public class RobotContainer {
     else {
       drivetrain.setDefaultCommand(driveFieldOrientedAnglularVelocity);
     }
+
+    driver.a().onTrue(drivetrain.runOnce(drivetrain::zeroGyro));
+    driver.rightTrigger().whileTrue(drivetrain.sysIdDriveMotorCommand());
+    driver.leftTrigger().whileTrue(drivetrain.sysIdAngleMotorCommand());
+
   }
 
   /**

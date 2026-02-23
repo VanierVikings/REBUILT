@@ -29,6 +29,7 @@ import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 import swervelib.SwerveController;
 import swervelib.SwerveDrive;
+import swervelib.SwerveDriveTest;
 import swervelib.math.SwerveMath;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
@@ -57,6 +58,8 @@ import frc.AlectronaLib.EstimatePose;
 import frc.AlectronaLib.AlectronaSwerveController;
 import frc.AlectronaLib.LimelightHelpers;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
+
 
 
 
@@ -266,10 +269,21 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
 
-  /**
-   * 
-   * SYSID STUFF HERE
-   */
+  public Command sysIdDriveMotorCommand()
+  {
+    return SwerveDriveTest.generateSysIdCommand(
+      SwerveDriveTest.setDriveSysIdRoutine(new Config(),this, swerveDrive, 12, true),
+      3.0, 5.0, 3.0
+      );
+  }
+
+
+  public Command sysIdAngleMotorCommand()
+  {
+    return SwerveDriveTest.generateSysIdCommand(
+        SwerveDriveTest.setAngleSysIdRoutine(new Config(),this, swerveDrive),
+        3.0, 5.0, 3.0);
+  }
 
 
    //Returns a Command that centers the modules of the SwerveDrive subsystem.
