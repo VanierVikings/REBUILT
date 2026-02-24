@@ -8,11 +8,15 @@ package frc.robot;
 import com.pathplanner.lib.config.PIDConstants;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
+import frc.robot.subsystems.shooter.shooter;
+
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
-
-import frc.robot.subsystems.shooter;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -24,6 +28,12 @@ import frc.robot.subsystems.shooter;
  */
 public final class Constants {
   public static final double ROBOT_MASS = 0.0; // kg
+  public static boolean disableHAL = false;
+
+  public static void disableHAL() {
+        disableHAL = true;
+      }
+
 
   public static class SwerveConstants{
     public static final double maxSpeed = Units.feetToMeters(10); 
@@ -45,7 +55,9 @@ public final class Constants {
     public static final double kShooterP = 0.0;
     public static final double kShooterI = 0.0;
     public static final double kShooterD = 0.0;
-    public static final double kShooterFF = 0.0;
+    public static final double kS = 0.0;
+    public static final double kV = 0.0;
+    public static final double kP = 0.0;
 
     public static final double kHoodP = 0.0;
     public static final double kHoodI = 0.0;
@@ -75,5 +87,22 @@ public final class Constants {
   public static class DriveConstants {
     public static final int DriverPort = 0;
     public static final double deadband = 0.01;
+  }
+
+  public static Transform3d robotToShooter = new Transform3d(0.2286,0.0, 0.3937, Rotation3d.kZero);
+
+
+   public class fieldPoses{
+        public static final Pose2d blueAllianceHub = new Pose2d(
+            FieldConstants.Hub.topCenterPoint.getX(),
+            FieldConstants.Hub.topCenterPoint.getY(),
+            new Rotation2d()
+        );
+
+        public static final Pose2d redAllianceHub = new Pose2d(
+            FieldConstants.Hub.oppTopCenterPoint.getX(),
+            FieldConstants.Hub.oppTopCenterPoint.getY(),
+            new Rotation2d()
+        );
   }
 }

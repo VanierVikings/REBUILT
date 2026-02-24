@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.shooter;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
@@ -35,10 +35,10 @@ import edu.wpi.first.math.MathUtil;
 
 public class shooter extends SubsystemBase {
     private final SparkMax shooterTopSpinMotor;
-    private final SparkMax shooterCenterMotor;
+    private final SparkMax flyWheelMotor;
     private final SparkMax feederMotor;
     private final TalonFX hoodMotor;
-    private final SparkMaxConfig shooterConfig;
+    private final SparkMaxConfig flyWheelConfig;
 
     // private final VelocityVoltage m_request;
     // private final InterpolatingDoubleTreeMap rpmMap;
@@ -46,26 +46,43 @@ public class shooter extends SubsystemBase {
     private final TalonFXConfiguration hoodMotorConfig;
     // private final RelativeEncoder hoodEncoder;
     // private final SparkClosedLoopController hoodClosedLoopController;
+    
+    private final SparkClosedLoopController topSpinController;
+    private final SparkClosedLoopController flyWheelController;
 
 
     public shooter(){
-        shooterCenterMotor = new SparkMax(ShooterConstants.shooterCenterMotorID, MotorType.kBrushless);
+        flyWheelMotor = new SparkMax(ShooterConstants.shooterCenterMotorID, MotorType.kBrushless);
         shooterTopSpinMotor = new SparkMax(ShooterConstants.shooterTopSpinMotorID,MotorType.kBrushless);
         feederMotor = new SparkMax(ShooterConstants.feederMotorID, MotorType.kBrushless);
         hoodMotor = new TalonFX(ShooterConstants.hoodMotorID);
 
-        shooterConfig = new SparkMaxConfig();
+        topSpinController = shooterTopSpinMotor.getClosedLoopController();
+        flyWheelController = flyWheelMotor.getClosedLoopController();
+
+        flyWheelConfig = new SparkMaxConfig();
         hoodMotorConfig = new TalonFXConfiguration();
 
 
 
-        shooterConfig
+        flyWheelConfig
             .smartCurrentLimit(40)
-            .idleMode(IdleMode.kCoast);        
+            .idleMode(IdleMode.kCoast);
             
-        shooterTopSpinMotor.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        shooterCenterMotor.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        feederMotor.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        shooterTopSpinMotor.configure(flyWheelConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        flyWheelMotor.configure(flyWheelConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        feederMotor.configure(flyWheelConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+        
+        hoodMotorConfig.CurrentLimits.SupplyCurrentLimit= 40;
+        hoodMotorConfig.Slot0.kS = 0.0;
+        hoodMotorConfig.Slot0.kV = 0.0;
+        hoodMotorConfig.Slot0.kP = 0.0;
+        hoodMotorConfig.Slot0.kI = 0.0;
+        hoodMotorConfig.Slot0.kD = 0.0;
+
+        hoodMotor.getConfigurator().apply(hoodMotorConfig);
+
 
 
 
