@@ -62,7 +62,7 @@ public void updateDriveInput(){
             () -> -modifiedDriveInput.getY(),
             () -> -modifiedDriveInput.getX()) // Axis which give the desired translational angle and speed.
             .withControllerRotationAxis(() -> -modifiedRotInput.getX()) // Axis which give the desired angular velocity.
-            .deadband(0.05)                  // Controller deadband
+            .deadband(0.00)                  // Controller deadband
             .scaleTranslation(0.8)           // Scaled controller translation axis
             .allianceRelativeControl(true);  // Alliance relative controls.
 
