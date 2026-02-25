@@ -90,9 +90,6 @@ public final class Constants {
       public static final double kD = 0.0;
   }
 
-  public static class IntakeConstants{
-    
-  }
 
   public static class DriveConstants {
     public static final int DriverPort = 0;
