@@ -74,6 +74,13 @@ public final class Constants {
 
   }
 
+  public static class IntakeConstants{
+    public static final int intakePivotMotor = 0;
+    public static final int intakeWheelMotor = 0;
+    public static final int smartCurrentLimit = 0;
+    
+  }
+
     public static class SpindexerConstants {
       public static final int SPINDEXER_MOTOR_ID = 0;
       public static final int SPINDEXER_CURRENT_LIMIT = 40;
