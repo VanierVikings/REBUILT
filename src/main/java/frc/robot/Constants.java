@@ -13,7 +13,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
-import frc.robot.subsystems.shooter.shooter;
+import frc.robot.subsystems.shooter.shooterSubsystem;
 
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
@@ -88,6 +88,11 @@ public final class Constants {
       public static final double kP = 0.0;
       public static final double kI = 0.0;
       public static final double kD = 0.0;
+  }
+
+  public static class ClimbConstants{
+    public static final int CLIMB_MOTOR_ID = 0;
+    
   }
 
 

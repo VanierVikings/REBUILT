@@ -23,7 +23,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorOutputStatusValue;
 
 
-public class intake extends SubsystemBase {
+public class intakeSubsystem extends SubsystemBase {
     private final RelativeEncoder wheelEncoder;
     private final SparkMax intakeWheelMotor;
     private final TalonFX intakePivotMotor;
@@ -42,7 +42,7 @@ public class intake extends SubsystemBase {
     }
 
 
-    public intake(){
+    public intakeSubsystem(){
         zeroPivot();
         intakeWheelMotor = new SparkMax(IntakeConstants.intakeWheelMotor, MotorType.kBrushless);
         wheelEncoder = intakeWheelMotor.getEncoder();
