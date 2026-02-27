@@ -3,10 +3,13 @@ package frc.AlectronaLib;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Velocity;
+import edu.wpi.first.wpilibj.DriverStation;
 
 public class AlectronaSwerveController {
     private final PIDController translationController;
@@ -15,9 +18,11 @@ public class AlectronaSwerveController {
     private final double maxAngularRate;
     private final double invertDrive;
     private final double invertRot;
+    private double distanceError = 30;
 
     // Added Limiters
     private final OPRSlewRateLimiter translationLimiter;
+    private final OPRSlewRateLimiter autonTranslationLimiter;
     
     public AlectronaSwerveController(
         PIDController translationController, 
@@ -27,7 +32,9 @@ public class AlectronaSwerveController {
         boolean invertDrive, 
         boolean invertRot,
         double driveRateLimit,   
-        double driveJerkLimit
+        double driveJerkLimit,
+        double autonRateLimit,
+        double autonJerkLimit
     ) {
         this.rotationController = rotationController;
         this.translationController = translationController;
@@ -36,6 +43,7 @@ public class AlectronaSwerveController {
         this.invertDrive = invertDrive ? -1 : 1;
         this.invertRot = invertRot ? -1 : 1;
         this.translationLimiter = new OPRSlewRateLimiter(driveRateLimit, driveJerkLimit);
+        this.autonTranslationLimiter = new OPRSlewRateLimiter(autonRateLimit, autonJerkLimit);
         this.translationController.calculate(Double.MAX_VALUE,0);
         this.rotationController.calculate(Double.MAX_VALUE, 0);
         this.rotationController.setTolerance(Units.degreesToRadians(3));
@@ -43,25 +51,35 @@ public class AlectronaSwerveController {
 
     }
 
-    public Speeds calculate(Supplier<Pose2d> currentPoseInput, Supplier<Pose2d> targetPoseInput, DoubleSupplier XTranslationInput, DoubleSupplier YTranslationInput, Supplier<Rotation2d> targetRotationInput, DoubleSupplier rightX) {
+    public Speeds calculate(Supplier<Pose2d> currentPoseInput, Supplier<Pose2d> targetPoseInput, DoubleSupplier XTranslationInput, DoubleSupplier YTranslationInput, Supplier<Rotation2d> targetRotationInput, DoubleSupplier rightX, DoubleSupplier velocityInput, boolean clampRotation){ 
         double vx, vy, vr;
         Pose2d currentPose, target;
-        Rotation2d targetRotation;  
-        double rawY = YTranslationInput.getAsDouble() * -1;
-        double rawX = XTranslationInput.getAsDouble() * -1;
-        double magnitude = Math.hypot(rawX, rawY);
-        if (magnitude > 1.0) {
-            rawX /= magnitude;
-            rawY /= magnitude;
+        Rotation2d targetRotation;
+        double rawX = 0;
+        double rawY = 0;
+        if (YTranslationInput != null || XTranslationInput != null) {
+            rawY = YTranslationInput.getAsDouble() * -1;
+            rawX = XTranslationInput.getAsDouble() * -1;
+            double magnitude = Math.hypot(rawX, rawY);
+            if (magnitude > 1.0) {
+                rawX /= magnitude;
+                rawY /= magnitude;
+            }   
         }
         currentPose = currentPoseInput.get();
         target = (targetPoseInput == null ? null:targetPoseInput.get());
         targetRotation = (targetRotationInput == null ? null:targetRotationInput.get());
-
         if (target != null) {
+            double velocity;
             // drive to pose, override pose target rot if target rotation exists
             double distance = currentPose.getTranslation().getDistance(target.getTranslation());
-            double velocity = translationController.calculate(distance, 0) * -1;
+            if (velocityInput != null){
+                velocity = velocityInput.getAsDouble();
+                distanceError = distance;
+            } else{
+                velocity = translationController.calculate(distance, 0) * -1;
+                distanceError = translationController.getPositionError();
+            }
             Rotation2d angleToTarget = target.getTranslation().minus(currentPose.getTranslation()).getAngle();
             
             vx = Math.cos(angleToTarget.getRadians()) * velocity * invertDrive;
@@ -80,12 +98,21 @@ public class AlectronaSwerveController {
             // manual Drive
             vx = rawY * maxSpeed;
             vy = rawX * maxSpeed;
-            vr = rightX.getAsDouble() * maxAngularRate * -1;
+            if (rightX != null){
+                vr = rightX.getAsDouble() * maxAngularRate * -1;
+            } else {
+                vr = 0;
+            }
         }
 
         double rawMag = Math.sqrt(vx * vx + vy * vy);
         if (rawMag > 1e-6) {
-            double limitedMag = translationLimiter.calculate(rawMag);
+            double limitedMag;
+            if (DriverStation.isAutonomous()) {
+                limitedMag = autonTranslationLimiter.calculate(rawMag);
+            } else {
+                limitedMag = translationLimiter.calculate(rawMag);
+            }
             double ratio = limitedMag / rawMag;
             vx *= ratio;
             vy *= ratio;
@@ -95,13 +122,13 @@ public class AlectronaSwerveController {
 
         final double finalVx = vx;
         final double finalVy = vy;
-        final double finalVr = vr;
+        final double finalVr = clampRotation ? MathUtil.clamp(vr,-2*Math.PI,2*Math.PI) : vr;
 
         return new Speeds(() -> finalVx, () -> finalVy, () -> finalVr);
     }
 
     public double getDistanceError() {
-        return Math.abs(translationController.getPositionError());
+        return Math.abs(this.distanceError);
     }
 
     public double getRotationalError() {

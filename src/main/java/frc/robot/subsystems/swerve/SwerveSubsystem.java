@@ -44,6 +44,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
 import static edu.wpi.first.units.Units.Meter;
 
+import com.ctre.phoenix6.Utils;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.commands.PathfindingCommand;
@@ -85,7 +86,10 @@ public class SwerveSubsystem extends SubsystemBase {
     SwerveConstants.maxSpeed, 
     SwerveConstants.maxAngularRate, false,false, 
     SwerveConstants.slewRateLimit, 
-    SwerveConstants.jerkRateLimit);
+    SwerveConstants.jerkRateLimit
+    SwerveConstants.autonSlewRateLimit,
+    SwerveConstants.autonJerkLimit);
+    
   private Rotation2d lastHeldPosition = Rotation2d.fromDegrees(0);
   private boolean wasRotating = false;
   
@@ -111,13 +115,15 @@ public class SwerveSubsystem extends SubsystemBase {
 
     swerveDrive.setCosineCompensator(true);// Disables cosine compensation for simulations since it causes discrepancies not seen in real life.
 
-     swerveDrive.setAngularVelocityCompensation(false, false, 0);// Correct for skew that gets worse as angular velocity increases. Start with a coefficient of 0.1.
+     swerveDrive.setAngularVelocityCompensation(true, false, 0.1);// Correct for skew that gets worse as angular velocity increases. Start with a coefficient of 0.1.
 
-     swerveDrive.setModuleEncoderAutoSynchronize(false,1); // Enable if you want to resynchronize your absolute encoders and motor encoders periodically when they are not moving.
+     swerveDrive.setModuleEncoderAutoSynchronize(true,1); // Enable if you want to resynchronize your absolute encoders and motor encoders periodically when they are not moving.
 
-    //  if(visionEnabled){
-    //   swerveDrive.stopOdometryThread(); //self explanatory
-    //  }
+
+     //Stop odometry thread if using vision -> can synchronize updates better
+     if(visionEnabled){
+      swerveDrive.stopOdometryThread(); 
+     }
 
     setupPathPlanner();
   } 
@@ -264,6 +270,7 @@ public class SwerveSubsystem extends SubsystemBase {
     {
       DriverStation.reportError(e.toString(), true);
     }
+    
     return Commands.none();
 
   }
@@ -471,7 +478,7 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   public void addVisionMeasurement(Pose2d visionRobotPoseMeters, double timestampSeconds){
-    swerveDrive.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds);
+    swerveDrive.addVisionMeasurement(visionRobotPoseMeters, Utils.fpgaToCurrentTime(timestampSeconds));
   }
 
   public double getTimeSinceLastTagSeen(){
@@ -479,7 +486,8 @@ public class SwerveSubsystem extends SubsystemBase {
   };
 
 
-  public Command SwerveControllerDrive(Supplier<Pose2d> targetSupplier, 
+  public Command SwerveControllerDrive(
+        Supplier<Pose2d> targetSupplier, 
         DoubleSupplier xInput, 
         DoubleSupplier yInput, 
         Supplier<Rotation2d> rotSupplier, 
@@ -533,7 +541,9 @@ public class SwerveSubsystem extends SubsystemBase {
             xInput,
             yInput,
             rotSupplier,
-            vR
+            vR,
+            null,
+            false
         );
 
         // YAGSL drive call — field-relative

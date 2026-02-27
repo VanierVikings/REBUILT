@@ -13,7 +13,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
-import frc.robot.subsystems.shooter.shooterSubsystem;
+// import frc.robot.subsystems.shooter.shooterSubsystem;
 
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
@@ -42,7 +42,8 @@ public final class Constants {
     public static final double jerkRateLimit = 45;
     public static final double slewRateLimit = 20;
     public static final double maxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond);
-
+    public static final double autonSlewRateLimit = 15;
+    public static final double autonJerkRateLimit = 45;
     public static final PIDConstants autoDrivePID = new PIDConstants(0,0,0);
     public static final PIDConstants autoRotationPID = new PIDConstants(0,0,0);
   }
@@ -92,9 +93,9 @@ public final class Constants {
 
   public static class ClimbConstants{
     public static final int CLIMB_MOTOR_ID = 0;
-    public static final double climbKp = 0.0;
-    public static final double climbKi = 0.0;
-    public static final double climbKd = 0.0;
+    public static final double kP = 0.0;
+    public static final double kI = 0.0;
+    public static final double kD = 0.0;
     
   }
 

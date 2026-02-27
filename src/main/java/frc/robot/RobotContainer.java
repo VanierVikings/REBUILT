@@ -8,8 +8,8 @@ import frc.AlectronaLib.SwerveDriveInput;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
-import frc.robot.subsystems.SuperStructure.ShooterStates;
-import frc.robot.subsystems.shooter.shooterSubsystem;
+// import frc.robot.subsystems.SuperStructure.ShooterStates;
+// import frc.robot.subsystems.shooter.shooterSubsystem;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 
 import java.io.File;
@@ -39,7 +39,7 @@ import swervelib.SwerveController;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final SwerveSubsystem drivetrain = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"));
-  private final shooterSubsystem m_shooter = new shooterSubsystem();
+  // private final shooterSubsystem m_shooter = new shooterSubsystem();
   
 
   private final SendableChooser<Command> autoChooser;
@@ -62,8 +62,8 @@ public void updateDriveInput(){
   
   //Cnvert driver input into field-relative ChassisSpeeds - controlled by angular velocity
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivetrain.getSwerveDrive(),
-            () -> modifiedDriveInput.getY(),
-            () -> modifiedDriveInput.getX()) // Axis which give the desired translational angle and speed.
+            () -> -modifiedDriveInput.getY(),
+            () -> -modifiedDriveInput.getX()) // Axis which give the desired translational angle and speed.
             .withControllerRotationAxis(() -> -modifiedRotInput.getX()) // Axis which give the desired angular velocity.
             .deadband(0.00)                  // Controller deadband
             .scaleTranslation(0.8)           // Scaled controller translation axis
@@ -138,8 +138,8 @@ public void updateDriveInput(){
 
     driver.a().onTrue(drivetrain.runOnce(drivetrain::zeroGyro)); //TESTING PURPOSES ONLY!!!
 
-    driver.rightTrigger().whileTrue(m_shooter.setState(ShooterStates.TEST)); //testing for lut values
-    driver.rightBumper().onTrue(m_shooter.setState(ShooterStates.REZERO)); //rezero hood
+    // driver.rightTrigger().whileTrue(m_shooter.setState(ShooterStates.TEST)); //testing for lut values
+    // driver.rightBumper().onTrue(m_shooter.setState(ShooterStates.REZERO)); //rezero hood
   }
 
   /**

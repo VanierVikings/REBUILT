@@ -1,48 +1,73 @@
-package frc.robot.subsystems;
+// package frc.robot.subsystems;
 
-import com.revrobotics.PersistMode;
-import com.revrobotics.ResetMode;
-import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkMaxConfig;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+// import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
+// import com.revrobotics.PersistMode;
+// import com.revrobotics.RelativeEncoder;
+// import com.revrobotics.ResetMode;
+// import com.revrobotics.spark.SparkClosedLoopController;
+// import com.revrobotics.spark.SparkMax;
+// import com.revrobotics.spark.SparkBase.ControlType;
+// import com.revrobotics.spark.SparkLowLevel.MotorType;
+// import com.revrobotics.spark.config.SparkMaxConfig;
+// import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.ClimbConstants;
+// import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+// import edu.wpi.first.wpilibj2.command.SubsystemBase;
+// import frc.robot.Constants.ClimbConstants;
 
 
-public class climbSubsystem extends SubsystemBase {
-    private final SparkMax climbMotor;
-    private final SparkClosedLoopController climbController;
-    private final SparkMaxConfig climbConfig;
-    private final double climbKp;
-    private final double climbKi;
-    private final double climbKd;
+// public class climbSubsystem extends SubsystemBase {
+//     private final SparkMax climbMotor;
+//     private final SparkClosedLoopController climbController;
+//     private final SparkMaxConfig climbConfig;
+//     private final RelativeEncoder climbEncoder;
 
-    public climbSubsystem(){
-        climbMotor = new SparkMax(ClimbConstants.CLIMB_MOTOR_ID, MotorType.kBrushless);
-        climbController = climbMotor.getClosedLoopController();
-        climbConfig = new SparkMaxConfig();
-        climbConfig
-            .smartCurrentLimit(45)
-            .idleMode(IdleMode.kBrake)
-            .inverted(false);
-        climbMotor.configure(climbConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        SparkClosedLoopController climbController = climbMotor.getClosedLoopController();
-        climbConfig.closedLoop
-            .p(climbKp)
-            .i(climbKi)
-            .d(climbKd);
-            // .outputRange(kMinOutput, kMaxOutput);
-    }
+//     public climbSubsystem(){
+//         climbMotor = new SparkMax(ClimbConstants.CLIMB_MOTOR_ID, MotorType.kBrushless);
+//         climbController = climbMotor.getClosedLoopController();
+//         climbConfig = new SparkMaxConfig();
+//         climbEncoder = climbMotor.getEncoder();
 
-    public void raise_climb(){
+//         climbConfig
+//             .smartCurrentLimit(45)
+//             .idleMode(IdleMode.kBrake)
+//             .inverted(false)
+//             .closedLoop
+//                 .p(ClimbConstants.kP)
+//                 .i(ClimbConstants.kI)
+//                 .d(ClimbConstants.kD);
+
         
-    }
+//             climbMotor.configure(climbConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+//         SparkClosedLoopController climbController = climbMotor.getClosedLoopController();
+
+        
+//             // .outputRange(kMinOutput, kMaxOutput);
+//     }
+
+//     @Override
+//     public void periodic(){
+//         SmartDashboard.putNumber("Climb position",climbEncoder.getPosition());
+//     }
+
+//     public void setSoftLimits(boolean active){
+//         climbConfig
+//             .softLimit
+//                 .forwardSoftLimitEnabled(active)
+//                 .reverseSoftLimitEnabled(false);
+//         climbMotor.configure(climbConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+//     }
+
+//     public void setClimbPosition(double position){
+//         climbController.setSetpoint(position, ControlType.kMAXMotionPositionControl);
+//     }
+
+//     // public void zeroClimber(){
+//     //     climbController.setSetpoint(0, )
+//     // }
 
 
     
 
     
-}
+// }
