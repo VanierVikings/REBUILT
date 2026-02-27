@@ -204,7 +204,8 @@ public class shooterSubsystem extends SubsystemBase {
                 case REZERO:
                     command = run(()->{
                         currentState = ShooterStates.REZERO;
-                        driveHoodVoltage(-2);
+                        resetHoodEncoder();
+                        // driveHoodVoltage(-2);
                         setSoftLimits(false);
                     });
                     break;

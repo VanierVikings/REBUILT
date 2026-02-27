@@ -92,6 +92,9 @@ public final class Constants {
 
   public static class ClimbConstants{
     public static final int CLIMB_MOTOR_ID = 0;
+    public static final double climbKp = 0.0;
+    public static final double climbKi = 0.0;
+    public static final double climbKd = 0.0;
     
   }
 
