@@ -62,8 +62,8 @@ public void updateDriveInput(){
   
   //Cnvert driver input into field-relative ChassisSpeeds - controlled by angular velocity
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivetrain.getSwerveDrive(),
-            () -> -modifiedDriveInput.getY(),
-            () -> -modifiedDriveInput.getX()) // Axis which give the desired translational angle and speed.
+            () -> modifiedDriveInput.getY(),
+            () -> modifiedDriveInput.getX()) // Axis which give the desired translational angle and speed.
             .withControllerRotationAxis(() -> -modifiedRotInput.getX()) // Axis which give the desired angular velocity.
             .deadband(0.00)                  // Controller deadband
             .scaleTranslation(0.8)           // Scaled controller translation axis
@@ -81,6 +81,9 @@ public void updateDriveInput(){
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+
+
+    
     // Configure the trigger bindings
     configureBindings();
     

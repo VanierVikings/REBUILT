@@ -20,6 +20,7 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Timer;
 import swervelib.parser.SwerveControllerConfiguration;
@@ -86,14 +87,22 @@ public class SwerveSubsystem extends SubsystemBase {
     SwerveConstants.maxSpeed, 
     SwerveConstants.maxAngularRate, false,false, 
     SwerveConstants.slewRateLimit, 
-    SwerveConstants.jerkRateLimit
+    SwerveConstants.jerkRateLimit,
     SwerveConstants.autonSlewRateLimit,
-    SwerveConstants.autonJerkLimit);
+    SwerveConstants.autonJerkRateLimit);
     
   private Rotation2d lastHeldPosition = Rotation2d.fromDegrees(0);
   private boolean wasRotating = false;
   
   public SwerveSubsystem(File directory) {
+
+    boolean blueAlliance = DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Blue;
+    Pose2d startingPose = blueAlliance ? new Pose2d(new Translation2d(Meter.of(1),
+                                                                      Meter.of(4)),
+                                                    Rotation2d.fromDegrees(0))
+                                       : new Pose2d(new Translation2d(Meter.of(16),
+                                                                      Meter.of(4)),
+                                                    Rotation2d.fromDegrees(180));
     
     SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH; // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary objects being created.
     
@@ -221,7 +230,7 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   public Command getAutonomousCommand(String pathName){
-    return new PathPlannerAuto(pathName);// Create a path following command using AutoBuilder. This will also trigger event markers.
+    return new PathPlannerAuto(pathName);// Create a path following command using AutoBuilder. T5his will also trigger event markers.
   }
 
   public Command driveToPose(Pose2d pose){
