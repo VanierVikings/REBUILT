@@ -8,6 +8,13 @@ import frc.AlectronaLib.SwerveDriveInput;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.subsystems.SuperStructure;
+import frc.robot.subsystems.climbSubsystem;
+import frc.robot.subsystems.spindexerSubsystem;
+import frc.robot.subsystems.SuperStructure.CLimberStates;
+import frc.robot.subsystems.SuperStructure.ShooterStates;
+import frc.robot.subsystems.SuperStructure.SpindexerStates;
+import frc.robot.subsystems.shooter.shooterSubsystem;
 // import frc.robot.subsystems.SuperStructure.ShooterStates;
 // import frc.robot.subsystems.shooter.shooterSubsystem;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
@@ -24,6 +31,7 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -40,13 +48,17 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final SwerveSubsystem drivetrain = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"));
   // private final shooterSubsystem m_shooter = new shooterSubsystem();
-  
+  private static shooterSubsystem shooter = new shooterSubsystem();
+  private static climbSubsystem climb = new climbSubsystem();
+  private static spindexerSubsystem spindexer = new spindexerSubsystem();
 
   private final SendableChooser<Command> autoChooser;
    
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController driver =
       new CommandXboxController(DriveConstants.DriverPort);
+  final CommandXboxController operator = 
+    new CommandXboxController(1);
 
   private SwerveDriveInput m_DriveInput = new SwerveDriveInput();
   private SwerveDriveInput m_RotInput = new SwerveDriveInput();
@@ -109,7 +121,11 @@ public void updateDriveInput(){
     Command driveRobotOrientedAngularVelocity = drivetrain.driveFieldOriented(driveRobotOriented);
     Command driveSetpointGen = drivetrain.driveWithSetpointGeneratorFieldRelative(driveDirectAngle);
 
-    drivetrain.SwerveControllerDrive(
+        operator.leftTrigger().onTrue(shooter.setState(ShooterStates.TEST));
+        operator.a().onTrue(spindexer.setState(SpindexerStates.FEED));
+        operator.b().onTrue(climb.setState(CLimberStates.TEST));
+         
+          drivetrain.SwerveControllerDrive(
             null,
             () -> modifiedDriveInput.getX(),
             () -> modifiedDriveInput.getY(),

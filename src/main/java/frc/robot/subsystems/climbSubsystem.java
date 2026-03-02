@@ -36,7 +36,6 @@ public class climbSubsystem extends SubsystemBase {
     
     
     
-    
             climbConfig
                 .smartCurrentLimit(45)
                 .idleMode(IdleMode.kBrake)
