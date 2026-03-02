@@ -76,8 +76,8 @@ public final class Constants {
   }
 
   public static class IntakeConstants{
-    public static final int intakePivotMotor = 0;
-    public static final int intakeWheelMotor = 0;
+    public static final int pivotMotorID = 0;
+    public static final int rollerMotorID = 0;
     public static final int smartCurrentLimit = 0;
     
   }
