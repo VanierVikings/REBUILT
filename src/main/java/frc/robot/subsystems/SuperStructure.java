@@ -32,18 +32,20 @@ public class SuperStructure extends SubsystemBase{
 
 
     private shooterSubsystem m_shooter;
-    private intakeSubsystem m_intake;
-    private climbSubsystem m_climber;
+    // private intakeSubsystem m_intake;
+    // private climbSubsystem m_climber;
     private SwerveSubsystem m_drive;
 
     private ShooterStates shooterStates = ShooterStates.HOME;
     private IntakePivotStates intakeStates = IntakePivotStates.START_POS;
     public boolean intaking;
 
-    public SuperStructure(shooterSubsystem shooter, intakeSubsystem intake, climbSubsystem climber){
+    // public SuperStructure(shooterSubsystem shooter, intakeSubsystem intake, climbSubsystem climber){
+
+    public SuperStructure(shooterSubsystem shooter){
         this.m_shooter = shooter;
-        this.m_intake = intake;
-        this.m_climber = climber;
+        // this.m_intake = intake;
+        // this.m_climber = climber;
         this.intaking = false;
         shotCalculator.getInstance(m_drive);
     }

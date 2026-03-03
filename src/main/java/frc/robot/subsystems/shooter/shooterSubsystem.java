@@ -44,7 +44,7 @@ public class shooterSubsystem extends SubsystemBase {
     private final SparkMax shooterLeftMotor;
     private final SparkMax shooterRightMotor;
     private final SparkMax feederMotor;
-    private final TalonFX hoodMotor;
+    // private final TalonFX hoodMotor;
     private final SparkMaxConfig rightFlyWheelConfig;
     private final SparkMaxConfig leftFlywheelConfig;
 
@@ -65,7 +65,7 @@ public class shooterSubsystem extends SubsystemBase {
         shooterRightMotor = new SparkMax(ShooterConstants.shooterCenterMotorID, MotorType.kBrushless);
         shooterLeftMotor = new SparkMax(ShooterConstants.shooterTopSpinMotorID,MotorType.kBrushless);
         feederMotor = new SparkMax(ShooterConstants.feederMotorID, MotorType.kBrushless);
-        hoodMotor = new TalonFX(ShooterConstants.hoodMotorID);
+        // hoodMotor = new TalonFX(ShooterConstants.hoodMotorID);
 
         rightFlyWheelConfig = new SparkMaxConfig();
         leftFlywheelConfig = new SparkMaxConfig();
@@ -116,7 +116,7 @@ public class shooterSubsystem extends SubsystemBase {
 
         hoodMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
-            hoodMotor.getConfigurator().apply(hoodMotorConfig);
+            // hoodMotor.getConfigurator().apply(hoodMotorConfig);
         }
 
         // public boolean shooterAtSpeed(double velocityTolerance){
@@ -143,18 +143,18 @@ public class shooterSubsystem extends SubsystemBase {
             rightFlyWheelController.setSetpoint(0, ControlType.kVelocity);
         }
 
-        public void driveHoodVoltage(double voltage){
-            hoodMotor.setVoltage(voltage);
-        }
+        // public void driveHoodVoltage(double voltage){
+        //     hoodMotor.setVoltage(voltage);
+        // }
 
-        public void setHoodPosition(double targetDegrees){
-            targetDegrees = Units.degreesToRotations(targetDegrees);
-            hoodMotor.setControl(m_MotionMagic.withPosition(targetDegrees));
-        }
+        // public void setHoodPosition(double targetDegrees){
+        //     targetDegrees = Units.degreesToRotations(targetDegrees);
+        //     hoodMotor.setControl(m_MotionMagic.withPosition(targetDegrees));
+        // }
 
-        public void resetHoodEncoder(){
-            hoodMotor.setPosition(0);
-        }
+        // public void resetHoodEncoder(){
+        //     hoodMotor.setPosition(0);
+        // }
 
         // public void setSoftLimits(boolean active){
         //     var limitConfigs = new SoftwareLimitSwitchConfigs();
@@ -169,7 +169,7 @@ public class shooterSubsystem extends SubsystemBase {
         @Override
         public void periodic(){
             SmartDashboard.putNumber("Shooter RPS", shooterRightMotor.getEncoder().getVelocity());
-            SmartDashboard.putNumber("Hood Angle degrees", hoodMotor.getPosition().getValueAsDouble()*360);
+            // SmartDashboard.putNumber("Hood Angle degrees", hoodMotor.getPosition().getValueAsDouble()*360);
             SmartDashboard.putString("Current Shooter State", currentState.toString());
 
         }
@@ -187,7 +187,7 @@ public class shooterSubsystem extends SubsystemBase {
                         boolean shouldFeed = SmartDashboard.getBoolean("Enable Feeder", false);
 
                         // Apply to hardware
-                        setHoodPosition(targetAngle);
+                        // setHoodPosition(targetAngle);
                         setShooterSpeed(targetRPS);
                         setFeederVelocity(shouldFeed ? 75 : 0);
                     });
@@ -201,18 +201,18 @@ public class shooterSubsystem extends SubsystemBase {
                 //     command = run(()->{});
                 //     break;
 
-                case REZERO:
-                    command = run(()->{
-                        currentState = ShooterStates.REZERO;
-                        resetHoodEncoder();
-                        // driveHoodVoltage(-2);
-                        // setSoftLimits(false);
-                    });
-                    break;
+                // case REZERO:
+                //     command = run(()->{
+                //         currentState = ShooterStates.REZERO;
+                //         resetHoodEncoder();
+                //         // driveHoodVoltage(-2);
+                //         // setSoftLimits(false);
+                //     });
+                //     break;
 
                 default: //home
                 command = run(()->{
-                    setHoodPosition(0);
+                    // setHoodPosition(0);
                 });
                 break;
             };

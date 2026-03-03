@@ -9,8 +9,8 @@ import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.SuperStructure;
-import frc.robot.subsystems.climbSubsystem;
-import frc.robot.subsystems.spindexerSubsystem;
+// import frc.robot.subsystems.climbSubsystem;
+// import frc.robot.subsystems.spindexerSubsystem;
 import frc.robot.subsystems.SuperStructure.CLimberStates;
 import frc.robot.subsystems.SuperStructure.ShooterStates;
 import frc.robot.subsystems.SuperStructure.SpindexerStates;
@@ -49,8 +49,8 @@ public class RobotContainer {
   private final SwerveSubsystem drivetrain = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"));
   // private final shooterSubsystem m_shooter = new shooterSubsystem();
   private static shooterSubsystem shooter = new shooterSubsystem();
-  private static climbSubsystem climb = new climbSubsystem();
-  private static spindexerSubsystem spindexer = new spindexerSubsystem();
+  // private static climbSubsystem climb = new climbSubsystem();
+  // private static spindexerSubsystem spindexer = new spindexerSubsystem();
 
   private final SendableChooser<Command> autoChooser;
    
@@ -122,29 +122,29 @@ public void updateDriveInput(){
     Command driveSetpointGen = drivetrain.driveWithSetpointGeneratorFieldRelative(driveDirectAngle);
 
         operator.leftTrigger().onTrue(shooter.setState(ShooterStates.TEST));
-        operator.a().onTrue(spindexer.setState(SpindexerStates.FEED));
-        operator.b().onTrue(climb.setState(CLimberStates.TEST));
+        // operator.a().onTrue(spindexer.setState(SpindexerStates.FEED));
+        // operator.b().onTrue(climb.setState(CLimberStates.TEST));
          
-          drivetrain.SwerveControllerDrive(
-            null,
-            () -> modifiedDriveInput.getX(),
-            () -> modifiedDriveInput.getY(),
-            () -> {
-                if (Math.abs(driver.getRightX()) > DriveConstants.deadband) {
-                    return null;
-                } else {
-                    return drivetrain.getLastHeldRotation();
-                }
-            },
-            () -> {
-                if (Math.abs(driver.getRightX()) > DriveConstants.deadband) {
-                    return modifiedRotInput.getX();
-                } else {
-                    return 0.0;
-                }
-            }
-        )
-    ;
+        //   drivetrain.SwerveControllerDrive(
+        //     null,
+        //     () -> modifiedDriveInput.getX(),
+        //     () -> modifiedDriveInput.getY(),
+        //     () -> {
+        //         if (Math.abs(driver.getRightX()) > DriveConstants.deadband) {
+        //             return null;
+        //         } else {
+        //             return drivetrain.getLastHeldRotation();
+        //         }
+        //     },
+        //     () -> {
+        //         if (Math.abs(driver.getRightX()) > DriveConstants.deadband) {
+        //             return modifiedRotInput.getX();
+        //         } else {
+        //             return 0.0;
+        //         }
+        //     }
+        // )
+    // ;
 
      if (RobotBase.isSimulation()) {
       drivetrain.setDefaultCommand(driveFieldOrientedAnglularVelocity);
