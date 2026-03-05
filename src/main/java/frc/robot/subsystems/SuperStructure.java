@@ -10,6 +10,10 @@ import frc.robot.subsystems.swerve.SwerveSubsystem;
 
 public class SuperStructure extends SubsystemBase{
 
+    public enum LedStates {
+        RED_GR, BLUE_GR, Off
+    }
+
     public enum ShooterStates{
         HOME, AIMING, SHOOTING, TEST, IDLE, REZERO
     }
