@@ -47,6 +47,7 @@ public class shooterSubsystem extends SubsystemBase {
     // private final TalonFX hoodMotor;
     private final SparkMaxConfig rightFlyWheelConfig;
     private final SparkMaxConfig leftFlywheelConfig;
+    private final SparkMaxConfig feederConfig;
 
     private final TalonFXConfiguration hoodMotorConfig;
 
@@ -69,6 +70,7 @@ public class shooterSubsystem extends SubsystemBase {
 
         rightFlyWheelConfig = new SparkMaxConfig();
         leftFlywheelConfig = new SparkMaxConfig();
+        feederConfig = new SparkMaxConfig();
 
         hoodMotorConfig = new TalonFXConfiguration();
 
@@ -83,6 +85,7 @@ public class shooterSubsystem extends SubsystemBase {
         rightFlyWheelConfig
             .smartCurrentLimit(40)
             .idleMode(IdleMode.kCoast)
+            .voltageCompensation(12)
             .closedLoop
                 .pid(0, 0, 0) //recalc it
                 .feedForward
@@ -94,11 +97,17 @@ public class shooterSubsystem extends SubsystemBase {
             .apply(rightFlyWheelConfig)
             .follow(shooterRightMotor)
             .inverted(true);
+
+        feederConfig
+            .smartCurrentLimit(40)
+            .idleMode(IdleMode.kCoast)
+            .voltageCompensation(12)
+            .inverted(false);
+
             
         shooterRightMotor.configure(rightFlyWheelConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         shooterLeftMotor.configure(leftFlywheelConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
-        feederMotor.configure(rightFlyWheelConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        feederMotor.configure(feederConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         
 
