@@ -44,7 +44,7 @@ public class shooterSubsystem extends SubsystemBase {
     private final SparkMax shooterLeftMotor;
     private final SparkMax shooterRightMotor;
     private final SparkMax feederMotor;
-    // private final TalonFX hoodMotor;
+    private final TalonFX hoodMotor;
     private final SparkMaxConfig rightFlyWheelConfig;
     private final SparkMaxConfig leftFlywheelConfig;
     private final SparkMaxConfig feederConfig;
@@ -66,7 +66,7 @@ public class shooterSubsystem extends SubsystemBase {
         shooterRightMotor = new SparkMax(ShooterConstants.shooterCenterMotorID, MotorType.kBrushless);
         shooterLeftMotor = new SparkMax(ShooterConstants.shooterTopSpinMotorID,MotorType.kBrushless);
         feederMotor = new SparkMax(ShooterConstants.feederMotorID, MotorType.kBrushless);
-        // hoodMotor = new TalonFX(ShooterConstants.hoodMotorID);
+        hoodMotor = new TalonFX(ShooterConstants.hoodMotorID);
 
         rightFlyWheelConfig = new SparkMaxConfig();
         leftFlywheelConfig = new SparkMaxConfig();
@@ -125,7 +125,7 @@ public class shooterSubsystem extends SubsystemBase {
 
         hoodMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
-            // hoodMotor.getConfigurator().apply(hoodMotorConfig);
+            hoodMotor.getConfigurator().apply(hoodMotorConfig);
         }
 
         // public boolean shooterAtSpeed(double velocityTolerance){
@@ -156,10 +156,10 @@ public class shooterSubsystem extends SubsystemBase {
         //     hoodMotor.setVoltage(voltage);
         // }
 
-        // public void setHoodPosition(double targetDegrees){
-        //     targetDegrees = Units.degreesToRotations(targetDegrees);
-        //     hoodMotor.setControl(m_MotionMagic.withPosition(targetDegrees));
-        // }
+        public void setHoodPosition(double targetDegrees){
+            targetDegrees = Units.degreesToRotations(targetDegrees);
+            hoodMotor.setControl(m_MotionMagic.withPosition(targetDegrees));
+        }
 
         // public void resetHoodEncoder(){
         //     hoodMotor.setPosition(0);
@@ -196,7 +196,7 @@ public class shooterSubsystem extends SubsystemBase {
                         boolean shouldFeed = SmartDashboard.getBoolean("Enable Feeder", false);
 
                         // Apply to hardware
-                        // setHoodPosition(targetAngle);
+                        setHoodPosition(targetAngle);
                         setShooterSpeed(targetRPS);
                         setFeederVelocity(shouldFeed ? 75 : 0);
                     });
@@ -221,7 +221,7 @@ public class shooterSubsystem extends SubsystemBase {
 
                 default: //home
                 command = run(()->{
-                    // setHoodPosition(0);
+                    setHoodPosition(0);
                 });
                 break;
             };

@@ -47,7 +47,7 @@ import swervelib.SwerveController;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final SwerveSubsystem drivetrain = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"));
-  // private final shooterSubsystem m_shooter = new shooterSubsystem();
+  private final shooterSubsystem m_shooter = new shooterSubsystem();
   private static shooterSubsystem shooter = new shooterSubsystem();
   // private static climbSubsystem climb = new climbSubsystem();
   // private static spindexerSubsystem spindexer = new spindexerSubsystem();
@@ -121,7 +121,7 @@ public void updateDriveInput(){
     Command driveRobotOrientedAngularVelocity = drivetrain.driveFieldOriented(driveRobotOriented);
     Command driveSetpointGen = drivetrain.driveWithSetpointGeneratorFieldRelative(driveDirectAngle);
 
-        operator.leftTrigger().onTrue(shooter.setState(ShooterStates.TEST));
+        driver.y().onTrue(shooter.setState(ShooterStates.TEST));
         // operator.a().onTrue(spindexer.setState(SpindexerStates.FEED));
         // operator.b().onTrue(climb.setState(CLimberStates.TEST));
          
