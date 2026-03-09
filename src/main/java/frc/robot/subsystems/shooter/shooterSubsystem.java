@@ -59,9 +59,16 @@ public class shooterSubsystem extends SubsystemBase {
 
     private ShooterStates currentState;
 
+    private double inputRPS;
+    private double inputHoodAngle;
+    private boolean enableFeeder;
+
 
     public shooterSubsystem(){
         currentState = ShooterStates.HOME;
+         inputRPS = 0;
+        inputHoodAngle = 2;
+        enableFeeder = false;
 
         shooterRightMotor = new SparkMax(ShooterConstants.shooterRightMotorID, MotorType.kBrushless);
         shooterLeftMotor = new SparkMax(ShooterConstants.shooterLeftMotorID,MotorType.kBrushless);
@@ -83,15 +90,15 @@ public class shooterSubsystem extends SubsystemBase {
         * Flywheel configs
         */
         rightFlyWheelConfig
-            .smartCurrentLimit(40)
+            .smartCurrentLimit(50)
             .idleMode(IdleMode.kCoast)
             .voltageCompensation(12)
             .closedLoop
                 .pid(0, 0, 0) //recalc it
                 .feedForward
-                    .kS(0) //recalc it
-                    .kV(0)
-                    .kA(0);
+                    .kS(0.38) //recalc it
+                    .kV(0.38)
+                   .kA(0.23);
 
         leftFlywheelConfig
             .apply(rightFlyWheelConfig)
@@ -119,7 +126,7 @@ public class shooterSubsystem extends SubsystemBase {
         hoodMotorConfig.Slot0.kS = 0.0; //recalc it
         hoodMotorConfig.Slot0.kV = 0.0;
         hoodMotorConfig.Slot0.kA = 0.0;
-        hoodMotorConfig.Slot0.kP = 0.0;
+        hoodMotorConfig.Slot0.kP = 0.01;
         hoodMotorConfig.Slot0.kI = 0.0;
         hoodMotorConfig.Slot0.kD = 0.0;
 
@@ -146,6 +153,10 @@ public class shooterSubsystem extends SubsystemBase {
 
         public void setShooterSpeed(double rps){
             rightFlyWheelController.setSetpoint(rps, ControlType.kVelocity);
+           
+        }
+        public void testshooter(){
+            rightFlyWheelController.setSetpoint(100, ControlType.kVelocity);
         }
 
         public void stopShooter(){
@@ -178,9 +189,9 @@ public class shooterSubsystem extends SubsystemBase {
         @Override
         public void periodic(){
             SmartDashboard.putNumber("Shooter RPS", shooterRightMotor.getEncoder().getVelocity());
-            // SmartDashboard.putNumber("Hood Angle degrees", hoodMotor.getPosition().getValueAsDouble()*360);
+            SmartDashboard.putNumber("Hood Angle degrees", hoodMotor.getPosition().getValueAsDouble()*360);
             SmartDashboard.putString("Current Shooter State", currentState.toString());
-            
+            SmartDashboard.putNumber("shooter setpoint",shooterRightMotor.getClosedLoopController().getSetpoint());
         }
 
 
@@ -196,8 +207,8 @@ public class shooterSubsystem extends SubsystemBase {
                         boolean shouldFeed = SmartDashboard.getBoolean("Enable Feeder", false);
 
                         // Apply to hardware
-                        setHoodPosition(targetAngle);
-                        setShooterSpeed(targetRPS);
+                        setHoodPosition(10);
+                        setShooterSpeed(80.0);
                         setFeederVelocity(shouldFeed ? 75 : 0);
                     });
                     break;
@@ -226,5 +237,9 @@ public class shooterSubsystem extends SubsystemBase {
                 break;
             };
             return command;
+        }
+
+        public Command testshooters(){
+            return this.run(()-> testshooter());
         }
 }

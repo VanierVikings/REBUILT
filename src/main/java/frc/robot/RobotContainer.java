@@ -1,4 +1,4 @@
-// Copyright (c) FIRST and other WPILib contributors.
+ // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
@@ -70,6 +70,7 @@ public void updateDriveInput(){
     modifiedDriveInput = m_DriveInput.getShapedInput(()-> driver.getLeftX(), ()-> driver.getLeftY());
     modifiedRotInput = m_RotInput.getShapedInput(()-> driver.getRightX(), ()-> driver.getRightY());
 
+
   }
   
   //Cnvert driver input into field-relative ChassisSpeeds - controlled by angular velocity
@@ -121,7 +122,8 @@ public void updateDriveInput(){
     Command driveRobotOrientedAngularVelocity = drivetrain.driveFieldOriented(driveRobotOriented);
     Command driveSetpointGen = drivetrain.driveWithSetpointGeneratorFieldRelative(driveDirectAngle);
 
-        driver.leftTrigger().onTrue(shooter.setState(ShooterStates.TEST));
+        driver.b().onTrue(shooter.setState(ShooterStates.TEST));
+        driver.leftTrigger().whileTrue(shooter.testshooters());
         // operator.a().onTrue(spindexer.setState(SpindexerStates.FEED));
         // operator.b().onTrue(climb.setState(CLimberStates.TEST));
          
@@ -156,6 +158,7 @@ public void updateDriveInput(){
     }
 
     driver.a().onTrue(drivetrain.runOnce(drivetrain::zeroGyro)); //TESTING PURPOSES ONLY!!!
+    
 
     // driver.rightTrigger().whileTrue(m_shooter.setState(ShooterStates.TEST)); //testing for lut values
     // driver.rightBumper().onTrue(m_shooter.setState(ShooterStates.REZERO)); //rezero hood
