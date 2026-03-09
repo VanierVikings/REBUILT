@@ -63,8 +63,8 @@ public class shooterSubsystem extends SubsystemBase {
     public shooterSubsystem(){
         currentState = ShooterStates.HOME;
 
-        shooterRightMotor = new SparkMax(ShooterConstants.shooterCenterMotorID, MotorType.kBrushless);
-        shooterLeftMotor = new SparkMax(ShooterConstants.shooterTopSpinMotorID,MotorType.kBrushless);
+        shooterRightMotor = new SparkMax(ShooterConstants.shooterRightMotorID, MotorType.kBrushless);
+        shooterLeftMotor = new SparkMax(ShooterConstants.shooterLeftMotorID,MotorType.kBrushless);
         feederMotor = new SparkMax(ShooterConstants.feederMotorID, MotorType.kBrushless);
         hoodMotor = new TalonFX(ShooterConstants.hoodMotorID);
 
@@ -180,7 +180,7 @@ public class shooterSubsystem extends SubsystemBase {
             SmartDashboard.putNumber("Shooter RPS", shooterRightMotor.getEncoder().getVelocity());
             // SmartDashboard.putNumber("Hood Angle degrees", hoodMotor.getPosition().getValueAsDouble()*360);
             SmartDashboard.putString("Current Shooter State", currentState.toString());
-
+            
         }
 
 
@@ -191,7 +191,7 @@ public class shooterSubsystem extends SubsystemBase {
                 case TEST:
                        command = run(() -> {
 
-                        double targetRPS = SmartDashboard.getNumber("Input RPS",0 );
+                        double targetRPS = SmartDashboard.getNumber("Input RPS",75 );
                         double targetAngle = SmartDashboard.getNumber("Input Hood Angle", 0);
                         boolean shouldFeed = SmartDashboard.getBoolean("Enable Feeder", false);
 
