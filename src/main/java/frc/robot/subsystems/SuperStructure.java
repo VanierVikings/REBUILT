@@ -36,18 +36,22 @@ public class SuperStructure extends SubsystemBase{
 
 
     private shooterSubsystem m_shooter;
+    private spindexerSubsystem m_spindexer;
     // private intakeSubsystem m_intake;
     // private climbSubsystem m_climber;
     private SwerveSubsystem m_drive;
 
     private ShooterStates shooterStates = ShooterStates.HOME;
+    private SpindexerStates spindexerStates = SpindexerStates.OFF;
     private IntakePivotStates intakeStates = IntakePivotStates.START_POS;
+
     public boolean intaking;
 
     // public SuperStructure(shooterSubsystem shooter, intakeSubsystem intake, climbSubsystem climber){
 
-    public SuperStructure(shooterSubsystem shooter){
+    public SuperStructure(shooterSubsystem shooter, spindexerSubsystem spindexer){
         this.m_shooter = shooter;
+        this.m_spindexer = spindexer;
         // this.m_intake = intake;
         // this.m_climber = climber;
         this.intaking = false;
@@ -71,6 +75,14 @@ public class SuperStructure extends SubsystemBase{
 
         CommandScheduler.getInstance().schedule(stateCommand);;
     
+    }
+
+    private void setSpindexerState(SpindexerStates requestedStates){
+        this.spindexerStates = requestedStates;
+        Command stateCommand = m_spindexer.setState(requestedStates);
+
+        // stateCommand.schedule();
+        CommandScheduler.getInstance().schedule(stateCommand);
     }
 }
 

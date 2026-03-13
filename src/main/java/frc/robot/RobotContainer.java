@@ -15,8 +15,6 @@ import frc.robot.subsystems.SuperStructure.CLimberStates;
 import frc.robot.subsystems.SuperStructure.ShooterStates;
 import frc.robot.subsystems.SuperStructure.SpindexerStates;
 import frc.robot.subsystems.shooter.shooterSubsystem;
-// import frc.robot.subsystems.SuperStructure.ShooterStates;
-// import frc.robot.subsystems.shooter.shooterSubsystem;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 
 import java.io.File;
@@ -48,7 +46,7 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final SwerveSubsystem drivetrain = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"));
   // private final shooterSubsystem m_shooter = new shooterSubsystem();
-  private static shooterSubsystem shooter = new shooterSubsystem();
+  private static shooterSubsystem m_shooter = new shooterSubsystem();
   // private static climbSubsystem climb = new climbSubsystem();
   // private static spindexerSubsystem spindexer = new spindexerSubsystem();
 
@@ -122,8 +120,8 @@ public void updateDriveInput(){
     Command driveRobotOrientedAngularVelocity = drivetrain.driveFieldOriented(driveRobotOriented);
     Command driveSetpointGen = drivetrain.driveWithSetpointGeneratorFieldRelative(driveDirectAngle);
 
-        driver.b().onTrue(shooter.setState(ShooterStates.TEST));
-        driver.leftTrigger().whileTrue(shooter.testshooters());
+        driver.b().whileTrue(m_shooter.setState(ShooterStates.TEST));
+        // driver.leftTrigger().onTrue(m_shooter.setState(ShooterStates.TEST));
         // operator.a().onTrue(spindexer.setState(SpindexerStates.FEED));
         // operator.b().onTrue(climb.setState(CLimberStates.TEST));
          

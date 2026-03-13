@@ -53,7 +53,8 @@
 //         rollerConfig
 //             .smartCurrentLimit(40)
 //             .inverted(false)
-//             .idleMode(IdleMode.kCoast);
+//             .idleMode(IdleMode.kCoast)
+//             .voltageCompensation(10);
         
 //         rollerMotor.configure(rollerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
@@ -85,10 +86,11 @@
 //         SmartDashboard.putNumber("Motor encoder", pivotMotor.getPosition().getValueAsDouble());
 //     }
 
-//     public void runRoller(double direction){
-//         rollerMotor.set(direction);
+//     public void runRoller(double voltage){
+//         rollerMotor.setVoltage(voltage);
 //     }
 //     public void stopRoller(){
+//         rollerMotor.setVoltage(0);
 //         rollerMotor.stopMotor();
 //     }
 
@@ -106,19 +108,19 @@
 //         switch (state) {
 //             case ACTIVE:
 //                 command = runOnce(()->{
-//                     runRoller(0.5);
+//                     runRoller(6);
 //                 });
 //                 break;
 
 //             case OFF:
 //             command = runOnce(()->{
-//                 runRoller(0);
+//                 stopRoller();
 //             });
 //             break;
 
 //             case SLOW:
 //             command = runOnce(()->{
-//                 runRoller(0.1);
+//                 runRoller(2);
 //             });
 //             break;
         

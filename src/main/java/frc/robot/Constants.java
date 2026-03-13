@@ -50,10 +50,11 @@ public final class Constants {
   
   public static class ShooterConstants {
     public static final int shooterRightMotorID = 6;
-    public static final int shooterLeftMotorID = 7;
+    public static final int shooterLeftMotorID = 14;
     public static final int feederMotorID = 5;
     public static final int hoodMotorID = 12;
     public static final double kShooterP = 0.0;
+    
     public static final double kShooterI = 0.0;
     public static final double kShooterD = 0.0;
     public static final double kS = 0.0;
@@ -85,7 +86,7 @@ public final class Constants {
 
 
     public static class SpindexerConstants {
-      public static final int SPINDEXER_MOTOR_ID = 0;
+      public static final int SPINDEXER_MOTOR_ID = 9;
       public static final int SPINDEXER_CURRENT_LIMIT = 40;
 
       public static final double kP = 0.0;

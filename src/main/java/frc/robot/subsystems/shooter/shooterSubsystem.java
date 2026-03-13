@@ -15,6 +15,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
 
@@ -63,6 +64,10 @@ public class shooterSubsystem extends SubsystemBase {
     private double inputHoodAngle;
     private boolean enableFeeder;
 
+    private double targetRPS;
+
+    private final RelativeEncoder rightFlyWheelEncoder;
+
 
     public shooterSubsystem(){
         currentState = ShooterStates.HOME;
@@ -85,6 +90,10 @@ public class shooterSubsystem extends SubsystemBase {
         rightFlyWheelController = shooterRightMotor.getClosedLoopController();
         feederController = feederMotor.getClosedLoopController();
 
+        rightFlyWheelEncoder = shooterRightMotor.getEncoder();
+
+        zeroHood();
+
 
         /*
         * Flywheel configs
@@ -92,13 +101,14 @@ public class shooterSubsystem extends SubsystemBase {
         rightFlyWheelConfig
             .smartCurrentLimit(50)
             .idleMode(IdleMode.kCoast)
-            .voltageCompensation(12)
-            .closedLoop
-                .pid(0, 0, 0) //recalc it
-                .feedForward
-                    .kS(0.38) //recalc it
-                    .kV(0.38)
-                   .kA(0.23);
+            .voltageCompensation(12);
+            // .closedLoop
+            //     .pid(0, 0, 0) //recalc it
+            //     .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+            // .feedForward
+            //     .kS(0.38) //recalc it
+            //     .kV(0.38)
+            //     .kA(0.23)
 
         leftFlywheelConfig
             .apply(rightFlyWheelConfig)
@@ -148,11 +158,12 @@ public class shooterSubsystem extends SubsystemBase {
         }
 
         public void setFeederVelocity(double rps){
-            feederController.setSetpoint((rps*60), ControlType.kMAXMotionVelocityControl); // maxmotion takes rpm ughh
+            feederMotor.set(0.7);
         }
 
         public void setShooterSpeed(double rps){
             rightFlyWheelController.setSetpoint(rps, ControlType.kVelocity);
+            // shooterRightMotor.setVoltage(rightFlyWheelController.calculate(rightFlyWheelEncoder.getPosition()));
            
         }
         public void testshooter(){
@@ -172,9 +183,9 @@ public class shooterSubsystem extends SubsystemBase {
             hoodMotor.setControl(m_MotionMagic.withPosition(targetDegrees));
         }
 
-        // public void resetHoodEncoder(){
-        //     hoodMotor.setPosition(0);
-        // }
+        public void zeroHood(){
+            hoodMotor.setPosition(0);
+        }
 
         // public void setSoftLimits(boolean active){
         //     var limitConfigs = new SoftwareLimitSwitchConfigs();
@@ -192,6 +203,8 @@ public class shooterSubsystem extends SubsystemBase {
             SmartDashboard.putNumber("Hood Angle degrees", hoodMotor.getPosition().getValueAsDouble()*360);
             SmartDashboard.putString("Current Shooter State", currentState.toString());
             SmartDashboard.putNumber("shooter setpoint",shooterRightMotor.getClosedLoopController().getSetpoint());
+
+            setShooterSpeed(targetRPS);
         }
 
 
@@ -202,13 +215,13 @@ public class shooterSubsystem extends SubsystemBase {
                 case TEST:
                        command = run(() -> {
 
-                        double targetRPS = SmartDashboard.getNumber("Input RPS",75 );
+                        double inputRPS = SmartDashboard.getNumber("Input RPS",75 );
                         double targetAngle = SmartDashboard.getNumber("Input Hood Angle", 0);
                         boolean shouldFeed = SmartDashboard.getBoolean("Enable Feeder", false);
 
                         // Apply to hardware
-                        setHoodPosition(10);
-                        setShooterSpeed(80.0);
+                        setHoodPosition(5);
+                        targetRPS = inputRPS; // feed to the command in periodic
                         setFeederVelocity(shouldFeed ? 75 : 0);
                     });
                     break;
