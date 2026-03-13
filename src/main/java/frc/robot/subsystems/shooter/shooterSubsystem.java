@@ -101,14 +101,14 @@ public class shooterSubsystem extends SubsystemBase {
         rightFlyWheelConfig
             .smartCurrentLimit(50)
             .idleMode(IdleMode.kCoast)
-            .voltageCompensation(12);
-            // .closedLoop
-            //     .pid(0, 0, 0) //recalc it
-            //     .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-            // .feedForward
-            //     .kS(0.38) //recalc it
-            //     .kV(0.38)
-            //     .kA(0.23)
+            .voltageCompensation(12)
+            .closedLoop
+                .pid(0, 0, 0) //kp of 0.074????
+                .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+            .feedForward
+                .kS(0.43) //retune
+                .kV(0.0021) //maybe 0.0001684
+                .kA(0.21); //0.0000931
 
         leftFlywheelConfig
             .apply(rightFlyWheelConfig)
@@ -215,7 +215,7 @@ public class shooterSubsystem extends SubsystemBase {
                 case TEST:
                        command = run(() -> {
 
-                        double inputRPS = SmartDashboard.getNumber("Input RPS",75 );
+                        double inputRPS = SmartDashboard.getNumber("Input RPS",0 );
                         double targetAngle = SmartDashboard.getNumber("Input Hood Angle", 0);
                         boolean shouldFeed = SmartDashboard.getBoolean("Enable Feeder", false);
 
