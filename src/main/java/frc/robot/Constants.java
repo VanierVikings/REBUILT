@@ -54,7 +54,7 @@ public final class Constants {
     public static final int feederMotorID = 5;
     public static final int hoodMotorID = 12;
     public static final double kShooterP = 0.0;
-    
+
     public static final double kShooterI = 0.0;
     public static final double kShooterD = 0.0;
     public static final double kS = 0.0;
@@ -108,7 +108,7 @@ public final class Constants {
     public static final double deadband = 0.01;
   }
 
-  public static Transform3d robotToShooter = new Transform3d(0.2286,0.0, 0.3937, Rotation3d.kZero);
+  // public static Transform3d robotToShooter = new Transform3d(0.2286,0.0, 0.3937, Rotation3d.kZero);
 
 
    public class fieldPoses{

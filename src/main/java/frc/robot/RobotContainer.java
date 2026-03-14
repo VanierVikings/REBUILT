@@ -1,4 +1,4 @@
- // Copyright (c) FIRST and other WPILib contributors.
+// Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
@@ -8,13 +8,8 @@ import frc.AlectronaLib.SwerveDriveInput;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
-import frc.robot.subsystems.SuperStructure;
-// import frc.robot.subsystems.climbSubsystem;
-// import frc.robot.subsystems.spindexerSubsystem;
-import frc.robot.subsystems.SuperStructure.CLimberStates;
-import frc.robot.subsystems.SuperStructure.ShooterStates;
-import frc.robot.subsystems.SuperStructure.SpindexerStates;
-import frc.robot.subsystems.shooter.shooterSubsystem;
+// import frc.robot.subsystems.SuperStructure.ShooterStates;
+// import frc.robot.subsystems.shooter.shooterSubsystem;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 
 import java.io.File;
@@ -29,12 +24,11 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import swervelib.SwerveInputStream;
-import swervelib.SwerveController;
+// import swervelib.SwerveController;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -46,17 +40,13 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final SwerveSubsystem drivetrain = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"));
   // private final shooterSubsystem m_shooter = new shooterSubsystem();
-  private static shooterSubsystem m_shooter = new shooterSubsystem();
-  // private static climbSubsystem climb = new climbSubsystem();
-  // private static spindexerSubsystem spindexer = new spindexerSubsystem();
+  
 
   private final SendableChooser<Command> autoChooser;
    
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController driver =
       new CommandXboxController(DriveConstants.DriverPort);
-  final CommandXboxController operator = 
-    new CommandXboxController(1);
 
   private SwerveDriveInput m_DriveInput = new SwerveDriveInput();
   private SwerveDriveInput m_RotInput = new SwerveDriveInput();
@@ -68,13 +58,12 @@ public void updateDriveInput(){
     modifiedDriveInput = m_DriveInput.getShapedInput(()-> driver.getLeftX(), ()-> driver.getLeftY());
     modifiedRotInput = m_RotInput.getShapedInput(()-> driver.getRightX(), ()-> driver.getRightY());
 
-
   }
   
   //Cnvert driver input into field-relative ChassisSpeeds - controlled by angular velocity
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivetrain.getSwerveDrive(),
-            () -> modifiedDriveInput.getY(),
-            () -> modifiedDriveInput.getX()) // Axis which give the desired translational angle and speed.
+            () -> -modifiedDriveInput.getY(), // (-) is blue alliance
+            () -> -modifiedDriveInput.getX()) // (-) is blue alliance
             .withControllerRotationAxis(() -> -modifiedRotInput.getX()) // Axis which give the desired angular velocity.
             .deadband(0.00)                  // Controller deadband
             .scaleTranslation(0.8)           // Scaled controller translation axis
@@ -92,9 +81,6 @@ public void updateDriveInput(){
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-
-
-    
     // Configure the trigger bindings
     configureBindings();
     
@@ -120,30 +106,27 @@ public void updateDriveInput(){
     Command driveRobotOrientedAngularVelocity = drivetrain.driveFieldOriented(driveRobotOriented);
     Command driveSetpointGen = drivetrain.driveWithSetpointGeneratorFieldRelative(driveDirectAngle);
 
-        driver.b().whileTrue(m_shooter.setState(ShooterStates.TEST));
-        // driver.leftTrigger().onTrue(m_shooter.setState(ShooterStates.TEST));
-        // operator.a().onTrue(spindexer.setState(SpindexerStates.FEED));
-        // operator.b().onTrue(climb.setState(CLimberStates.TEST));
-         
-        //   drivetrain.SwerveControllerDrive(
-        //     null,
-        //     () -> modifiedDriveInput.getX(),
-        //     () -> modifiedDriveInput.getY(),
-        //     () -> {
-        //         if (Math.abs(driver.getRightX()) > DriveConstants.deadband) {
-        //             return null;
-        //         } else {
-        //             return drivetrain.getLastHeldRotation();
-        //         }
-        //     },
-        //     () -> {
-        //         if (Math.abs(driver.getRightX()) > DriveConstants.deadband) {
-        //             return modifiedRotInput.getX();
-        //         } else {
-        //             return 0.0;
-        //         }
-        //     }
-        // )
+    // driver.leftBumper().whileTrue(m_shooter.setState(ShooterStates.TEST));
+
+    // drivetrain.SwerveControllerDrive(
+    //         null,
+    //         () -> modifiedDriveInput.getX(),
+    //         () -> modifiedDriveInput.getY(),
+    //         () -> {
+    //             if (Math.abs(driver.getRightX()) > DriveConstants.deadband) {
+    //                 return null;
+    //             } else {
+    //                 return drivetrain.getLastHeldRotation();
+    //             }
+    //         },
+    //         () -> {
+    //             if (Math.abs(driver.getRightX()) > DriveConstants.deadband) {
+    //                 return modifiedRotInput.getX();
+    //             } else {
+    //                 return 0.0;
+    //             }
+    //         }
+    //     )
     // ;
 
      if (RobotBase.isSimulation()) {
@@ -155,8 +138,7 @@ public void updateDriveInput(){
       drivetrain.setDefaultCommand(driveFieldOrientedAnglularVelocity);
     }
 
-    driver.a().onTrue(drivetrain.runOnce(drivetrain::zeroGyro)); //TESTING PURPOSES ONLY!!!
-    
+    driver.rightTrigger().onTrue(drivetrain.runOnce(drivetrain::zeroGyro)); //TESTING PURPOSES ONLY!!!
 
     // driver.rightTrigger().whileTrue(m_shooter.setState(ShooterStates.TEST)); //testing for lut values
     // driver.rightBumper().onTrue(m_shooter.setState(ShooterStates.REZERO)); //rezero hood

@@ -14,7 +14,6 @@ public class EstimatePose {
     // Field dimensions in meters
     private static final double kFieldLength = 16.6;
     private static final double kFieldWidth = 8.1;
-
     // Hub tags we trust more
     private static final Set<Integer> PRIORITY_TAGS = Set.of(
         8, 5, 9, 10, 4, 3, 11, 2, 18, 27, 19, 20, 26, 25, 21, 24
@@ -37,7 +36,8 @@ public class EstimatePose {
     public EstimatePose(String name) {
         this.m_name = name;
         this.m_lastTagTimestamp = Timer.getFPGATimestamp();
-        LimelightHelpers.setCameraPose_RobotSpace(m_name, 0.33401, 0, 0.45578, 0, 25, 0);
+        LimelightHelpers.setCameraPose_RobotSpace(m_name, 0.33401, 0, 0.45578, 0, 25, 0); //herhejihejlrafna
+        LimelightHelpers.SetIMUMode(m_name, 0); 
     }
 
     /**
@@ -50,7 +50,6 @@ public class EstimatePose {
     }
 
     public void update(RobotState robotState, VisionUpdateConsumer visionConsumer) {
-        
         // megaTag 1 logic - Disabled/Auto only
         if (DriverStation.isDisabled() || DriverStation.isAutonomous()) {
             LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(m_name);
@@ -66,23 +65,15 @@ public class EstimatePose {
                 }
             }
         }
-
-        // toggle da IMU based on movement
-        boolean isStationary = Math.abs(robotState.Speeds.vxMetersPerSecond) < 0.2
-                            && Math.abs(robotState.Speeds.vyMetersPerSecond) < 0.2
-                            && Math.abs(robotState.Speeds.omegaRadiansPerSecond) < Units.degreesToRadians(30);
-
-        LimelightHelpers.SetIMUMode(m_name, isStationary ? 1 : 2);
         LimelightHelpers.SetRobotOrientation(m_name, robotState.Pose.getRotation().getDegrees(), 0, 0, 0, 0, 0);
 
         // MegaTag 2 Logic
         LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(m_name);
-    
-        if (mt2 != null && mt2.tagCount > 0) {
-            boolean rotatingTooFast = Math.abs(Units.radiansToDegrees(robotState.Speeds.omegaRadiansPerSecond)) > 720;
 
-            if (!rotatingTooFast) {
-                Matrix<N3, N1> stdDevs = calculateMT2StdDevs(mt2);
+        if (mt2 != null && mt2.tagCount > 0) {
+            double omegaDegrees = Math.abs(Units.radiansToDegrees(robotState.Speeds.omegaRadiansPerSecond));
+            if (omegaDegrees < 50) { 
+                Matrix<N3, N1> stdDevs = calculateMT2StdDevs(mt2, omegaDegrees);
                 
                 if (stdDevs.get(0, 0) != Double.MAX_VALUE) {
                     if (isPoseInField(mt2.pose)) {
@@ -128,38 +119,46 @@ public class EstimatePose {
         return VecBuilder.fill(xyStdDev, xyStdDev, 0.7); 
     }
 
-    private Matrix<N3, N1> calculateMT2StdDevs(LimelightHelpers.PoseEstimate estimate) {
-        double avgDist = 0;
-        int count = estimate.rawFiducials.length;
-        boolean seesPriorityTag = false;
+    private Matrix<N3, N1> calculateMT2StdDevs(LimelightHelpers.PoseEstimate estimate, double omegaDegrees) {
+    double avgDist = 0;
+    int count = estimate.rawFiducials.length;
+    boolean seesPriorityTag = false;
 
-        for (var tag : estimate.rawFiducials) {
-            avgDist += tag.distToCamera;
-            if (PRIORITY_TAGS.contains(tag.id)) {
-                seesPriorityTag = true;
-            }
+    for (var tag : estimate.rawFiducials) {
+        avgDist += tag.distToCamera;
+        if (PRIORITY_TAGS.contains(tag.id)) {
+            seesPriorityTag = true;
         }
-        
-        if (count > 0) avgDist /= count;
-
-        // apply distance filter based on da priority status
-        double maxAllowedDist = seesPriorityTag ? kMaxDistTrusted : kMaxDistNormal;
-
-        if (count == 1 && avgDist > maxAllowedDist) return VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
-
-        // base trust
-        double xyStdDev = (count > 1) ? 0.2 : 0.5;
-
-        // distance scaling
-        xyStdDev *= (1 + (Math.pow(avgDist, 2) / 15.0));
-
-        // priority scaling
-        if (seesPriorityTag) {
-            xyStdDev *= 0.6; // ~40% more trust
-        }
-
-        return VecBuilder.fill(xyStdDev, xyStdDev, Double.MAX_VALUE);
     }
+    
+    if (count > 0) avgDist /= count;
+
+    // Apply distance filter based on priority status
+    double maxAllowedDist = seesPriorityTag ? kMaxDistTrusted : kMaxDistNormal;
+    if (count == 1 && avgDist > maxAllowedDist) return VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+
+    // --- ADJUSTED BASE TRUST ---
+    // If count > 1, base is 1.0. If count == 1, base is 1.5.
+    double xyStdDev = (count > 1) ? 1.0 : 1.5;
+    
+    // Distance scaling (same logic as before)
+    xyStdDev *= (1 + (Math.pow(avgDist, 2) / 15.0));
+
+    // If > 360 return MAX_VALUE
+    if (omegaDegrees > 360) return VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+
+    // Scaling factor for rotation
+    double rotationMultiplier = 1.0 + (omegaDegrees - 50.0) * (15.0 / 310.0); 
+    xyStdDev *= rotationMultiplier;
+
+    // --- ADJUSTED PRIORITY WEIGHT ---
+    // 1.0 (Base) * 0.6 (Priority) = 0.6 Total
+    if (seesPriorityTag) {
+        xyStdDev *= 0.6; 
+    }
+
+    return VecBuilder.fill(xyStdDev, xyStdDev, Double.MAX_VALUE);
+}
 
     public double getLastTagTimestamp() { return m_lastTagTimestamp; }
 
