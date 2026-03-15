@@ -46,8 +46,8 @@
 //     private final SparkMax shooterRightMotor;
 //     private final SparkMax feederMotor;
 //     // private final TalonFX hoodMotor;
-//     private final SparkMaxConfig rightFlyWheelConfig;
-//     private final SparkMaxConfig leftFlywheelConfig;
+//     private final TalonFX rightFlyWheelConfig;
+//     private final TalonFx leftFlywheelConfig;
 //     private final SparkMaxConfig feederConfig;
 
 //     private final TalonFXConfiguration hoodMotorConfig;
@@ -162,7 +162,7 @@
 
 //         public void setShooterSpeed(double rps){
 //             rightFlyWheelController.setSetpoint(rps, ControlType.kVelocity);
-//             // shooterRightMotor.setVoltage(rightFlyWheelController.calculate(rightFlyWheelEncoder.getPosition()));
+//             // shooterRighMotor.setVoltage(rightFlyWheelController.calculate(rightFlyWheelEncoder.getPosition()));
            
 //         }
 //         public void testshooter(){

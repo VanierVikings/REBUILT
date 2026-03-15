@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Unit;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import java.util.Set;
@@ -36,7 +37,7 @@ public class EstimatePose {
     public EstimatePose(String name) {
         this.m_name = name;
         this.m_lastTagTimestamp = Timer.getFPGATimestamp();
-        LimelightHelpers.setCameraPose_RobotSpace(m_name, 0.33401, 0, 0.45578, 0, 25, 0); //herhejihejlrafna
+        LimelightHelpers.setCameraPose_RobotSpace(m_name, Units.inchesToMeters(12.054), Units.inchesToMeters(5.967579), Units.inchesToMeters(17.431841), 0, 20.7836, 0); //herhejihejlrafna
         LimelightHelpers.SetIMUMode(m_name, 0); 
     }
 
@@ -65,7 +66,7 @@ public class EstimatePose {
                 }
             }
         }
-        LimelightHelpers.SetRobotOrientation(m_name, robotState.Pose.getRotation().getDegrees(), 0, 0, 0, 0, 0);
+    LimelightHelpers.SetRobotOrientation(m_name, robotState.Pose.getRotation().getDegrees(), 0, 0, 0, 0, 0);
 
         // MegaTag 2 Logic
         LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(m_name);

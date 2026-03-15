@@ -62,8 +62,8 @@ public void updateDriveInput(){
   
   //Cnvert driver input into field-relative ChassisSpeeds - controlled by angular velocity
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivetrain.getSwerveDrive(),
-            () -> -modifiedDriveInput.getY(), // (-) is blue alliance
-            () -> -modifiedDriveInput.getX()) // (-) is blue alliance
+            () -> modifiedDriveInput.getY(), // (-) is blue alliance
+            () -> modifiedDriveInput.getX()) // (-) is blue alliance
             .withControllerRotationAxis(() -> -modifiedRotInput.getX()) // Axis which give the desired angular velocity.
             .deadband(0.00)                  // Controller deadband
             .scaleTranslation(0.8)           // Scaled controller translation axis
