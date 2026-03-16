@@ -42,8 +42,8 @@ import edu.wpi.first.math.MathUtil;
 
 
 public class shooterSubsystem extends SubsystemBase {
-    private final TalonFX shooterRightMotor; //leaer
-    private final TalonFX shooterLeftMotor; //follower
+    private final TalonFX shooterLeadMotor; //leaer
+    private final TalonFX shooterFollowerMotor; //follower
     
     private final SparkMax feederMotor;
 
@@ -54,7 +54,7 @@ public class shooterSubsystem extends SubsystemBase {
 
     
     
-    private final VelocityVoltage m_VelocityVoltage = new VelocityVoltage(0);
+    private final VelocityVoltage m_VelocityVoltage = new VelocityVoltage(0).withSlot(0);
     private final MotionMagicVoltage m_MotionMagic = new MotionMagicVoltage(0);
 
     private ShooterStates currentState;
@@ -73,8 +73,8 @@ public class shooterSubsystem extends SubsystemBase {
         inputHoodAngle = 2;
         enableFeeder = false;
 
-        shooterRightMotor = new TalonFX(ShooterConstants.shooterRightMotorID, "rio");
-        shooterLeftMotor = new TalonFX(ShooterConstants.shooterLeftMotorID, "rio");
+        shooterLeadMotor = new TalonFX(Constants.ShooterConstants.shooterLeaderMotor, "rio");
+        shooterFollowerMotor = new TalonFX(Constants.ShooterConstants.shooterFollowerMotor, "rio");
         hoodMotor = new TalonFX(ShooterConstants.hoodMotorID);
         feederMotor = new SparkMax(ShooterConstants.feederMotorID, MotorType.kBrushless);
 
@@ -95,11 +95,11 @@ public class shooterSubsystem extends SubsystemBase {
         flywheelConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
         flywheelConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-        shooterRightMotor.getConfigurator().apply(flywheelConfig);
-        shooterLeftMotor.setControl(new Follower(ShooterConstants.shooterRightMotorID, MotorAlignmentValue.Opposed));
+        shooterLeadMotor.getConfigurator().apply(flywheelConfig);
+        shooterFollowerMotor.setControl(new Follower(Constants.ShooterConstants.shooterLeaderMotor, MotorAlignmentValue.Opposed));
 
-        shooterRightMotor.getVelocity().setUpdateFrequency(50);
-        shooterLeftMotor.getVelocity().setUpdateFrequency(50);
+        shooterLeadMotor.getVelocity().setUpdateFrequency(50);
+        shooterFollowerMotor.getVelocity().setUpdateFrequency(50);
 
 
         
@@ -137,7 +137,7 @@ public class shooterSubsystem extends SubsystemBase {
         }
 
         public void setShooterSpeed(double rps) {
-            shooterRightMotor.setControl(m_VelocityVoltage.withVelocity(rps));
+            shooterLeadMotor.setControl(m_VelocityVoltage.withVelocity(rps));
         }
 
 
@@ -155,8 +155,8 @@ public class shooterSubsystem extends SubsystemBase {
         }
 
         public void stopShooter() {
-            shooterRightMotor.stopMotor();
-            shooterLeftMotor.stopMotor();
+            shooterLeadMotor.stopMotor();
+            shooterFollowerMotor.stopMotor();
         }
 
         public void setFeederVoltage(double volts) {
@@ -178,8 +178,8 @@ public class shooterSubsystem extends SubsystemBase {
 
         @Override
         public void periodic(){
-            SmartDashboard.putNumber("Right RPS ", shooterRightMotor.getVelocity().getValueAsDouble());
-            SmartDashboard.putNumber("Left RPS", shooterLeftMotor.getVelocity().getValueAsDouble());
+            SmartDashboard.putNumber("Right RPS ", shooterLeadMotor.getVelocity().getValueAsDouble());
+            SmartDashboard.putNumber("Left RPS", shooterFollowerMotor.getVelocity().getValueAsDouble());
             SmartDashboard.putString("Current Shooter State", currentState.toString());
 
             SmartDashboard.putNumber("Current Hood Degrees", hoodMotor.getPosition().getValueAsDouble()*360);
