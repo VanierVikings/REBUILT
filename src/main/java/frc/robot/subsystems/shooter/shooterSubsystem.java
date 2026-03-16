@@ -73,8 +73,8 @@ public class shooterSubsystem extends SubsystemBase {
         inputHoodAngle = 2;
         enableFeeder = false;
 
-        shooterRightMotor = new TalonFX(ShooterConstants.shooterRightMotorID);
-        shooterLeftMotor = new TalonFX(ShooterConstants.shooterLeftMotorID);
+        shooterRightMotor = new TalonFX(ShooterConstants.shooterRightMotorID, "rio");
+        shooterLeftMotor = new TalonFX(ShooterConstants.shooterLeftMotorID, "rio");
         hoodMotor = new TalonFX(ShooterConstants.hoodMotorID);
         feederMotor = new SparkMax(ShooterConstants.feederMotorID, MotorType.kBrushless);
 
