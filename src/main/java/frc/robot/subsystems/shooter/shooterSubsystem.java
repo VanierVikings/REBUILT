@@ -84,22 +84,21 @@ public class shooterSubsystem extends SubsystemBase {
         var flywheelConfig = new TalonFXConfiguration();
         flywheelConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
         flywheelConfig.CurrentLimits.SupplyCurrentLimit = 40;
-        // flywheelConfig.CurrentLimits.SupplyCurrentLowerTime = 2;
-        // flywheelConfig.CurrentLimits.SupplyCurrentLowerLimit = 40;
+        flywheelConfig.CurrentLimits.SupplyCurrentLowerTime = 2;
+        flywheelConfig.CurrentLimits.SupplyCurrentLowerLimit = 40;
         // flywheelConfig.CurrentLimits.StatorCurrentLimitEnable = true;
         // flywheelConfig.CurrentLimits.StatorCurrentLimit = 60;
         flywheelConfig.Voltage.PeakReverseVoltage = 0;
 
-        flywheelConfig.Slot0.kS = 0;
-        flywheelConfig.Slot0.kV = 0;
+        flywheelConfig.Slot0.kS = 0.26;
+        flywheelConfig.Slot0.kV = 0.12;
         flywheelConfig.Slot0.kP = 0;
         flywheelConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
-        flywheelConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        flywheelConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         shooterRightMotor.getConfigurator().apply(flywheelConfig);
 
-        flywheelConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-        shooterLeftMotor.getConfigurator().apply(flywheelConfig);
+        shooterLeftMotor.setControl(new Follower(ShooterConstants.shooterRightMotorID, MotorAlignmentValue.Opposed));
 
         shooterRightMotor.getVelocity().setUpdateFrequency(50);
         shooterLeftMotor.getVelocity().setUpdateFrequency(50);
@@ -141,14 +140,14 @@ public class shooterSubsystem extends SubsystemBase {
         hoodMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         hoodMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
-        hoodMotorConfig.MotionMagic.MotionMagicCruiseVelocity = 1;
-        hoodMotorConfig.MotionMagic.MotionMagicAcceleration = 3;
+        // hoodMotorConfig.MotionMagic.MotionMagicCruiseVelocity = 1;
+        // hoodMotorConfig.MotionMagic.MotionMagicAcceleration = 3;
         
         hoodMotorConfig.Feedback.SensorToMechanismRatio = (365/30);
 
 
         hoodMotorConfig.Slot0.kS = 0;//test
-        hoodMotorConfig.Slot0.kV = (0.12*(365/30));
+        // hoodMotorConfig.Slot0.kV = (0.12*(365/30));
         hoodMotorConfig.Slot0.kP = 0; //test
         hoodMotorConfig.Slot0.kI = 0; //test
         hoodMotorConfig.Slot0.kD = 0;//test
@@ -197,7 +196,6 @@ public class shooterSubsystem extends SubsystemBase {
         }
 
         public void stopFeeder() {
-            feederMotor.setVoltage(0);
             feederMotor.stopMotor();
         }
 
@@ -235,12 +233,13 @@ public class shooterSubsystem extends SubsystemBase {
                         boolean shouldFeed = SmartDashboard.getBoolean("Feeder On?", false);
 
                         setHoodPosition(targetAngle);
-                        setShooterSpeed(inputRPS); //please god work
-                        if (shouldFeed) {
-                            setFeederVoltage(10);
-                        } else {
-                            stopFeeder();
-                        }
+                        setShooterSpeed(20); //please god work
+                        setFeederVoltage(3);
+                        // if (shouldFeed) {
+                        //     setFeederVoltage(10);
+                        // } else {
+                        //     stopFeeder();
+                        // }
                     });
                     break;
             

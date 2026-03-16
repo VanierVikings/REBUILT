@@ -37,7 +37,14 @@ public class EstimatePose {
     public EstimatePose(String name) {
         this.m_name = name;
         this.m_lastTagTimestamp = Timer.getFPGATimestamp();
-        LimelightHelpers.setCameraPose_RobotSpace(m_name, Units.inchesToMeters(12.054), Units.inchesToMeters(5.967579), Units.inchesToMeters(17.431841), 0, 20.7836, 0); //herhejihejlrafna
+        LimelightHelpers.setCameraPose_RobotSpace(
+            m_name, 
+            Units.inchesToMeters(12.054), 
+            Units.inchesToMeters(-5.967579), 
+            Units.inchesToMeters(17.431841), 
+        0,
+        20.7836,
+        0); //herhejihejlrafna
         LimelightHelpers.SetIMUMode(m_name, 0); 
     }
 

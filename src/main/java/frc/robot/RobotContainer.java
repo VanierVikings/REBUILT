@@ -8,12 +8,13 @@ import frc.AlectronaLib.SwerveDriveInput;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
-// import frc.robot.subsystems.SuperStructure.ShooterStates;
-// import frc.robot.subsystems.shooter.shooterSubsystem;
+import frc.robot.subsystems.SuperStructure.ShooterStates;
+import frc.robot.subsystems.shooter.shooterSubsystem;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 
 import java.io.File;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.pathplanner.lib.auto.AutoBuilder;
 
 import choreo.auto.AutoChooser;
@@ -39,7 +40,7 @@ import swervelib.SwerveInputStream;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final SwerveSubsystem drivetrain = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"));
-  // private final shooterSubsystem m_shooter = new shooterSubsystem();
+  private final shooterSubsystem m_shooter = new shooterSubsystem();
   
 
   private final SendableChooser<Command> autoChooser;
@@ -62,10 +63,10 @@ public void updateDriveInput(){
   
   //Cnvert driver input into field-relative ChassisSpeeds - controlled by angular velocity
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivetrain.getSwerveDrive(),
-            () -> modifiedDriveInput.getY(), // (-) is blue alliance
-            () -> modifiedDriveInput.getX()) // (-) is blue alliance
+            () -> -modifiedDriveInput.getY(), // (-) is blue alliance
+            () -> -modifiedDriveInput.getX()) // (-) is blue alliance
             .withControllerRotationAxis(() -> -modifiedRotInput.getX()) // Axis which give the desired angular velocity.
-            .deadband(0.00)                  // Controller deadband
+            .deadband(0.00)                 // Controller deadband
             .scaleTranslation(0.8)           // Scaled controller translation axis
             .allianceRelativeControl(true);  // Alliance relative controls.
 
@@ -106,7 +107,7 @@ public void updateDriveInput(){
     Command driveRobotOrientedAngularVelocity = drivetrain.driveFieldOriented(driveRobotOriented);
     Command driveSetpointGen = drivetrain.driveWithSetpointGeneratorFieldRelative(driveDirectAngle);
 
-    // driver.leftBumper().whileTrue(m_shooter.setState(ShooterStates.TEST));
+    driver.leftBumper().whileTrue(m_shooter.setState(ShooterStates.TEST));
 
     // drivetrain.SwerveControllerDrive(
     //         null,
