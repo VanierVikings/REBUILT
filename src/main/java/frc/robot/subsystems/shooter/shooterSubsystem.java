@@ -235,6 +235,8 @@ public class shooterSubsystem extends SubsystemBase {
                         setHoodPosition(targetAngle);
                         setShooterSpeed(20); //please god work
                         setFeederVoltage(3);
+
+                        System.out.println("green fn");
                         // if (shouldFeed) {
                         //     setFeederVoltage(10);
                         // } else {
