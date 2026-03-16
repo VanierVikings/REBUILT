@@ -88,50 +88,19 @@ public class shooterSubsystem extends SubsystemBase {
         flywheelConfig.CurrentLimits.SupplyCurrentLowerLimit = 40;
         // flywheelConfig.CurrentLimits.StatorCurrentLimitEnable = true;
         // flywheelConfig.CurrentLimits.StatorCurrentLimit = 60;
-        flywheelConfig.Voltage.PeakReverseVoltage = 0;
 
         flywheelConfig.Slot0.kS = 0.26;
         flywheelConfig.Slot0.kV = 0.12;
-        flywheelConfig.Slot0.kP = 0;
+        flywheelConfig.Slot0.kP = 0.5;
         flywheelConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
         flywheelConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         shooterRightMotor.getConfigurator().apply(flywheelConfig);
-
         shooterLeftMotor.setControl(new Follower(ShooterConstants.shooterRightMotorID, MotorAlignmentValue.Opposed));
 
         shooterRightMotor.getVelocity().setUpdateFrequency(50);
         shooterLeftMotor.getVelocity().setUpdateFrequency(50);
 
-
-        // rightFlyWheelConfig
-        //     .smartCurrentLimit(40)
-        //     .idleMode(IdleMode.kCoast)
-        //     // .voltageCompensation(12)
-        //     .closedLoop
-        //         .pid(0.01, 0, 0) //kp of 0.074????
-        //         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        //     .feedForward
-        //         .kS(0.43) //retune
-        //         .kV(0.0021) //maybe 0.0001684
-        //         .kA(0.21); //0.0000931
-
-        // leftFlywheelConfig
-        //     .follow(shooterRightMotor)
-        //     .inverted(true);
-
-        // shooterRightMotor.configure(rightFlyWheelConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        // shoot
-
-        // feederConfig
-        //     .smartCurrentLimit(40)
-        //     .idleMode(IdleMode.kCoast)
-        //     .voltageCompensation(12)
-        //     .inverted(false);
-
-            
-        // erLeftMotor.configure(leftFlywheelConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        // feederMotor.configure(feederConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         
 
@@ -169,7 +138,6 @@ public class shooterSubsystem extends SubsystemBase {
 
         public void setShooterSpeed(double rps) {
             shooterRightMotor.setControl(m_VelocityVoltage.withVelocity(rps));
-            shooterLeftMotor.setControl(m_VelocityVoltage.withVelocity(rps));
         }
 
 
