@@ -101,11 +101,7 @@ public class shooterSubsystem extends SubsystemBase{
 
         feederMotor.configure(feederConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-        
-
-
-
-
+    
 
     } 
 
@@ -132,13 +128,15 @@ public class shooterSubsystem extends SubsystemBase{
 
     @Override
     public void periodic(){
-        SmartDashboard.putNumber("Shooter/Shooter RPS", shooterLeaderMotor.getVelocity().getValueAsDouble());
-        SmartDashboard.putNumber("Shooter/Hood Angle (degrees)", hoodMotor.getPosition().getValueAsDouble()*360);
-        SmartDashboard.putString("Shooter/Shooter State", this.currentState.toString());
-        SmartDashboard.putNumber("Current Hood Pos", (hoodMotor.getPosition().getValueAsDouble())*360.0);
+        //Current Values
+        SmartDashboard.putNumber("Shooter Current/Shooter RPS", shooterLeaderMotor.getVelocity().getValueAsDouble());
+        SmartDashboard.putNumber("Shooter Current/Hood Angle (degrees)", hoodMotor.getPosition().getValueAsDouble()*360);
+        SmartDashboard.putString("Shooter Current/Shooter State", this.currentState.toString());
 
-        SmartDashboard.putNumber("Shooter Inputs/Input Shooter RPS", 20);
-
+        //Input Values
+        SmartDashboard.putNumber("Shooter Inputs/Input Shooter RPS", 0); 
+        SmartDashboard.putNumber("Shooter Inputs/Input Hood Angle", 0);
+        SmartDashboard.putBoolean("Shooter Inputs/Enable Feeder", false);
     }
 
 
@@ -151,8 +149,8 @@ public class shooterSubsystem extends SubsystemBase{
                     double targetRPS = SmartDashboard.getNumber("Shooter Inputs/Input Shooter RPS",0 );
                     double targetAngle = SmartDashboard.getNumber("Shooter Inputs/Input Hood Angle", 0);
                     boolean shouldFeed = SmartDashboard.getBoolean("Shooter Inputs/Enable Feeder", false);
-                    setHoodAngle(targetRPS);
-                    setShooterRPS(targetAngle);
+                    setHoodAngle(targetAngle);
+                    setShooterRPS(targetRPS);
                     setFeederVoltage(shouldFeed ? 5: 0);
                 });
                 break;

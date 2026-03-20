@@ -122,31 +122,30 @@ public class SuperStructure extends SubsystemBase{
             setShooterState(ShooterStates.JAM);
             setSpindexerState(spindexerStates.JAM);
             this.driveStates = dState;
-        }
+        })
         .andThen(runOnce(()->{
             setShooterState(sState);
-            setSpindexerState(spinState);(spinState);
-            }))
-            ).andThen(
+            setSpindexerState(spinState);
+        }))
+        .andThen(
             Commands.either(
-                Commands.waitSeconds(Constants.intakeConstants.retractDelay)
-                    .andThen(runOnce(() -> {
-                        setIntakeState(IntakeStates.AGITATING);
-                        setIntakeRollerState(IntakeRollerState.INTAKE_SLOW);
-                    })),
+                runOnce(() -> {
+                        // setIntakeState(IntakeStates.AGITATING);
+                        // setIntakeRollerState(IntakeRollerState.INTAKE_SLOW);
+                    }),
                 Commands.none(),
-                () -> this.intakeState == IntakeStates.INTAKE_TRAVEL && sState == ShooterStates.SHOOTING
+                () -> /*this.intakeState == IntakeStates.INTAKE_TRAVEL &&*/ sState == ShooterStates.SHOOTING
             )
         )
         .andThen(Commands.idle()) 
         .finallyDo((interrupted) -> {
             setShooterState(ShooterStates.IDLE);
-            setHopperState(HopperStates.OFF);
-            this.driveState = DriveStates.FIELD;
-            if (this.intakeState == IntakeStates.AGITATING){
-                setIntakeState(IntakeStates.INTAKE_TRAVEL);
-                setIntakeRollerState(IntakeRollerState.INTAKE_OFF);
-            }
+            setSpindexerState(spindexerStates.OFF);
+            this.driveStates = DriveStates.FIELD;
+            // if (this.intakeState == IntakeStates.AGITATING){
+            //     setIntakeState(IntakeStates.INTAKE_TRAVEL);
+            //     setIntakeRollerState(IntakeRollerState.INTAKE_OFF);
+            // }
         });
     }
 }
