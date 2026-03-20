@@ -1,248 +1,178 @@
 package frc.robot.subsystems.shooter;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
-import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.Constants.ShooterConstants;
-import frc.robot.subsystems.SuperStructure;
-import frc.robot.subsystems.SuperStructure.ShooterStates;
-import edu.wpi.first.wpilibj2.command.Command;
+
+
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.PersistMode;
-import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
-import com.revrobotics.spark.FeedbackSensor;
-import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
-
-import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.ClosedLoopConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
-import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.DutyCycleOut;
-
-import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.controls.VelocityVoltage;
-import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-
-import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.ShooterConstants;
+import frc.robot.subsystems.SuperStructure.ShooterStates;
+import frc.robot.subsystems.SuperStructure;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 
 
 
-public class shooterSubsystem extends SubsystemBase {
-    private final TalonFX shooterLeadMotor; //leaer
-    private final TalonFX shooterFollowerMotor; //follower
-    
+public class shooterSubsystem extends SubsystemBase{
+    private final TalonFX shooterLeaderMotor;
+    private final TalonFX shooterFollowerMotor;
+    private final TalonFX hoodMotor;
     private final SparkMax feederMotor;
 
-    private final TalonFX hoodMotor;
-
+    private final TalonFXConfiguration flywheelConfig;
+    private final TalonFXConfiguration hoodConfig;
     private final SparkMaxConfig feederConfig;
 
 
+    private final VelocityVoltage m_request = new VelocityVoltage(0);
+    private final MotionMagicVoltage m_motionMagic = new MotionMagicVoltage(0);
     
-    
-    private final VelocityVoltage m_VelocityVoltage = new VelocityVoltage(0).withSlot(0);
-    private final MotionMagicVoltage m_MotionMagic = new MotionMagicVoltage(0);
-
     private ShooterStates currentState;
-
-    private double inputRPS;
-    private double inputHoodAngle;
-    private boolean enableFeeder;
-
-    private double targetRPS;
-
-
 
     public shooterSubsystem(){
         currentState = ShooterStates.HOME;
-        inputRPS = 0;
-        inputHoodAngle = 2;
-        enableFeeder = false;
-
-        shooterLeadMotor = new TalonFX(Constants.ShooterConstants.shooterLeaderMotor, "rio");
-        shooterFollowerMotor = new TalonFX(Constants.ShooterConstants.shooterFollowerMotor, "rio");
+        shooterLeaderMotor = new TalonFX(ShooterConstants.shooterLeaderMotor);
+        shooterFollowerMotor = new TalonFX(ShooterConstants.shooterFollowerMotor);
         hoodMotor = new TalonFX(ShooterConstants.hoodMotorID);
         feederMotor = new SparkMax(ShooterConstants.feederMotorID, MotorType.kBrushless);
 
-        feederConfig = new SparkMaxConfig();
-
-        /*  Flywheel configs  */
-        var flywheelConfig = new TalonFXConfiguration();
-        flywheelConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+        /* FLYWHEEL CONFIGS */
+        flywheelConfig = new TalonFXConfiguration();
+        flywheelConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        flywheelConfig.CurrentLimits.StatorCurrentLimit = 100;
         flywheelConfig.CurrentLimits.SupplyCurrentLimit = 40;
-        flywheelConfig.CurrentLimits.SupplyCurrentLowerTime = 2;
-        flywheelConfig.CurrentLimits.SupplyCurrentLowerLimit = 40;
-        // flywheelConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-        // flywheelConfig.CurrentLimits.StatorCurrentLimit = 60;
+        // flywheelConfig.CurrentLimits.SupplyCurrentLowerTime = 2;
+        // flywheelConfig.CurrentLimits.SupplyCurrentLowerLimit = 40;
 
         flywheelConfig.Slot0.kS = 0.26;
         flywheelConfig.Slot0.kV = 0.12;
-        flywheelConfig.Slot0.kP = 0.5;
-        flywheelConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        flywheelConfig.Slot0.kP = 0.1;
 
+        flywheelConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         flywheelConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-        shooterLeadMotor.getConfigurator().apply(flywheelConfig);
-        shooterFollowerMotor.setControl(new Follower(Constants.ShooterConstants.shooterLeaderMotor, MotorAlignmentValue.Opposed));
 
-        shooterLeadMotor.getVelocity().setUpdateFrequency(50);
-        shooterFollowerMotor.getVelocity().setUpdateFrequency(50);
+        shooterLeaderMotor.getConfigurator().apply(flywheelConfig);
+        shooterFollowerMotor.setControl(new Follower(ShooterConstants.shooterLeaderMotor, MotorAlignmentValue.Opposed));
 
 
-        
-
-        /*  Hood Configs  */
-        var hoodMotorConfig = new TalonFXConfiguration();
-        hoodMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-        hoodMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-
-        // hoodMotorConfig.MotionMagic.MotionMagicCruiseVelocity = 1;
-        // hoodMotorConfig.MotionMagic.MotionMagicAcceleration = 3;
-        
-        hoodMotorConfig.Feedback.SensorToMechanismRatio = (365/30);
 
 
-        hoodMotorConfig.Slot0.kS = 0;//test
-        // hoodMotorConfig.Slot0.kV = (0.12*(365/30));
-        hoodMotorConfig.Slot0.kP = 0; //test
-        hoodMotorConfig.Slot0.kI = 0; //test
-        hoodMotorConfig.Slot0.kD = 0;//test
+        /* HOOD CONFIGS */
+        hoodConfig = new TalonFXConfiguration();
 
-        hoodMotor.getConfigurator().apply(hoodMotorConfig);
+        hoodConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        hoodConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+
+        hoodConfig.MotionMagic.MotionMagicCruiseVelocity = 1.0;
+        hoodConfig.MotionMagic.MotionMagicAcceleration = 3.0;
+
+        hoodConfig.Feedback.SensorToMechanismRatio = (4.0*(365.0/30.0)); // 4:1 maxplanetary + 365:30 rack and pinion
+        hoodConfig.Slot0.kS = 0.2;
+        hoodConfig.Slot0.kV = (0.12*(4.0*(365.0/30.0)));
+        hoodConfig.Slot0.kP = 200;
+        hoodConfig.Slot0.kD = 0;
+
+        hoodMotor.getConfigurator().apply(hoodConfig);
         hoodMotor.setPosition(0);
-        
+    
+        // //limit stuff
 
 
-        /* Feeder Configs */
+
+        /* FEEDER CONFIGS */
+        feederConfig = new SparkMaxConfig();
         feederConfig
-            .smartCurrentLimit(40)
-            .inverted(false)
-            .idleMode(IdleMode.kBrake);
+        .smartCurrentLimit(40)
+        .idleMode(IdleMode.kBrake)
+        .inverted(false);
 
         feederMotor.configure(feederConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-        }
-
-        public void setShooterSpeed(double rps) {
-            shooterLeadMotor.setControl(m_VelocityVoltage.withVelocity(rps));
-        }
-
-
-        public void hoodVoltage(double volts) {
-            hoodMotor.setVoltage(volts);
-        }
-
-        public void resetHoodEncoder(){
-            hoodMotor.setPosition(0);
-        }
-
-        public void setHoodPosition(double degrees) {
-            degrees = Units.degreesToRotations(degrees);
-            hoodMotor.setControl(m_MotionMagic.withPosition(degrees));
-        }
-
-        public void stopShooter() {
-            shooterLeadMotor.stopMotor();
-            shooterFollowerMotor.stopMotor();
-        }
-
-        public void setFeederVoltage(double volts) {
-            feederMotor.setVoltage(volts);
-        }
-
-        public void stopFeeder() {
-            feederMotor.stopMotor();
-        }
-
-        public void setSoftLimits(boolean active) {
-            var limitConfigs = new SoftwareLimitSwitchConfigs();
-            limitConfigs.ForwardSoftLimitEnable = active;
-            limitConfigs.ReverseSoftLimitEnable = false;
-            hoodMotor.getConfigurator().apply(limitConfigs);
-        }
+        
 
 
 
-        @Override
-        public void periodic(){
-            SmartDashboard.putNumber("Right RPS ", shooterLeadMotor.getVelocity().getValueAsDouble());
-            SmartDashboard.putNumber("Left RPS", shooterFollowerMotor.getVelocity().getValueAsDouble());
-            SmartDashboard.putString("Current Shooter State", currentState.toString());
-
-            SmartDashboard.putNumber("Current Hood Degrees", hoodMotor.getPosition().getValueAsDouble()*360);
-            SmartDashboard.putBoolean("Feeder On?", false);
-
-           
-        }
 
 
-        public Command setState(SuperStructure.ShooterStates state){
-            this.currentState = state;
-            Command command;
-            switch (state) {
-                case TEST:
-                       command = run(() -> {
+    } 
 
-                        double inputRPS = SmartDashboard.getNumber("Right RPS",0 );
-                        double targetAngle = SmartDashboard.getNumber("Current Hood Angle", 0);
-                        boolean shouldFeed = SmartDashboard.getBoolean("Feeder On?", false);
+    public void setShooterRPS(double rps){
+        shooterLeaderMotor.setControl(m_request.withVelocity(rps));
+ }
 
-                        setHoodPosition(targetAngle);
-                        setShooterSpeed(20); //please god work
-                        setFeederVoltage(3);
+    public void setFeederVoltage(double voltage){
+        feederMotor.setVoltage(voltage);
+    }
 
-                        System.out.println("green fn");
-                        // if (shouldFeed) {
-                        //     setFeederVoltage(10);
-                        // } else {
-                        //     stopFeeder();
-                        // }
-                    });
-                    break;
-            
-                case IDLE:
-                    command = run(()->{
-                        setHoodPosition(0);
-                        stopFeeder();
-                        setShooterSpeed(0);
+    public void setHoodAngle(double targetDegrees){
+        targetDegrees = Units.degreesToRotations(targetDegrees);
+        hoodMotor.setControl(m_motionMagic.withPosition(targetDegrees));
+    }
 
-                    });
-                    break;
+    public void stopShooter(){
+        shooterLeaderMotor.stopMotor();
+    }
 
-                // case SHOOTING:
-                //     command = run(()->{});
-                //     break;
+    public void stopFeeder(){
+        feederMotor.stopMotor();
+    }
 
-                // case REZERO:
-                //     command = run(()->{
-                //         currentState = ShooterStates.REZERO;
-                //         resetHoodEncoder();
-                //         // driveHoodVoltage(-2);
-                //         // setSoftLimits(false);
-                //     });
-                //     break;
+    @Override
+    public void periodic(){
+        SmartDashboard.putNumber("Shooter/Shooter RPS", shooterLeaderMotor.getVelocity().getValueAsDouble());
+        SmartDashboard.putNumber("Shooter/Hood Angle (degrees)", hoodMotor.getPosition().getValueAsDouble()*360);
+        SmartDashboard.putString("Shooter/Shooter State", this.currentState.toString());
+        SmartDashboard.putNumber("Current Hood Pos", (hoodMotor.getPosition().getValueAsDouble())*360.0);
 
-                default: //home
+        SmartDashboard.putNumber("Shooter Inputs/Input Shooter RPS", 20);
+
+    }
+
+
+    public Command setState(SuperStructure.ShooterStates state){
+        this.currentState = state;
+        Command command;
+        switch (state) {
+            case TEST:
                 command = run(()->{
-                    setHoodPosition(0);
+                    double targetRPS = SmartDashboard.getNumber("Shooter Inputs/Input Shooter RPS",0 );
+                    double targetAngle = SmartDashboard.getNumber("Shooter Inputs/Input Hood Angle", 0);
+                    boolean shouldFeed = SmartDashboard.getBoolean("Shooter Inputs/Enable Feeder", false);
+                    setHoodAngle(targetRPS);
+                    setShooterRPS(targetAngle);
+                    setFeederVoltage(shouldFeed ? 5: 0);
+                });
+                break;
+        
+            case IDLE:
+                command = run(()->{
+                    setHoodAngle(20);
                     stopFeeder();
                     stopShooter();
                 });
                 break;
-            };
-            return command;
-        }
+
+            default:
+            command = run(()->{
+                setHoodAngle(10);
+                stopShooter();
+                stopFeeder();
+            });
+                break;
+        };
+        return command;
+    }
 }

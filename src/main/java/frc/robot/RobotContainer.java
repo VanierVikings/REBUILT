@@ -8,9 +8,13 @@ import frc.AlectronaLib.SwerveDriveInput;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.subsystems.spindexerSubsystem;
 import frc.robot.subsystems.SuperStructure.ShooterStates;
+import frc.robot.subsystems.SuperStructure.SpindexerStates;
 import frc.robot.subsystems.shooter.shooterSubsystem;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
+import frc.robot.subsystems.shooter.shotCalculator;
+
 
 import java.io.File;
 
@@ -29,7 +33,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import swervelib.SwerveInputStream;
-// import swervelib.SwerveController;
+// import swervelib.SwerveCont?roller;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -40,7 +44,10 @@ import swervelib.SwerveInputStream;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final SwerveSubsystem drivetrain = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"));
-  private final shooterSubsystem m_shooter = new shooterSubsystem();
+  private final shooterSubsystem m_ShooterSubsystem = new shooterSubsystem();
+  private final spindexerSubsystem m_spindexer = new spindexerSubsystem();
+    private final shotCalculator m_ShotCalculator = new shotCalculator(drivetrain);
+
   
 
   private final SendableChooser<Command> autoChooser;
@@ -107,7 +114,9 @@ public void updateDriveInput(){
     Command driveRobotOrientedAngularVelocity = drivetrain.driveFieldOriented(driveRobotOriented);
     Command driveSetpointGen = drivetrain.driveWithSetpointGeneratorFieldRelative(driveDirectAngle);
 
-    driver.leftBumper().whileTrue(m_shooter.setState(ShooterStates.TEST));
+    // driver.leftBumper().whileTrue(m_shooter.setState(ShooterStates.TEST));
+    driver.leftBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.TEST));
+    driver.rightBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.IDLE));
 
     // drivetrain.SwerveControllerDrive(
     //         null,

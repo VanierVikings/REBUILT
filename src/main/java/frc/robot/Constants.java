@@ -49,10 +49,11 @@ public final class Constants {
   }
   
   public static class ShooterConstants {
+    public static final double hubOffset = 0;
     public static final int shooterLeaderMotor = 12;
     public static final int shooterFollowerMotor = 11;
     public static final int feederMotorID = 5;
-    public static final int hoodMotorID = 12;
+    public static final int hoodMotorID = 0;
     public static final double kShooterP = 0.0;
 
     public static final double kShooterI = 0.0;
@@ -86,7 +87,7 @@ public final class Constants {
 
 
     public static class SpindexerConstants {
-      public static final int SPINDEXER_MOTOR_ID = 9;
+      public static final int SPINDEXER_MOTOR_ID = 4;
       public static final int SPINDEXER_CURRENT_LIMIT = 40;
 
       public static final double kP = 0.0;
@@ -108,7 +109,7 @@ public final class Constants {
     public static final double deadband = 0.01;
   }
 
-  // public static Transform3d robotToShooter = new Transform3d(0.2286,0.0, 0.3937, Rotation3d.kZero);
+  public static Transform3d robotToShooter = new Transform3d(Units.inchesToMeters(4.818), Units.inchesToMeters(5.975), Units.inchesToMeters(17.834), Rotation3d.kZero);
 
 
    public class fieldPoses{

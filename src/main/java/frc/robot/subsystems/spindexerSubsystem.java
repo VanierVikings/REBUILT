@@ -32,9 +32,7 @@ public class spindexerSubsystem extends SubsystemBase {
         spindexerConfig
             .smartCurrentLimit(SpindexerConstants.SPINDEXER_CURRENT_LIMIT)
             .idleMode(IdleMode.kBrake)
-            .inverted(false)
-            .voltageCompensation(10);
-
+            .inverted(false);
 
         spindexerMotor.configure(spindexerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
@@ -54,7 +52,7 @@ public class spindexerSubsystem extends SubsystemBase {
         switch (state) {
             case FEED:
                 command = runOnce(()->{
-                    runSpindexer(9);
+                    runSpindexer(6);
                 });
                 break;
 
@@ -66,7 +64,7 @@ public class spindexerSubsystem extends SubsystemBase {
             
             case SLOW:
             command = runOnce(()-> {
-                runSpindexer(4);
+                runSpindexer(1);
             });
             break;
 
