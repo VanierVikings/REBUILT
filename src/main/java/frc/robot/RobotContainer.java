@@ -63,16 +63,17 @@ public class RobotContainer {
   private Translation2d modifiedDriveInput = new Translation2d(0,0);
   private Translation2d modifiedRotInput = new Translation2d(0,0);
 
-public void updateDriveInput(){
-    modifiedDriveInput = m_DriveInput.getShapedInput(()-> driver.getLeftX(), ()-> driver.getLeftY());
-    modifiedRotInput = m_RotInput.getShapedInput(()-> driver.getRightX(), ()-> driver.getRightY());
+  public void updateDriveInput(){
+      modifiedDriveInput = m_DriveInput.getShapedInput(()-> driver.getLeftX(), ()-> driver.getLeftY());
+      modifiedRotInput = m_RotInput.getShapedInput(()-> driver.getRightX(), ()-> driver.getRightY());
 
-  }
+    }
+
   
   //Cnvert driver input into field-relative ChassisSpeeds - controlled by angular velocity
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivetrain.getSwerveDrive(),
-            () -> -modifiedDriveInput.getY(), // (-) is blue alliance
-            () -> -modifiedDriveInput.getX()) // (-) is blue alliance
+            () -> -modifiedDriveInput.getY()*SwerveSubsystem.getInvert(), // (-) is blue alliance
+            () -> -modifiedDriveInput.getX()*SwerveSubsystem.getInvert()) // (-) is blue alliance
             .withControllerRotationAxis(() -> -modifiedRotInput.getX()) // Axis which give the desired angular velocity.
             .deadband(0.00)                 // Controller deadband
             .scaleTranslation(0.8)           // Scaled controller translation axis
@@ -116,7 +117,7 @@ public void updateDriveInput(){
     Command driveSetpointGen = drivetrain.driveWithSetpointGeneratorFieldRelative(driveDirectAngle);
 
     // driver.leftBumper().whileTrue(m_shooter.setState(ShooterStates.TEST));
-    driver.leftBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.TEST));
+    driver.leftBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.TEST).alongWith(m_spindexer.setState(SpindexerStates.FEED)));
       driver.leftTrigger().whileTrue(m_ShooterSubsystem.runFeeder());
       driver.povDown().whileTrue(m_ShooterSubsystem.run(() -> m_ShooterSubsystem.shooterLeaderMotor.setControl(
         m_ShooterSubsystem.m_request.withVelocity(m_ShooterSubsystem.shooterLeaderMotor.getVelocity().getValueAsDouble() - 5))));
@@ -128,6 +129,8 @@ public void updateDriveInput(){
 
       driver.povLeft().whileTrue(m_ShooterSubsystem.run(()-> m_ShooterSubsystem.hoodMotor.setControl(m_ShooterSubsystem.m_motionMagic.withPosition(Units.degreesToRotations(m_ShooterSubsystem.hoodMotor.getPosition().getValueAsDouble()) -Units.degreesToRadians(0.5)))));
       driver.povRight().whileTrue(m_ShooterSubsystem.run(()-> m_ShooterSubsystem.hoodMotor.setControl(m_ShooterSubsystem.m_motionMagic.withPosition(Units.degreesToRotations(m_ShooterSubsystem.hoodMotor.getPosition().getValueAsDouble()) + Units.degreesToRadians(0.5)))));
+
+      driver.a().onTrue(drivetrain.run(()-> drivetrain.setInverted()));
 
         // driver.rightBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.IDLE));
 

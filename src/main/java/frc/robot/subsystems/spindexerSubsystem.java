@@ -52,7 +52,7 @@ public class spindexerSubsystem extends SubsystemBase {
         switch (state) {
             case FEED:
                 command = runOnce(()->{
-                    runSpindexer(6);
+                    runSpindexer(10);
                 });
                 break;
 

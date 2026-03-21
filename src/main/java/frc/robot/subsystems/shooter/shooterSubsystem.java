@@ -169,7 +169,7 @@ public class shooterSubsystem extends SubsystemBase{
                     feederOn = SmartDashboard.getBoolean("Shooter Inputs/Enable Feeder", feederOn);
                     
                     setShooterRPS(inputRPS);
-                    setFeederVoltage(feederOn ? 6: 0);
+                    setFeederVoltage(feederOn ? 10: 0);
                     
                     setHoodAngle(inputAngle);
                     // setShooterRPS(inputRPS);

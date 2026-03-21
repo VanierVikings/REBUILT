@@ -70,6 +70,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
 //SwerveDrive object
   private final SwerveDrive swerveDrive;
+  public static int invert = 1;
 
   //Apriltag field layout
   private final AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
@@ -568,5 +569,13 @@ public class SwerveSubsystem extends SubsystemBase {
   public Rotation2d getLastHeldRotation() {
         return lastHeldPosition;
     }
+
+  public void setInverted(){
+    invert = invert*-1;
+  }
+
+  public static int getInvert(){
+    return invert;
+  }
 
 }

@@ -1,5 +1,7 @@
 package frc.robot.subsystems.shooter;
 
+import java.util.concurrent.TimeoutException;
+
 import com.pathplanner.lib.util.FlippingUtil;
 
 import edu.wpi.first.math.MathUtil;
@@ -49,29 +51,58 @@ import frc.robot.subsystems.swerve.SwerveSubsystem;
 
     static {
         // // Shooting Maps
+            shotHoodAngleMap.put(3.67, Rotation2d.fromDegrees(0));
+            shotFlywheelSpeedMap.put(3.67, 50.0);
+            // timeOfFlightMap.put(3.67, null);
 
-            shotHoodAngleMap.put(2.6, Rotation2d.fromDegrees(18));
-            shotFlywheelSpeedMap.put(2.6, 60.0);
-            timeOfFlightMap.put(1.64, 0.93);
+            shotHoodAngleMap.put(2.84, Rotation2d.fromDegrees(0));
+            shotFlywheelSpeedMap.put(2.84, 45.0);
 
-            shotHoodAngleMap.put(2.02, Rotation2d.fromDegrees(15));
-            shotFlywheelSpeedMap.put(2.02, 60.0);
+            shotHoodAngleMap.put(2.33, Rotation2d.fromDegrees(0));
+            shotFlywheelSpeedMap.put(2.33, 35.0);
+            timeOfFlightMap.put(2.33,1.29);
+
+            shotHoodAngleMap.put(4.189, Rotation2d.fromDegrees(4));
+            shotFlywheelSpeedMap.put(4.189, 47.0);
+
+            shotHoodAngleMap.put(4.78, Rotation2d.fromDegrees(8));
+            shotFlywheelSpeedMap.put(4.78, 47.0);
+            timeOfFlightMap.put(4.78, 1.24);
+
+            shotFlywheelSpeedMap.put(1.55, 33.0);
+            shotHoodAngleMap.put(1.55,Rotation2d.fromDegrees(0));
+            timeOfFlightMap.put(1.55,0.96);
+
+            shotFlywheelSpeedMap.put(2.00,35.0);
+            shotHoodAngleMap.put(2.00,Rotation2d.fromDegrees(0));
+            timeOfFlightMap.put(2.00,0.92);
+
+
+
+
+            //Alectron values
+            // shotHoodAngleMap.put(2.6, Rotation2d.fromDegrees(18));
+            // shotFlywheelSpeedMap.put(2.6, 60.0);
             // timeOfFlightMap.put(1.64, 0.93);
+
+            // shotHoodAngleMap.put(2.02, Rotation2d.fromDegrees(15));
+            // shotFlywheelSpeedMap.put(2.02, 60.0);
+            // // timeOfFlightMap.put(1.64, 0.93);
             
-            shotHoodAngleMap.put(3.2, Rotation2d.fromDegrees(18.5));
-            shotFlywheelSpeedMap.put(3.2, 64.0);
-            // timeOfFlightMap.put(1.64, 0.93);
+            // shotHoodAngleMap.put(3.2, Rotation2d.fromDegrees(18.5));
+            // shotFlywheelSpeedMap.put(3.2, 64.0);
+            // // timeOfFlightMap.put(1.64, 0.93);
 
-            shotHoodAngleMap.put(1.8, Rotation2d.fromDegrees(13));
-            shotFlywheelSpeedMap.put(1.8, 60.0);
-            // timeOfFlightMap.put(1.64, 0.93);
+            // shotHoodAngleMap.put(1.8, Rotation2d.fromDegrees(13));
+            // shotFlywheelSpeedMap.put(1.8, 60.0);
+            // // timeOfFlightMap.put(1.64, 0.93);
 
-            shotHoodAngleMap.put(4.6, Rotation2d.fromDegrees(24.7));
-            shotFlywheelSpeedMap.put(4.6, 69.0);
-            // timeOfFlightMap.put(1.64, 0.93);
+            // shotHoodAngleMap.put(4.6, Rotation2d.fromDegrees(24.7));
+            // shotFlywheelSpeedMap.put(4.6, 69.0);
+            // // timeOfFlightMap.put(1.64, 0.93);
 
-            shotHoodAngleMap.put(2.75, Rotation2d.fromDegrees(21));
-            shotFlywheelSpeedMap.put(2.75, 51.0);
+            // shotHoodAngleMap.put(2.75, Rotation2d.fromDegrees(21));
+            // shotFlywheelSpeedMap.put(2.75, 51.0);
 
             passingShotHoodAngleMap.put(1.45, Rotation2d.fromDegrees(19.0)); //outlier??
             passingShotFlywheelSpeedMap.put(1.45, 20.0);
