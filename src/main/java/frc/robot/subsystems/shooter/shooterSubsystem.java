@@ -27,9 +27,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 
 public class shooterSubsystem extends SubsystemBase{
-    private final TalonFX shooterLeaderMotor;
+    public final TalonFX shooterLeaderMotor;
     private final TalonFX shooterFollowerMotor;
-    private final TalonFX hoodMotor;
+    public final TalonFX hoodMotor;
     private final SparkMax feederMotor;
 
     private final TalonFXConfiguration flywheelConfig;
@@ -37,13 +37,21 @@ public class shooterSubsystem extends SubsystemBase{
     private final SparkMaxConfig feederConfig;
 
 
-    private final VelocityVoltage m_request = new VelocityVoltage(0);
-    private final MotionMagicVoltage m_motionMagic = new MotionMagicVoltage(0);
+    public final VelocityVoltage m_request = new VelocityVoltage(0);
+    public final MotionMagicVoltage m_motionMagic = new MotionMagicVoltage(0);
     
     private ShooterStates currentState;
 
+    public double inputRPS;
+    public double inputAngle;
+    public boolean feederOn;
+
     public shooterSubsystem(){
-        currentState = ShooterStates.HOME;
+        inputRPS = 0;
+        inputAngle = 0;
+        feederOn = false;
+
+        currentState = ShooterStates.TEST;
         shooterLeaderMotor = new TalonFX(ShooterConstants.shooterLeaderMotor);
         shooterFollowerMotor = new TalonFX(ShooterConstants.shooterFollowerMotor);
         hoodMotor = new TalonFX(ShooterConstants.hoodMotorID);
@@ -102,7 +110,10 @@ public class shooterSubsystem extends SubsystemBase{
         feederMotor.configure(feederConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     
-
+        //Input Values
+        SmartDashboard.putNumber("Shooter Inputs/Input Shooter RPS", inputRPS); 
+        SmartDashboard.putNumber("Shooter Inputs/Input Hood Angle", inputAngle);
+        SmartDashboard.putBoolean("Shooter Inputs/Enable Feeder", feederOn);
     } 
 
     public void setShooterRPS(double rps){
@@ -118,12 +129,14 @@ public class shooterSubsystem extends SubsystemBase{
         hoodMotor.setControl(m_motionMagic.withPosition(targetDegrees));
     }
 
-    public void stopShooter(){
+    public void stopShooterMotors(){
         shooterLeaderMotor.stopMotor();
     }
 
-    public void stopFeeder(){
-        feederMotor.stopMotor();
+    public Command stopFeeder(){
+        return run(()->{
+            feederMotor.stopMotor();
+        });
     }
 
     @Override
@@ -132,11 +145,16 @@ public class shooterSubsystem extends SubsystemBase{
         SmartDashboard.putNumber("Shooter Current/Shooter RPS", shooterLeaderMotor.getVelocity().getValueAsDouble());
         SmartDashboard.putNumber("Shooter Current/Hood Angle (degrees)", hoodMotor.getPosition().getValueAsDouble()*360);
         SmartDashboard.putString("Shooter Current/Shooter State", this.currentState.toString());
+        
 
-        //Input Values
-        SmartDashboard.putNumber("Shooter Inputs/Input Shooter RPS", 0); 
-        SmartDashboard.putNumber("Shooter Inputs/Input Hood Angle", 0);
-        SmartDashboard.putBoolean("Shooter Inputs/Enable Feeder", false);
+    }
+
+    public Command runFeeder(){
+        return this.runEnd(() -> feederMotor.setVoltage(6), () -> feederMotor.setVoltage(0));
+    }
+
+    public Command stopShooter(){
+        return this.run(()->{stopShooterMotors();});
     }
 
 
@@ -146,12 +164,16 @@ public class shooterSubsystem extends SubsystemBase{
         switch (state) {
             case TEST:
                 command = run(()->{
-                    double targetRPS = SmartDashboard.getNumber("Shooter Inputs/Input Shooter RPS",0 );
-                    double targetAngle = SmartDashboard.getNumber("Shooter Inputs/Input Hood Angle", 0);
-                    boolean shouldFeed = SmartDashboard.getBoolean("Shooter Inputs/Enable Feeder", false);
-                    setHoodAngle(targetAngle);
-                    setShooterRPS(targetRPS);
-                    setFeederVoltage(shouldFeed ? 5: 0);
+                    inputRPS = SmartDashboard.getNumber("Shooter Inputs/Input Shooter RPS", inputRPS);
+                    inputAngle = SmartDashboard.getNumber("Shooter Inputs/Input Hood Angle", inputAngle);
+                    feederOn = SmartDashboard.getBoolean("Shooter Inputs/Enable Feeder", feederOn);
+                    
+                    setShooterRPS(inputRPS);
+                    setFeederVoltage(feederOn ? 6: 0);
+                    
+                    setHoodAngle(inputAngle);
+                    // setShooterRPS(inputRPS);
+                    
                 });
                 break;
         

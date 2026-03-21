@@ -25,6 +25,7 @@ import choreo.auto.AutoChooser;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -116,7 +117,19 @@ public void updateDriveInput(){
 
     // driver.leftBumper().whileTrue(m_shooter.setState(ShooterStates.TEST));
     driver.leftBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.TEST));
-    driver.rightBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.IDLE));
+      driver.leftTrigger().whileTrue(m_ShooterSubsystem.runFeeder());
+      driver.povDown().whileTrue(m_ShooterSubsystem.run(() -> m_ShooterSubsystem.shooterLeaderMotor.setControl(
+        m_ShooterSubsystem.m_request.withVelocity(m_ShooterSubsystem.shooterLeaderMotor.getVelocity().getValueAsDouble() - 5))));
+
+      driver.povUp().whileTrue(m_ShooterSubsystem.run(() -> m_ShooterSubsystem.shooterLeaderMotor.setControl(
+        m_ShooterSubsystem.m_request.withVelocity(m_ShooterSubsystem.shooterLeaderMotor.getVelocity().getValueAsDouble() + 5))));
+
+      driver.y().whileTrue(m_ShooterSubsystem.stopShooter());
+
+      driver.povLeft().whileTrue(m_ShooterSubsystem.run(()-> m_ShooterSubsystem.hoodMotor.setControl(m_ShooterSubsystem.m_motionMagic.withPosition(Units.degreesToRotations(m_ShooterSubsystem.hoodMotor.getPosition().getValueAsDouble()) -Units.degreesToRadians(0.5)))));
+      driver.povRight().whileTrue(m_ShooterSubsystem.run(()-> m_ShooterSubsystem.hoodMotor.setControl(m_ShooterSubsystem.m_motionMagic.withPosition(Units.degreesToRotations(m_ShooterSubsystem.hoodMotor.getPosition().getValueAsDouble()) + Units.degreesToRadians(0.5)))));
+
+        // driver.rightBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.IDLE));
 
     // drivetrain.SwerveControllerDrive(
     //         null,
