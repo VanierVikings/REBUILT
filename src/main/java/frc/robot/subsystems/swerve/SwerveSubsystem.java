@@ -81,15 +81,15 @@ public class SwerveSubsystem extends SubsystemBase {
   public SwerveController controller;
 
   private final EstimatePose m_EstimatePose = new EstimatePose("limelight");
-  // private final AlectronaSwerveController m_SwerveController = new AlectronaSwerveController(
-  //   SwerveConstants.translationController, 
-  //   SwerveConstants.rotationController, 
-  //   SwerveConstants.maxSpeed, 
-  //   SwerveConstants.maxAngularRate, false,false, 
-  //   SwerveConstants.slewRateLimit, 
-  //   SwerveConstants.jerkRateLimit
-  //   // SwerveConstants.autonSlewRateLimit,
-  //   SwerveConstants.autonJerkLimit);
+  private final AlectronaSwerveController m_SwerveController = new AlectronaSwerveController(
+    SwerveConstants.translationController, 
+    SwerveConstants.rotationController, 
+    SwerveConstants.maxSpeed, 
+    SwerveConstants.maxAngularRate, false,false, 
+    SwerveConstants.slewRateLimit, 
+    SwerveConstants.jerkRateLimit,
+    SwerveConstants.autonSlewRateLimit,
+    SwerveConstants.autonJerkRateLimit);
     
   private Rotation2d lastHeldPosition = Rotation2d.fromDegrees(0);
   private boolean wasRotating = false;
@@ -487,84 +487,84 @@ public class SwerveSubsystem extends SubsystemBase {
   };
 
 
-  // public Command SwerveControllerDrive(
-  //       Supplier<Pose2d> targetSupplier, 
-  //       DoubleSupplier xInput, 
-  //       DoubleSupplier yInput, 
-  //       Supplier<Rotation2d> rotSupplier, 
-  //       DoubleSupplier vR
-  //   ){
-  //     return this.run(() -> {
-  //       Rotation2d currentHeading = swerveDrive.getPose().getRotation();
-  //       boolean hasManualRotation = false;
-  //       double manualRot = 0.0;
+  public Command SwerveControllerDrive(
+        Supplier<Pose2d> targetSupplier, 
+        DoubleSupplier xInput, 
+        DoubleSupplier yInput, 
+        Supplier<Rotation2d> rotSupplier, 
+        DoubleSupplier vR
+    ){
+      return this.run(() -> {
+        Rotation2d currentHeading = swerveDrive.getPose().getRotation();
+        boolean hasManualRotation = false;
+        double manualRot = 0.0;
 
-  //       if (DriverStation.isAutonomous()) {
-  //           lastHeldPosition = swerveDrive.getPose().getRotation();
-  //       } else {
-  //           if (vR != null) {
-  //               manualRot = vR.getAsDouble();
+        if (DriverStation.isAutonomous()) {
+            lastHeldPosition = swerveDrive.getPose().getRotation();
+        } else {
+            if (vR != null) {
+                manualRot = vR.getAsDouble();
 
-  //               boolean isRotating = Math.abs(manualRot) > DriveConstants.deadband;
-  //               if (!isRotating && wasRotating) {
-  //                   double rotationRate = Units.radiansToDegrees(
-  //                       swerveDrive.getRobotVelocity().omegaRadiansPerSecond
-  //                   );
-  //                   double kP = 0.15;
-  //                   double compensation = kP * rotationRate;
-  //                   lastHeldPosition = currentHeading.plus(Rotation2d.fromDegrees(compensation));
-  //                   System.out.println(
-  //                       "Applying rotational compensation of " + compensation +
-  //                       " degrees to counteract rotation rate of " + rotationRate + " degrees/s"
-  //                   );
-  //               }
-  //               wasRotating = isRotating;
-  //               if (isRotating) {
-  //                   lastHeldPosition = currentHeading;
-  //                   hasManualRotation = true;
-  //               }
-  //           }
+                boolean isRotating = Math.abs(manualRot) > DriveConstants.deadband;
+                if (!isRotating && wasRotating) {
+                    double rotationRate = Units.radiansToDegrees(
+                        swerveDrive.getRobotVelocity().omegaRadiansPerSecond
+                    );
+                    double kP = 0.15;
+                    double compensation = kP * rotationRate;
+                    lastHeldPosition = currentHeading.plus(Rotation2d.fromDegrees(compensation));
+                    System.out.println(
+                        "Applying rotational compensation of " + compensation +
+                        " degrees to counteract rotation rate of " + rotationRate + " degrees/s"
+                    );
+                }
+                wasRotating = isRotating;
+                if (isRotating) {
+                    lastHeldPosition = currentHeading;
+                    hasManualRotation = true;
+                }
+            }
 
-  //           if (!hasManualRotation && rotSupplier != null) {
-  //               Rotation2d target = rotSupplier.get();
-  //               if (target != null) {
-  //                   double errorDeg = target.minus(currentHeading).getDegrees();
-  //                   if (Math.abs(errorDeg) > 0.5) {
-  //                       lastHeldPosition = target;
-  //                   }
-  //               }
-  //           }
-  //       }
+            if (!hasManualRotation && rotSupplier != null) {
+                Rotation2d target = rotSupplier.get();
+                if (target != null) {
+                    double errorDeg = target.minus(currentHeading).getDegrees();
+                    if (Math.abs(errorDeg) > 0.5) {
+                        lastHeldPosition = target;
+                    }
+                }
+            }
+        }
 
-  //       var speeds = m_SwerveController.calculate(
-  //           () -> swerveDrive.getPose(),
-  //           targetSupplier,
-  //           xInput,
-  //           yInput,
-  //           rotSupplier,
-  //           vR,
-  //           null,
-  //           false
-  //       );
+        var speeds = m_SwerveController.calculate(
+            () -> swerveDrive.getPose(),
+            targetSupplier,
+            xInput,
+            yInput,
+            rotSupplier,
+            vR,
+            null,
+            false
+        );
 
-  //       // YAGSL drive call — field-relative
-  //       swerveDrive.driveFieldOriented(
-  //           new ChassisSpeeds(
-  //               speeds.vx().getAsDouble(),
-  //               speeds.vy().getAsDouble(),
-  //               speeds.vr().getAsDouble()
-  //           )
-  //       );
-  //   }).withName("SwerveControllerDrive");
-  // }
+        // YAGSL drive call — field-relative
+        swerveDrive.driveFieldOriented(
+            new ChassisSpeeds(
+                speeds.vx().getAsDouble(),
+                speeds.vy().getAsDouble(),
+                speeds.vr().getAsDouble()
+            )
+        );
+    }).withName("SwerveControllerDrive");
+  }
 
-  // public double getDistanceError(){
-  //   return m_SwerveController.getDistanceError();
-  // }
+  public double getDistanceError(){
+    return m_SwerveController.getDistanceError();
+  }
 
-  // public double getRotationalError(){
-  //   return m_SwerveController.getRotationalError();
-  // }
+  public double getRotationalError(){
+    return m_SwerveController.getRotationalError();
+  }
 
   public Rotation2d getLastHeldRotation() {
         return lastHeldPosition;

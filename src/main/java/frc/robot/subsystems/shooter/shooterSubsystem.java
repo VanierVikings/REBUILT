@@ -1,6 +1,7 @@
 package frc.robot.subsystems.shooter;
 
 
+import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
@@ -20,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.SuperStructure.ShooterStates;
 import frc.robot.subsystems.SuperStructure;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -39,6 +41,8 @@ public class shooterSubsystem extends SubsystemBase{
 
     public final VelocityVoltage m_request = new VelocityVoltage(0);
     public final MotionMagicVoltage m_motionMagic = new MotionMagicVoltage(0);
+    private final Debouncer m_currentDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kRising);
+
     
     private ShooterStates currentState;
 
@@ -93,10 +97,17 @@ public class shooterSubsystem extends SubsystemBase{
         hoodConfig.Slot0.kP = 200;
         hoodConfig.Slot0.kD = 0;
 
+        hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 35.0 / 360.0; // 45 degrees
+        hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+        hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0.0; // 0 degrees
+        hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+
+
         hoodMotor.getConfigurator().apply(hoodConfig);
         hoodMotor.setPosition(0);
     
         // //limit stuff
+        
 
 
 
@@ -129,14 +140,28 @@ public class shooterSubsystem extends SubsystemBase{
         hoodMotor.setControl(m_motionMagic.withPosition(targetDegrees));
     }
 
+    public void driveHoodVoltage(double voltage){
+        hoodMotor.setVoltage(voltage);
+    }
+
+    public void setSoftLimits(boolean active){
+        var limitConfigs = new SoftwareLimitSwitchConfigs();
+        limitConfigs.ForwardSoftLimitEnable = active;
+        limitConfigs.ReverseSoftLimitEnable = false;
+        hoodMotor.getConfigurator().apply(limitConfigs);     
+        hoodMotor.getConfigurator().apply(limitConfigs);     
+    }
+
+    public void resetHoodEncoder(){
+            hoodMotor.setPosition(0);
+        }
+
     public void stopShooterMotors(){
         shooterLeaderMotor.stopMotor();
     }
 
-    public Command stopFeeder(){
-        return run(()->{
-            feederMotor.stopMotor();
-        });
+    public void stopFeeder(){
+        feederMotor.stopMotor();
     }
 
     @Override
@@ -145,16 +170,15 @@ public class shooterSubsystem extends SubsystemBase{
         SmartDashboard.putNumber("Shooter Current/Shooter RPS", shooterLeaderMotor.getVelocity().getValueAsDouble());
         SmartDashboard.putNumber("Shooter Current/Hood Angle (degrees)", hoodMotor.getPosition().getValueAsDouble()*360);
         SmartDashboard.putString("Shooter Current/Shooter State", this.currentState.toString());
+
+        if ((m_currentDebouncer.calculate(hoodMotor.getStatorCurrent().getValueAsDouble() > 20)&& hoodMotor.getVelocity().getValueAsDouble() < 1)&& currentState == ShooterStates.REZERO){
+                driveHoodVoltage(0);
+                resetHoodEncoder();
+                setSoftLimits(false);
+                this.currentState = ShooterStates.IDLE;
+            }
         
 
-    }
-
-    public Command runFeeder(){
-        return this.runEnd(() -> feederMotor.setVoltage(6), () -> feederMotor.setVoltage(0));
-    }
-
-    public Command stopShooter(){
-        return this.run(()->{stopShooterMotors();});
     }
 
 
@@ -162,6 +186,24 @@ public class shooterSubsystem extends SubsystemBase{
         this.currentState = state;
         Command command;
         switch (state) {
+            case AIMING:
+            command = run(()->{
+                var params = shotCalculator.getInstance().getParameters();
+                setHoodAngle(params.hoodAngle());
+                setShooterRPS(params.flywheelSpeed());
+                stopFeeder();
+            });
+            break;
+
+            case SHOOTING:
+                command = run(()->{
+                    var params = shotCalculator.getInstance().getParameters();
+                    setHoodAngle(params.hoodAngle());
+                    setShooterRPS(params.flywheelSpeed());
+                    setFeederVoltage(7);
+                });
+            break;
+
             case TEST:
                 command = run(()->{
                     inputRPS = SmartDashboard.getNumber("Shooter Inputs/Input Shooter RPS", inputRPS);
@@ -176,19 +218,38 @@ public class shooterSubsystem extends SubsystemBase{
                     
                 });
                 break;
+
+            case JAM:
+                command = run(()->{
+                    var params = shotCalculator.getInstance().getParameters();
+                    setHoodAngle(params.hoodAngle());
+                    setShooterRPS(params.flywheelSpeed());
+                    setFeederVoltage(-7);
+
+                });
         
             case IDLE:
                 command = run(()->{
                     setHoodAngle(20);
                     stopFeeder();
-                    stopShooter();
+                    stopShooterMotors();
+                });
+                break;
+
+            case REZERO:
+                command = run(()->{
+                    currentState = ShooterStates.REZERO;
+                    m_currentDebouncer.calculate(false);
+                    driveHoodVoltage(-2);
+                    setSoftLimits(false);
+                    
                 });
                 break;
 
             default:
             command = run(()->{
-                setHoodAngle(10);
-                stopShooter();
+                setHoodAngle(0);
+                stopShooterMotors();
                 stopFeeder();
             });
                 break;

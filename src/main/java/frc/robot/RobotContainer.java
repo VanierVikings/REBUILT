@@ -9,6 +9,8 @@ import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.spindexerSubsystem;
+import frc.robot.subsystems.SuperStructure;
+import frc.robot.subsystems.SuperStructure.DriveStates;
 import frc.robot.subsystems.SuperStructure.ShooterStates;
 import frc.robot.subsystems.SuperStructure.SpindexerStates;
 import frc.robot.subsystems.shooter.shooterSubsystem;
@@ -47,7 +49,9 @@ public class RobotContainer {
   private final SwerveSubsystem drivetrain = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"));
   private final shooterSubsystem m_ShooterSubsystem = new shooterSubsystem();
   private final spindexerSubsystem m_spindexer = new spindexerSubsystem();
-    private final shotCalculator m_ShotCalculator = new shotCalculator(drivetrain);
+  private final shotCalculator m_ShotCalculator = new shotCalculator(drivetrain);
+
+  private final SuperStructure m_SuperStructure = new SuperStructure(m_ShooterSubsystem,m_spindexer,drivetrain);
 
   
 
@@ -118,19 +122,25 @@ public class RobotContainer {
 
     // driver.leftBumper().whileTrue(m_shooter.setState(ShooterStates.TEST));
     driver.leftBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.TEST).alongWith(m_spindexer.setState(SpindexerStates.FEED)));
-      driver.leftTrigger().whileTrue(m_ShooterSubsystem.runFeeder());
-      driver.povDown().whileTrue(m_ShooterSubsystem.run(() -> m_ShooterSubsystem.shooterLeaderMotor.setControl(
-        m_ShooterSubsystem.m_request.withVelocity(m_ShooterSubsystem.shooterLeaderMotor.getVelocity().getValueAsDouble() - 5))));
-
-      driver.povUp().whileTrue(m_ShooterSubsystem.run(() -> m_ShooterSubsystem.shooterLeaderMotor.setControl(
-        m_ShooterSubsystem.m_request.withVelocity(m_ShooterSubsystem.shooterLeaderMotor.getVelocity().getValueAsDouble() + 5))));
-
-      driver.y().whileTrue(m_ShooterSubsystem.stopShooter());
-
-      driver.povLeft().whileTrue(m_ShooterSubsystem.run(()-> m_ShooterSubsystem.hoodMotor.setControl(m_ShooterSubsystem.m_motionMagic.withPosition(Units.degreesToRotations(m_ShooterSubsystem.hoodMotor.getPosition().getValueAsDouble()) -Units.degreesToRadians(0.5)))));
-      driver.povRight().whileTrue(m_ShooterSubsystem.run(()-> m_ShooterSubsystem.hoodMotor.setControl(m_ShooterSubsystem.m_motionMagic.withPosition(Units.degreesToRotations(m_ShooterSubsystem.hoodMotor.getPosition().getValueAsDouble()) + Units.degreesToRadians(0.5)))));
-
       driver.a().onTrue(drivetrain.run(()-> drivetrain.setInverted()));
+
+      //aiming
+      Command aiming = m_SuperStructure.firingCommand(ShooterStates.AIMING, SpindexerStates.OFF, DriveStates.AIMING);
+
+      //shooting
+      Command shooting = m_SuperStructure.firingCommand(ShooterStates.SHOOTING, SpindexerStates.FEED, DriveStates.AIMING);
+
+      driver.rightBumper().whileTrue(drivetrain.SwerveControllerDrive(null,
+       ()-> -modifiedDriveInput.getX(),
+        ()-> -modifiedDriveInput.getY(),
+         ()-> Rotation2d.fromRadians(shotCalculator.getInstance().getParameters().robotHeadingRadians()),
+          null)
+        );
+      driver.leftTrigger().whileTrue(aiming);
+
+      driver.rightTrigger().whileTrue(shooting);
+
+      driver.y().onTrue(m_ShooterSubsystem.setState(ShooterStates.REZERO)); //Hood rezero
 
         // driver.rightBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.IDLE));
 

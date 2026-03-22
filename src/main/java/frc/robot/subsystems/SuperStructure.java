@@ -120,7 +120,7 @@ public class SuperStructure extends SubsystemBase{
     public Command firingCommand(ShooterStates sState, SpindexerStates spinState, DriveStates dState) {
         return runOnce(() -> {
             setShooterState(ShooterStates.JAM);
-            setSpindexerState(spindexerStates.JAM);
+            setSpindexerState(SpindexerStates.JAM);
             this.driveStates = dState;
         })
         .andThen(runOnce(()->{

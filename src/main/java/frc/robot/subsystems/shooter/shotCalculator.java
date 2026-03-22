@@ -80,7 +80,7 @@ import frc.robot.subsystems.swerve.SwerveSubsystem;
 
 
 
-            //Alectron values
+            //Alectrona values
             // shotHoodAngleMap.put(2.6, Rotation2d.fromDegrees(18));
             // shotFlywheelSpeedMap.put(2.6, 60.0);
             // timeOfFlightMap.put(1.64, 0.93);
