@@ -122,7 +122,7 @@ public class RobotContainer {
 
     // driver.leftBumper().whileTrue(m_shooter.setState(ShooterStates.TEST));
     driver.leftBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.TEST).alongWith(m_spindexer.setState(SpindexerStates.FEED)));
-      driver.a().onTrue(drivetrain.run(()-> drivetrain.setInverted()));
+      // driver.a().onTrue(drivetrain.run(()-> drivetrain.setInverted()));
 
       //aiming
       Command aiming = m_SuperStructure.firingCommand(ShooterStates.AIMING, SpindexerStates.OFF, DriveStates.AIMING);
