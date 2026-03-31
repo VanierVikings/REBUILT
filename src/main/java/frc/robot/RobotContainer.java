@@ -18,6 +18,7 @@ import frc.robot.subsystems.shooter.shotCalculator;
 
 import java.io.File;
 
+import com.fasterxml.jackson.annotation.JsonFormat.Feature;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.pathplanner.lib.auto.AutoBuilder;
 
@@ -116,7 +117,7 @@ public void updateDriveInput(){
     Command driveSetpointGen = drivetrain.driveWithSetpointGeneratorFieldRelative(driveDirectAngle);
 
     // driver.leftBumper().whileTrue(m_shooter.setState(ShooterStates.TEST));
-    driver.leftBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.TEST));
+    driver.leftBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.TEST).alongWith(m_spindexer.setState(SpindexerStates.FEED)));
       driver.leftTrigger().whileTrue(m_ShooterSubsystem.runFeeder());
       driver.povDown().whileTrue(m_ShooterSubsystem.run(() -> m_ShooterSubsystem.shooterLeaderMotor.setControl(
         m_ShooterSubsystem.m_request.withVelocity(m_ShooterSubsystem.shooterLeaderMotor.getVelocity().getValueAsDouble() - 5))));
