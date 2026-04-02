@@ -122,7 +122,7 @@ public class RobotContainer {
     Command driveSetpointGen = drivetrain.driveWithSetpointGeneratorFieldRelative(driveDirectAngle);
 
     // driver.leftBumper().whileTrue(m_shooter.setState(ShooterStates.TEST));
-    driver.leftBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.TEST).alongWith(m_spindexer.setState(SpindexerStates.FEED)));
+    driver.leftBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.SHOOTING).alongWith(m_spindexer.setState(SpindexerStates.FEED)));
       // driver.a().onTrue(drivetrain.run(()-> drivetrain.setInverted()));
 
       //aiming
@@ -145,7 +145,8 @@ public class RobotContainer {
 
         // driver.rightBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.IDLE));
 
-    // drivetrain.SwerveControllerDrive(
+    // drivetrain.SwerveControllerDrive([]\
+
     //         null,
     //         () -> modifiedDriveInput.getX(),
     //         () -> modifiedDriveInput.getY(),
