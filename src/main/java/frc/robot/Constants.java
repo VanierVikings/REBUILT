@@ -53,7 +53,7 @@ public final class Constants {
     public static final int shooterLeaderMotor = 12;
     public static final int shooterFollowerMotor = 11;
     public static final int feederMotorID = 5;
-    public static final int hoodMotorID = 0;
+    public static final int hoodMotorID = 22;
     public static final double kShooterP = 0.0;
 
     public static final double kShooterI = 0.0;
@@ -80,8 +80,18 @@ public final class Constants {
   public static class IntakeConstants{
     public static final int pivotMotorID = 0;
     public static final int rollerMotorID = 0;
-    public static final int smartCurrentLimit = 0;
-    
+    public static final int CANcoderID = 33;
+
+    public static final double CANcoderOffset = 0; //TEST
+
+    public static final double rollerRPM = 2500.0;
+    public static final double rollerSlow = 300.0;
+    public static final double rollerOutake = -1000.0;
+
+    public static final double homeAngle = 30;
+    public static final double deployedAngle =-5;
+    public static final double startingPosAngle = 100;
+
   }
 
 

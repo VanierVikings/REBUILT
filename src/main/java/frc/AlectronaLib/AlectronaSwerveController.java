@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class AlectronaSwerveController {
     private final PIDController translationController;
@@ -123,8 +124,12 @@ public class AlectronaSwerveController {
         final double finalVx = vx;
         final double finalVy = vy;
         final double finalVr = clampRotation ? MathUtil.clamp(vr,-2*Math.PI,2*Math.PI) : vr;
+        SmartDashboard.putNumber("DT Speed / Vx", finalVx);
+        SmartDashboard.putNumber("DT Speed / Vy", finalVy);
+        SmartDashboard.putNumber("DT Speed / Vr", finalVr);
 
-        return new Speeds(() -> finalVx, () -> finalVy, () -> finalVr);
+
+        return new Speeds(finalVx, finalVy, finalVr);
     }
 
     public double getDistanceError() {
@@ -135,5 +140,5 @@ public class AlectronaSwerveController {
         return Math.abs(rotationController.getPositionError());
     }
 
-    public record Speeds(DoubleSupplier vx, DoubleSupplier vy, DoubleSupplier vr) {}
+    public record Speeds(Double vx, Double vy, Double vr) {}
 }

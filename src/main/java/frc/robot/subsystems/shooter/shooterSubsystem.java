@@ -164,6 +164,14 @@ public class shooterSubsystem extends SubsystemBase{
         feederMotor.stopMotor();
     }
 
+    public ShooterStates getState(){
+        return this.currentState;
+    }
+
+    public boolean shooterAtSpeed(double tolerance){
+        return shooterLeaderMotor.getClosedLoopError().getValueAsDouble() < tolerance;
+    }
+
     @Override
     public void periodic(){
         //Current Values
@@ -230,7 +238,7 @@ public class shooterSubsystem extends SubsystemBase{
         
             case IDLE:
                 command = run(()->{
-                    setHoodAngle(20);
+                    setHoodAngle(0);
                     stopFeeder();
                     stopShooterMotors();
                 });

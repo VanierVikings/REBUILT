@@ -10,6 +10,7 @@ import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.spindexerSubsystem;
 import frc.robot.subsystems.SuperStructure;
+import frc.robot.subsystems.intakeSubsystem;
 import frc.robot.subsystems.SuperStructure.DriveStates;
 import frc.robot.subsystems.SuperStructure.ShooterStates;
 import frc.robot.subsystems.SuperStructure.SpindexerStates;
@@ -51,8 +52,9 @@ public class RobotContainer {
   private final shooterSubsystem m_ShooterSubsystem = new shooterSubsystem();
   private final spindexerSubsystem m_spindexer = new spindexerSubsystem();
   private final shotCalculator m_ShotCalculator = new shotCalculator(drivetrain);
+  private final intakeSubsystem m_intake = new intakeSubsystem();
 
-  private final SuperStructure m_SuperStructure = new SuperStructure(m_ShooterSubsystem,m_spindexer,drivetrain);
+  private final SuperStructure m_SuperStructure = new SuperStructure(m_ShooterSubsystem,m_spindexer,m_intake,drivetrain);
 
   
 

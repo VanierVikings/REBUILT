@@ -1,7 +1,5 @@
 package frc.robot.subsystems.shooter;
 
-import java.util.concurrent.TimeoutException;
-
 import com.pathplanner.lib.util.FlippingUtil;
 
 import edu.wpi.first.math.MathUtil;
@@ -12,16 +10,21 @@ import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 
 /**
  * Combines high-fidelity pose extrapolation with custom shot maps.
+ * 9785 superiority
  */
     public class shotCalculator extends SubsystemBase {
         private static shotCalculator instance;
@@ -47,67 +50,85 @@ import frc.robot.subsystems.swerve.SwerveSubsystem;
         private static InterpolatingDoubleTreeMap currentShotFlywheelSpeedMap;
         private static InterpolatingDoubleTreeMap currentTimeOfFlightMap;
                 Translation2d shooterOffset = Constants.robotToShooter.getTranslation().toTranslation2d();
+        StructPublisher<Pose2d> shooterPublisher = NetworkTableInstance.getDefault()
+            .getStructTopic("ShooterTargetPose", Pose2d.struct).publish();
 
 
     static {
-        // // Shooting Maps
-            shotHoodAngleMap.put(3.67, Rotation2d.fromDegrees(0));
+        
+            // Shooting Maps
+            shotHoodAngleMap.put((3.67), Rotation2d.fromDegrees(0));
+            shotHoodAngleMap.put((2.84), Rotation2d.fromDegrees(0));
+            shotHoodAngleMap.put((2.33), Rotation2d.fromDegrees(0));
+            shotHoodAngleMap.put((4.189), Rotation2d.fromDegrees(4));
+            shotHoodAngleMap.put((4.78), Rotation2d.fromDegrees(8));
+            shotHoodAngleMap.put((1.55), Rotation2d.fromDegrees(0));
+            shotHoodAngleMap.put((2.00), Rotation2d.fromDegrees(0));
+
+
             shotFlywheelSpeedMap.put(3.67, 50.0);
-            // timeOfFlightMap.put(3.67, null);
-
-            shotHoodAngleMap.put(2.84, Rotation2d.fromDegrees(0));
             shotFlywheelSpeedMap.put(2.84, 45.0);
-
-            shotHoodAngleMap.put(2.33, Rotation2d.fromDegrees(0));
             shotFlywheelSpeedMap.put(2.33, 35.0);
-            timeOfFlightMap.put(2.33,1.29);
-
-            shotHoodAngleMap.put(4.189, Rotation2d.fromDegrees(4));
             shotFlywheelSpeedMap.put(4.189, 47.0);
-
-            shotHoodAngleMap.put(4.78, Rotation2d.fromDegrees(8));
             shotFlywheelSpeedMap.put(4.78, 47.0);
-            timeOfFlightMap.put(4.78, 1.24);
-
             shotFlywheelSpeedMap.put(1.55, 33.0);
-            shotHoodAngleMap.put(1.55,Rotation2d.fromDegrees(0));
-            timeOfFlightMap.put(1.55,0.96);
+            shotFlywheelSpeedMap.put(2.00, 35.0);
 
-            shotFlywheelSpeedMap.put(2.00,35.0);
-            shotHoodAngleMap.put(2.00,Rotation2d.fromDegrees(0));
-            timeOfFlightMap.put(2.00,0.92);
-
+            timeOfFlightMap.put(4.78, 1.24);
+            timeOfFlightMap.put(1.55, 0.96);
+            timeOfFlightMap.put(2.00, 0.92);
 
 
 
-            //Alectrona values
-            // shotHoodAngleMap.put(2.6, Rotation2d.fromDegrees(18));
-            // shotFlywheelSpeedMap.put(2.6, 60.0);
-            // timeOfFlightMap.put(1.64, 0.93);
 
-            // shotHoodAngleMap.put(2.02, Rotation2d.fromDegrees(15));
-            // shotFlywheelSpeedMap.put(2.02, 60.0);
-            // // timeOfFlightMap.put(1.64, 0.93);
+            // shotFlywheelSpeedMap.put(1.0, 43.0);
+            // shotFlywheelSpeedMap.put(1.5, 47.0);
+            // shotFlywheelSpeedMap.put(2.0, 46.0);
+            // shotFlywheelSpeedMap.put(2.5, 51.0);
+            // shotFlywheelSpeedMap.put(3.0, 54.0);
+            // shotFlywheelSpeedMap.put(3.5, 56.0);
+            // shotFlywheelSpeedMap.put(4.0, 58.0);
+            // shotFlywheelSpeedMap.put(4.5, 62.0);
+            // shotFlywheelSpeedMap.put(5.0, 63.0);
+            // shotFlywheelSpeedMap.put(5.5, 67.0);
+
+
+            // shotHoodAngleMap.put(1.0, Rotation2d.fromDegrees(14));  
+            // shotHoodAngleMap.put(1.5, Rotation2d.fromDegrees(17));      
+            // shotHoodAngleMap.put(2.0, Rotation2d.fromDegrees(17));   
+            // shotHoodAngleMap.put(2.5, Rotation2d.fromDegrees(21));   
+            // shotHoodAngleMap.put(3.0, Rotation2d.fromDegrees(23));
+            // shotHoodAngleMap.put(3.5, Rotation2d.fromDegrees(25));        
+            // shotHoodAngleMap.put(4.0, Rotation2d.fromDegrees(28));
+            // shotHoodAngleMap.put(4.5, Rotation2d.fromDegrees(30));
+            // shotHoodAngleMap.put(5.0, Rotation2d.fromDegrees(32));     
+            // shotHoodAngleMap.put(5.5, Rotation2d.fromDegrees(33));                   
+
             
-            // shotHoodAngleMap.put(3.2, Rotation2d.fromDegrees(18.5));
-            // shotFlywheelSpeedMap.put(3.2, 64.0);
-            // // timeOfFlightMap.put(1.64, 0.93);
+            // timeOfFlightMap.put(1.5, 1.0);
+            // timeOfFlightMap.put(3.0, 1.15);
+            // timeOfFlightMap.put(5.0, 1.3);
+            
+            // Passing Maps
+            passingShotHoodAngleMap.put(1.58, Rotation2d.fromDegrees(23.0));
+            passingShotHoodAngleMap.put(5.4, Rotation2d.fromDegrees(30.0));
+            passingShotHoodAngleMap.put(6.28, Rotation2d.fromDegrees(35.0)); 
+            passingShotHoodAngleMap.put(8.68, Rotation2d.fromDegrees(45.0)); 
+            passingShotHoodAngleMap.put(10.52, Rotation2d.fromDegrees(45.0)); 
+            passingShotHoodAngleMap.put(13.34, Rotation2d.fromDegrees(45.0)); 
 
-            // shotHoodAngleMap.put(1.8, Rotation2d.fromDegrees(13));
-            // shotFlywheelSpeedMap.put(1.8, 60.0);
-            // // timeOfFlightMap.put(1.64, 0.93);
+            passingShotFlywheelSpeedMap.put(1.58, 40.0);
+            passingShotFlywheelSpeedMap.put(5.4, 45.0);
+            passingShotFlywheelSpeedMap.put(6.28, 52.0);
+            passingShotFlywheelSpeedMap.put(8.68, 60.0);
+            passingShotFlywheelSpeedMap.put(10.52, 60.0);
+            passingShotFlywheelSpeedMap.put(13.34, 73.0);
 
-            // shotHoodAngleMap.put(4.6, Rotation2d.fromDegrees(24.7));
-            // shotFlywheelSpeedMap.put(4.6, 69.0);
-            // // timeOfFlightMap.put(1.64, 0.93);
-
-            // shotHoodAngleMap.put(2.75, Rotation2d.fromDegrees(21));
-            // shotFlywheelSpeedMap.put(2.75, 51.0);
-
-            passingShotHoodAngleMap.put(1.45, Rotation2d.fromDegrees(19.0)); //outlier??
-            passingShotFlywheelSpeedMap.put(1.45, 20.0);
-            passingTimeOfFlightMap.put(1.64, 0.93);
-
+            passingTimeOfFlightMap.put(6.28, 1.34);
+            passingTimeOfFlightMap.put(7.81, 1.51);
+            passingTimeOfFlightMap.put(8.68, 1.55);
+            passingTimeOfFlightMap.put(8.79, 1.52);
+        
     }
 
     public record ShootParameters(
@@ -145,11 +166,10 @@ import frc.robot.subsystems.swerve.SwerveSubsystem;
         // Dashboard Debugging
         SmartDashboard.putNumber("Shot Calculator/Distance", params.initialDistance);
         SmartDashboard.putNumber("Shot Calculator/Desired RPS", params.flywheelSpeed);
+        SmartDashboard.putNumber("Shot Calculator/Desired HoodAngle", params.hoodAngle);
         SmartDashboard.putNumber("Shot Calculator/Desired Hood Angle", params.hoodAngle);
         SmartDashboard.putNumber("Shot Calculator/Desired Robot Heading", Units.radiansToDegrees(params.robotHeadingRadians));
-        SmartDashboard.putNumber("Shot Calculator/Actual robot Heading", Units.radiansToDegrees(drive.getPose().getRotation().getDegrees()));
-
-
+        SmartDashboard.putNumber("Shot Calculator/Actual robot Heading", (drive.getPose().getRotation().getDegrees()));
     }
 
     public ShootParameters getParameters() {
@@ -173,22 +193,25 @@ import frc.robot.subsystems.swerve.SwerveSubsystem;
         double robotX = currentPose.getX();
         boolean isPastTrench = isRed ? (robotX < 11) : (robotX > 5.5);
         boolean isLeftRight = currentPose.getY() > 4;
+        boolean isPassing = false;
 
 
-        if (isPastTrench) {
-            targetPose = isLeftRight ? new Pose2d(1, 7, new Rotation2d()) : new Pose2d(1, 1, new Rotation2d());
+        if (isPastTrench && DriverStation.isTeleop()) {
+            targetPose = isRed ? 
+            (isLeftRight ? new Pose2d(1, 1, new Rotation2d()) : new Pose2d(1, 7, new Rotation2d())) : 
+            (isLeftRight ? new Pose2d(1, 7, new Rotation2d()) : new Pose2d(1, 1, new Rotation2d()));            
             if (isRed) targetPose = FlippingUtil.flipFieldPose(targetPose);
             currentShotHoodAngleMap = passingShotHoodAngleMap;
             currentShotFlywheelSpeedMap = passingShotFlywheelSpeedMap;
             currentTimeOfFlightMap = passingTimeOfFlightMap;
+            isPassing = true;
         } else {
             targetPose = isRed ? Constants.fieldPoses.redAllianceHub : Constants.fieldPoses.blueAllianceHub;
             currentShotHoodAngleMap = shotHoodAngleMap;
             currentShotFlywheelSpeedMap = shotFlywheelSpeedMap;
             currentTimeOfFlightMap = timeOfFlightMap;
         }
-
-        // 3. TANGENTIAL VELOCITY COMPENSATION (The Missing Link)
+        shooterPublisher.set(targetPose);
         // If the robot is rotating, the shooter (being offset from center) has extra velocity
         double robotRotation = extrapolatedPose.getRotation().getRadians();
         
@@ -204,7 +227,7 @@ import frc.robot.subsystems.swerve.SwerveSubsystem;
         );
 
         // 4. ITERATIVE LOOKAHEAD + HUB OFFSET
-        double initialDistance = targetPose.getTranslation().getDistance(shooterPosition.getTranslation()) + Constants.ShooterConstants.hubOffset;
+        double initialDistance = targetPose.getTranslation().getDistance(shooterPosition.getTranslation()) + ShooterConstants.hubOffset;
         double predictedTOF = currentTimeOfFlightMap.get(initialDistance);
         
         Translation2d virtualTarget = targetPose.getTranslation(); 
@@ -212,11 +235,11 @@ import frc.robot.subsystems.swerve.SwerveSubsystem;
             virtualTarget = targetPose.getTranslation().minus(
                 new Translation2d(totalVelX * predictedTOF, totalVelY * predictedTOF)
             );
-            double virtualDistance = virtualTarget.getDistance(shooterPosition.getTranslation()) + Constants.ShooterConstants.hubOffset;
+            double virtualDistance = virtualTarget.getDistance(shooterPosition.getTranslation()) + ShooterConstants.hubOffset;
             predictedTOF = currentTimeOfFlightMap.get(virtualDistance);
         }
 
-        double lookaheadDistance = virtualTarget.getDistance(shooterPosition.getTranslation()) + Constants.ShooterConstants.hubOffset;
+        double lookaheadDistance = virtualTarget.getDistance(shooterPosition.getTranslation()) + ShooterConstants.hubOffset;
 
         // 5. LOOKUP & FILTERING
         double hoodAngle = currentShotHoodAngleMap.get(lookaheadDistance).getDegrees();
@@ -234,7 +257,7 @@ import frc.robot.subsystems.swerve.SwerveSubsystem;
             flywheelSpeed,
             driveAngle.getRadians(),
             filteredHoodVel,
-            false,
+            isPassing,
             lookaheadDistance > 1.0 && lookaheadDistance < 6.0
         );
 

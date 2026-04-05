@@ -93,6 +93,14 @@ public class SwerveSubsystem extends SubsystemBase {
     
   private Rotation2d lastHeldPosition = Rotation2d.fromDegrees(0);
   private boolean wasRotating = false;
+  private boolean isSettlingAfterRelease = false;
+  private static final double ROTATION_SETTLE_TIME = 0.3; // 300 ms
+  private double rotationReleaseStartTime = -1.0;
+
+
+
+
+
   
   public SwerveSubsystem(File directory) {
     
@@ -486,77 +494,96 @@ public class SwerveSubsystem extends SubsystemBase {
     return Timer.getFPGATimestamp() - m_EstimatePose.getLastTagTimestamp();
   };
 
+  
 
-  public Command SwerveControllerDrive(
-        Supplier<Pose2d> targetSupplier, 
-        DoubleSupplier xInput, 
-        DoubleSupplier yInput, 
-        Supplier<Rotation2d> rotSupplier, 
-        DoubleSupplier vR
-    ){
-      return this.run(() -> {
-        Rotation2d currentHeading = swerveDrive.getPose().getRotation();
+public Command SwerveControllerDrive(
+    Supplier<Pose2d> targetSupplier, 
+    DoubleSupplier xInput, 
+    DoubleSupplier yInput, 
+    Supplier<Rotation2d> rotSupplier, 
+    DoubleSupplier vR
+) {
+    return run(() -> {
+        // 1. Get the current pose directly from YAGSL
+        Pose2d currentPose = swerveDrive.getPose();
+        Rotation2d currentHeading = currentPose.getRotation();
+        
         boolean hasManualRotation = false;
         double manualRot = 0.0;
-
-        if (DriverStation.isAutonomous()) {
-            lastHeldPosition = swerveDrive.getPose().getRotation();
+        
+        if (DriverStation.isAutonomous()){
+            lastHeldPosition = currentHeading;
         } else {
             if (vR != null) {
                 manualRot = vR.getAsDouble();
 
                 boolean isRotating = Math.abs(manualRot) > DriveConstants.deadband;
-                if (!isRotating && wasRotating) {
-                    double rotationRate = Units.radiansToDegrees(
-                        swerveDrive.getRobotVelocity().omegaRadiansPerSecond
-                    );
-                    double kP = 0.15;
-                    double compensation = kP * rotationRate;
-                    lastHeldPosition = currentHeading.plus(Rotation2d.fromDegrees(compensation));
-                    System.out.println(
-                        "Applying rotational compensation of " + compensation +
-                        " degrees to counteract rotation rate of " + rotationRate + " degrees/s"
-                    );
-                }
-                wasRotating = isRotating;
+                double now = Timer.getFPGATimestamp();
+                
                 if (isRotating) {
+                    // Continuously update heading while rotating
                     lastHeldPosition = currentHeading;
                     hasManualRotation = true;
-                }
-            }
 
-            if (!hasManualRotation && rotSupplier != null) {
+                    // Cancel any settle window
+                    isSettlingAfterRelease = false;
+                    rotationReleaseStartTime = -1.0;
+                }
+                if (!isRotating && wasRotating) {
+                    rotationReleaseStartTime = now;
+                    isSettlingAfterRelease = true;
+                }
+                if (isSettlingAfterRelease) {
+                    double elapsed = now - rotationReleaseStartTime;
+
+                    if (elapsed < ROTATION_SETTLE_TIME) {
+                        // Continue updating heading while robot coasts
+                        lastHeldPosition = currentHeading;
+                    } else {
+                        // Lock heading after settle time
+                        isSettlingAfterRelease = false;
+                        hasManualRotation = false;
+
+                        System.out.println("Heading locked at: " 
+                            + lastHeldPosition.getDegrees());
+                    }
+                }
+
+                wasRotating = isRotating;
+            } 
+            if (rotSupplier != null) {
                 Rotation2d target = rotSupplier.get();
+
                 if (target != null) {
                     double errorDeg = target.minus(currentHeading).getDegrees();
+
                     if (Math.abs(errorDeg) > 0.5) {
                         lastHeldPosition = target;
                     }
                 }
             }
         }
-
+        
         var speeds = m_SwerveController.calculate(
-            () -> swerveDrive.getPose(),
+            () -> currentPose, 
             targetSupplier,
-            xInput,
-            yInput,
-            rotSupplier,
+            xInput, 
+            yInput, 
+            rotSupplier, 
             vR,
             null,
             false
+        );      
+        
+        ChassisSpeeds desiredSpeeds = new ChassisSpeeds(
+            speeds.vx(), 
+            speeds.vy(), 
+            speeds.vr()
         );
+        swerveDrive.setChassisSpeeds(desiredSpeeds);
 
-        // YAGSL drive call — field-relative
-        swerveDrive.driveFieldOriented(
-            new ChassisSpeeds(
-                speeds.vx().getAsDouble(),
-                speeds.vy().getAsDouble(),
-                speeds.vr().getAsDouble()
-            )
-        );
     }).withName("SwerveControllerDrive");
-  }
+  }   
 
   public double getDistanceError(){
     return m_SwerveController.getDistanceError();
