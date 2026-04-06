@@ -50,10 +50,10 @@ public final class Constants {
   
   public static class ShooterConstants {
     public static final double hubOffset = 0;
-    public static final int shooterLeaderMotor = 12;
-    public static final int shooterFollowerMotor = 11;
-    public static final int feederMotorID = 5;
-    public static final int hoodMotorID = 22;
+    public static final int shooterLeaderMotor = 11;
+    public static final int shooterFollowerMotor = 12;
+    public static final int feederMotorID = 9;
+    public static final int hoodMotorID = 10;
     public static final double kShooterP = 0.0;
 
     public static final double kShooterI = 0.0;
@@ -78,9 +78,9 @@ public final class Constants {
   }
 
   public static class IntakeConstants{
-    public static final int pivotMotorID = 0;
-    public static final int rollerMotorID = 0;
-    public static final int CANcoderID = 33;
+    public static final int pivotMotorID = 14;
+    public static final int rollerMotorID = 15;
+    public static final int CANcoderID = 16;
 
     public static final double CANcoderOffset = 0; //TEST
 
@@ -97,7 +97,7 @@ public final class Constants {
 
 
     public static class SpindexerConstants {
-      public static final int SPINDEXER_MOTOR_ID = 4;
+      public static final int SPINDEXER_MOTOR_ID = 13;
       public static final int SPINDEXER_CURRENT_LIMIT = 40;
 
       public static final double kP = 0.0;

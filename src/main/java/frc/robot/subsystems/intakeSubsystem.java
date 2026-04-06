@@ -80,10 +80,11 @@ public class intakeSubsystem extends SubsystemBase {
         pivotConfig.CurrentLimits.SupplyCurrentLimit = 60;
         pivotConfig.CurrentLimits.StatorCurrentLimit  = 120;
 
-        pivotConfig.Feedback.SensorToMechanismRatio = 33.5; //69 rotations of motor: 1 rotation of pivot
+        pivotConfig.Feedback.RotorToSensorRatio = (4*3*(42/36));
+        pivotConfig.Feedback.SensorToMechanismRatio = (32/14); 
         // pivotConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         pivotConfig.Feedback.FeedbackRemoteSensorID = pivotEncoder.getDeviceID();
-        pivotConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+        pivotConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
         pivotConfig.ClosedLoopGeneral.ContinuousWrap = true;
 
 
