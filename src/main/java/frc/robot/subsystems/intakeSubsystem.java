@@ -81,17 +81,20 @@ public class intakeSubsystem extends SubsystemBase {
         pivotConfig.CurrentLimits.SupplyCurrentLimit = 60;
         pivotConfig.CurrentLimits.StatorCurrentLimit  = 120;
 
-        pivotConfig.Feedback.RotorToSensorRatio = (4*3*(42/36));
-        pivotConfig.Feedback.SensorToMechanismRatio = (32/14); 
+        pivotConfig.Feedback.RotorToSensorRatio = (4.0*3.0*(42.0/36.0));
+        pivotConfig.Feedback.SensorToMechanismRatio = (32.0/14.0); 
         pivotConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         pivotConfig.Feedback.FeedbackRemoteSensorID = pivotEncoder.getDeviceID();
         pivotConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
         pivotConfig.ClosedLoopGeneral.ContinuousWrap = true;
         pivotConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
+        pivotConfig.MotionMagic.MotionMagicCruiseVelocity = 2;
+        pivotConfig.MotionMagic.MotionMagicAcceleration = 3.5;
+
 
         pivotConfig.Slot0.kS = 0.25; // "good enough" - eric zeng
-        pivotConfig.Slot0.kV = (0.12*(4*3*(42/36)*(32/14)));
+        pivotConfig.Slot0.kV = (0.12*(4.0*3.0*(42.0/36.0)*(32.0/14.0)));
         pivotConfig.Slot0.kP = 50;
         pivotConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
 
@@ -135,7 +138,7 @@ public class intakeSubsystem extends SubsystemBase {
     }
 
     public void setPivotPosition(double angleDegrees){
-        angleDegrees = Units.degreesToRadians(angleDegrees);
+        angleDegrees = Units.degreesToRotations(angleDegrees);
         pivotMotor.setControl(m_MotionMagicVoltage.withPosition(angleDegrees));
     }
 
