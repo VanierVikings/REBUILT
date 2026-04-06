@@ -12,6 +12,7 @@ import frc.robot.subsystems.spindexerSubsystem;
 import frc.robot.subsystems.SuperStructure;
 import frc.robot.subsystems.intakeSubsystem;
 import frc.robot.subsystems.SuperStructure.DriveStates;
+import frc.robot.subsystems.SuperStructure.IntakePivotStates;
 import frc.robot.subsystems.SuperStructure.ShooterStates;
 import frc.robot.subsystems.SuperStructure.SpindexerStates;
 import frc.robot.subsystems.shooter.shooterSubsystem;
@@ -124,8 +125,9 @@ public class RobotContainer {
     Command driveSetpointGen = drivetrain.driveWithSetpointGeneratorFieldRelative(driveDirectAngle);
 
     // driver.leftBumper().whileTrue(m_shooter.setState(ShooterStates.TEST));
-    driver.leftBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.SHOOTING).alongWith(m_spindexer.setState(SpindexerStates.FEED)));
+    // driver.leftBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.SHOOTING).alongWith(m_spindexer.setState(SpindexerStates.FEED)));
       // driver.a().onTrue(drivetrain.run(()-> drivetrain.setInverted()));
+      driver.leftBumper().whileTrue(m_intake.setPivotState(IntakePivotStates.PIVOT_TEST));
 
       //aiming
       Command aiming = m_SuperStructure.firingCommand(ShooterStates.AIMING, SpindexerStates.OFF, DriveStates.AIMING);

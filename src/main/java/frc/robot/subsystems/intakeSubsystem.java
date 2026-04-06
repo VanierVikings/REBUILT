@@ -35,6 +35,7 @@ import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorOutputStatusValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 
 
@@ -67,7 +68,7 @@ public class intakeSubsystem extends SubsystemBase {
 
         /*  --- WCP THROUGBORE ENCODER VIA CANCODER --- */   
         var encoderConfig = new CANcoderConfiguration();
-        encoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive; //subject to change
+        encoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive; //subject to change
         encoderConfig.MagnetSensor.MagnetOffset = IntakeConstants.CANcoderOffset;
         pivotEncoder.getConfigurator().apply(encoderConfig);
 
@@ -82,16 +83,16 @@ public class intakeSubsystem extends SubsystemBase {
 
         pivotConfig.Feedback.RotorToSensorRatio = (4*3*(42/36));
         pivotConfig.Feedback.SensorToMechanismRatio = (32/14); 
-        // pivotConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        pivotConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         pivotConfig.Feedback.FeedbackRemoteSensorID = pivotEncoder.getDeviceID();
         pivotConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
         pivotConfig.ClosedLoopGeneral.ContinuousWrap = true;
+        pivotConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
 
-        pivotConfig.Slot0.kS = 0; //TEST
-        pivotConfig.Slot0.kV = (0.12*33.5);
-        pivotConfig.Slot0.kP = 0;
-        pivotConfig.Slot0.kP = 0;
+        pivotConfig.Slot0.kS = 0.25; // "good enough" - eric zeng
+        pivotConfig.Slot0.kV = (0.12*(4*3*(42/36)*(32/14)));
+        pivotConfig.Slot0.kP = 50;
         pivotConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
 
         // pivotConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
@@ -158,6 +159,7 @@ public class intakeSubsystem extends SubsystemBase {
     public double getIntakePivotAngle(){
         return pivotMotor.getPosition().getValueAsDouble()*360; //degrees
     }
+    
 
 
 
