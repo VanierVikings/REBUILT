@@ -18,6 +18,8 @@ import frc.robot.subsystems.SuperStructure.SpindexerStates;
 import frc.robot.subsystems.shooter.shooterSubsystem;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 import frc.robot.subsystems.shooter.shotCalculator;
+import frc.robot.subsystems.LED;
+import frc.robot.subsystems.LEDState;
 
 
 import java.io.File;
@@ -25,7 +27,6 @@ import java.io.File;
 import com.fasterxml.jackson.annotation.JsonFormat.Feature;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.pathplanner.lib.auto.AutoBuilder;
-
 import choreo.auto.AutoChooser;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -106,8 +107,18 @@ public class RobotContainer {
 
   }
 
-  
 
+  private void updateLedStates(){
+    LEDState desired;
+    if(m_ShooterSubsystem.getState() == ShooterStates.AIMING){
+        desired = LEDState.startShootwhite
+    } else if (m_ShooterSubsystem.getState() == ShooterStates.SHOOTING){
+      desired = LEDState.readyGreen
+    }else{
+      deisred = LEDState.test
+    }
+  }
+  
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
    * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
