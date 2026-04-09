@@ -18,11 +18,12 @@ import frc.robot.subsystems.SuperStructure.SpindexerStates;
 import frc.robot.subsystems.shooter.shooterSubsystem;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 import frc.robot.subsystems.shooter.shotCalculator;
-import frc.robot.subsystems.LED;
-import frc.robot.subsystems.LEDState;
+// import frc.robot.subsystems.LED;
+// import frc.robot.subsystems.LEDState;
 
 
 import java.io.File;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonFormat.Feature;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
@@ -36,6 +37,7 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -108,16 +110,16 @@ public class RobotContainer {
   }
 
 
-  private void updateLedStates(){
-    LEDState desired;
-    if(m_ShooterSubsystem.getState() == ShooterStates.AIMING){
-        desired = LEDState.startShootwhite
-    } else if (m_ShooterSubsystem.getState() == ShooterStates.SHOOTING){
-      desired = LEDState.readyGreen
-    }else{
-      deisred = LEDState.test
-    }
-  }
+  // private void updateLedStates(){
+  //   LEDState desired;
+  //   if(m_ShooterSubsystem.getState() == ShooterStates.AIMING){
+  //       desired = LEDState.startShootwhite
+  //   } else if (m_ShooterSubsystem.getState() == ShooterStates.SHOOTING){
+  //     desired = LEDState.readyGreen
+  //   }else{
+  //     deisred = LEDState.test
+  //   }
+  // }
   
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
@@ -146,17 +148,31 @@ public class RobotContainer {
       //shooting
       Command shooting = m_SuperStructure.firingCommand(ShooterStates.SHOOTING, SpindexerStates.FEED, DriveStates.AIMING);
 
-      driver.rightBumper().whileTrue(drivetrain.SwerveControllerDrive(null,
-       ()-> -modifiedDriveInput.getX(),
-        ()-> -modifiedDriveInput.getY(),
-         ()-> Rotation2d.fromRadians(shotCalculator.getInstance().getParameters().robotHeadingRadians()),
-          null)
+      driver.a().whileTrue(
+            drivetrain.SwerveControllerDrive(
+                ()-> new Pose2d(3, 4, new Rotation2d()), 
+                ()->modifiedDriveInput.getX(), 
+                ()->modifiedDriveInput.getY(),
+                null, 
+                null)
         );
+
+
       driver.leftTrigger().whileTrue(aiming);
 
       driver.rightTrigger().whileTrue(shooting);
 
-      driver.y().onTrue(m_ShooterSubsystem.setState(ShooterStates.REZERO)); //Hood rezero
+      // driver.y().onTrue(m_ShooterSubsystem.setState(ShooterStates.REZERO)); //Hood rezero
+
+      driver.leftBumper().onTrue(
+            Commands.defer(() -> {
+                if (m_intake.isDeployed()) {
+                    return m_SuperStructure.intakeRequest(IntakePivotStates.PIVOT_HOME);
+                } else {
+                    return m_SuperStructure.intakeRequest(IntakePivotStates.PIVOT_DEPLOYED);
+                }
+            }, Set.of(m_intake, m_SuperStructure)) 
+        );
 
         // driver.rightBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.IDLE));
 

@@ -61,7 +61,7 @@ public class SuperStructure extends SubsystemBase{
         this.m_shooter = shooter;
         this.m_spindexer = spindexer;
         this.m_drive = drive;
-        // this.m_intake = intake;
+        this.m_intake = intake;
         // this.m_climber = climber;
         intaking = false;
         shotCalculator.getInstance(m_drive);
@@ -126,6 +126,11 @@ public class SuperStructure extends SubsystemBase{
         });
     }
 
+    public Command intakeRequest(IntakePivotStates requestedState){
+        this.intakeState = requestedState;
+        return run(()-> setIntakePivotState(requestedState));
+    }
+
 
     public Command firingCommand(ShooterStates sState, SpindexerStates spinState, DriveStates dState) {
         return runOnce(() -> {
@@ -134,26 +139,19 @@ public class SuperStructure extends SubsystemBase{
             this.driveState = dState;
         })
         .andThen(
-            Commands.waitSeconds(0.1)
+            Commands.waitSeconds(0.1).unless(()->intakeState == IntakePivotStates.PIVOT_DEPLOYED)
             .andThen(runOnce(()->{
                 setShooterState(sState);
                 setSpindexerState(spinState);
-            }))
-        )
-        .andThen(
+            })).unless(()->intakeState == IntakePivotStates.PIVOT_DEPLOYED)
+            ).andThen(
             Commands.either(
-                // Path if condition is true: replaced intake agitation with none
-                Commands.none(),
-                /* Commands.waitSeconds(0.65)
+                Commands.waitSeconds(0.65).unless(()->intakeState == IntakePivotStates.PIVOT_DEPLOYED)
                     .andThen(runOnce(() -> {
-                        setIntakePivotState(IntakePivotStates.AGITATING);
+                        setIntakePivotState(IntakePivotStates.PIVOT_AGITATING);
                         setIntakeRollerState(IntakeRollerStates.ROLLER_SLOW);
-                    })
-                ), 
-                */
-                // Path if condition is false
+                    })).unless(()->intakeState == IntakePivotStates.PIVOT_DEPLOYED),
                 Commands.none(),
-                // Condition to check
                 () -> this.intakeState == IntakePivotStates.PIVOT_TRAVEL && sState == ShooterStates.SHOOTING
             )
         )
@@ -162,13 +160,10 @@ public class SuperStructure extends SubsystemBase{
             setShooterState(ShooterStates.IDLE);
             setSpindexerState(SpindexerStates.OFF);
             this.driveState = DriveStates.FIELD;
-            
-            // Commented out intake reset logic
-            /* if (this.intakeState == IntakePivotStates.AGITATING){
+            if (this.intakeState == IntakePivotStates.PIVOT_AGITATING){
                 setIntakePivotState(IntakePivotStates.PIVOT_TRAVEL);
                 setIntakeRollerState(IntakeRollerStates.ROLLER_OFF);
-            } 
-            */
+            }
         });
     }
 }
