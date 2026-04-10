@@ -148,12 +148,13 @@ public class RobotContainer {
       //shooting
       Command shooting = m_SuperStructure.firingCommand(ShooterStates.SHOOTING, SpindexerStates.FEED, DriveStates.AIMING);
 
+      //aims
       driver.a().whileTrue(
             drivetrain.SwerveControllerDrive(
-                ()-> new Pose2d(3, 4, new Rotation2d()), 
+                ()-> null, 
                 ()->modifiedDriveInput.getX(), 
                 ()->modifiedDriveInput.getY(),
-                null, 
+                ()-> Rotation2d.fromRadians(shotCalculator.getInstance().getParameters().robotHeadingRadians()), 
                 null)
         );
 
@@ -176,27 +177,28 @@ public class RobotContainer {
 
         // driver.rightBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.IDLE));
 
-    // drivetrain.SwerveControllerDrive([]\
-
-    //         null,
-    //         () -> modifiedDriveInput.getX(),
-    //         () -> modifiedDriveInput.getY(),
-    //         () -> {
-    //             if (Math.abs(driver.getRightX()) > DriveConstants.deadband) {
-    //                 return null;
-    //             } else {
-    //                 return drivetrain.getLastHeldRotation();
-    //             }
-    //         },
-    //         () -> {
-    //             if (Math.abs(driver.getRightX()) > DriveConstants.deadband) {
-    //                 return modifiedRotInput.getX();
-    //             } else {
-    //                 return 0.0;
-    //             }
-    //         }
-    //     )
-    // ;
+    drivetrain.setDefaultCommand(
+    drivetrain.SwerveControllerDrive(
+            null,
+            () -> modifiedDriveInput.getX(),
+            () -> modifiedDriveInput.getY(),
+            () -> {
+                if (Math.abs(driver.getRightX()) > DriveConstants.deadband) {
+                    return null;
+                } else {
+                    return drivetrain.getLastHeldRotation();
+                }
+            },
+            () -> {
+                if (Math.abs(driver.getRightX()) > DriveConstants.deadband) {
+                    return modifiedRotInput.getX();
+                } else {
+                    return 0.0;
+                }
+            }
+        )
+    )
+    ;
 
      if (RobotBase.isSimulation()) {
       drivetrain.setDefaultCommand(driveFieldOrientedAnglularVelocity);
@@ -204,7 +206,28 @@ public class RobotContainer {
       drivetrain.visionEnabled = false;
     } 
     else {
-      drivetrain.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+      drivetrain.setDefaultCommand(
+        drivetrain.SwerveControllerDrive(
+            null,
+            () -> modifiedDriveInput.getX(),
+            () -> modifiedDriveInput.getY(),
+            () -> {
+                if (Math.abs(driver.getRightX()) > DriveConstants.deadband) {
+                    return null;
+                } else {
+                    return drivetrain.getLastHeldRotation();
+                }
+            },
+            () -> {
+                if (Math.abs(driver.getRightX()) > DriveConstants.deadband) {
+                    return modifiedRotInput.getX();
+                } else {
+                    return 0.0;
+                }
+            }
+        )
+        
+        );
     }
 
     driver.rightTrigger().onTrue(drivetrain.runOnce(drivetrain::zeroGyro)); //TESTING PURPOSES ONLY!!!

@@ -54,26 +54,10 @@ public final class Constants {
     public static final int shooterFollowerMotor = 12;
     public static final int feederMotorID = 9;
     public static final int hoodMotorID = 10;
-    public static final double kShooterP = 0.0;
-
-    public static final double kShooterI = 0.0;
-    public static final double kShooterD = 0.0;
-    public static final double kS = 0.0;
-    public static final double kV = 0.0;
-    public static final double kP = 0.0;
-
-    public static final double kHoodP = 0.0;
-    public static final double kHoodI = 0.0;
-    public static final double kHoodD = 0.0;
   
 
     public static final int SHOOTER_CURRENT_LIMIT = 40; //amps;
     public static final int HOOD_CURRENT_LIMIT = 40; //made this up
-
-    public static final int maxDistance = 10; // I put random values for these, used to make sure hood does not kill itself 
-    public static final int minDistance = 1;
-
-    public static final int degreesPerRotation = 365/30*360; //no clue how to do this, probabaly wrong
 
   }
 
@@ -88,6 +72,7 @@ public final class Constants {
     public static final double rollerSlow = 300.0;
     public static final double rollerOutake = -1000.0;
 
+    
     public static final double homeAngle = 30;
     public static final double deployedAngle =-5;
     public static final double startingPosAngle = 100;

@@ -45,7 +45,6 @@ public class SuperStructure extends SubsystemBase{
     private shooterSubsystem m_shooter;
     private spindexerSubsystem m_spindexer;
     private intakeSubsystem m_intake;
-    // private climbSubsystem m_climber;
     private SwerveSubsystem m_drive;
 
     private ShooterStates shooterState = ShooterStates.HOME;
@@ -73,7 +72,7 @@ public class SuperStructure extends SubsystemBase{
                                 requestedState == ShooterStates.TEST);
         // boolean isIntakeSafe = (m_intake.getIntakeAngle() < 120);
 
-        ShooterStates finalState = (isActionState /*&& !isIntakeSafe*/) 
+        ShooterStates finalState = (isActionState) 
                                         ? this.shooterState 
                                         : requestedState;
 
@@ -139,32 +138,51 @@ public class SuperStructure extends SubsystemBase{
             this.driveState = dState;
         })
         .andThen(
-            Commands.waitSeconds(0.1).unless(()->intakeState == IntakePivotStates.PIVOT_DEPLOYED)
-            .andThen(runOnce(()->{
+            Commands.waitSeconds(0.1)
+            .andThen(runOnce(() -> {
                 setShooterState(sState);
                 setSpindexerState(spinState);
-            })).unless(()->intakeState == IntakePivotStates.PIVOT_DEPLOYED)
-            ).andThen(
-            Commands.either(
-                Commands.waitSeconds(0.65).unless(()->intakeState == IntakePivotStates.PIVOT_DEPLOYED)
-                    .andThen(runOnce(() -> {
-                        setIntakePivotState(IntakePivotStates.PIVOT_AGITATING);
-                        setIntakeRollerState(IntakeRollerStates.ROLLER_SLOW);
-                    })).unless(()->intakeState == IntakePivotStates.PIVOT_DEPLOYED),
-                Commands.none(),
-                () -> this.intakeState == IntakePivotStates.PIVOT_TRAVEL && sState == ShooterStates.SHOOTING
-            )
+            }))
         )
         .andThen(Commands.idle()) 
         .finallyDo((interrupted) -> {
             setShooterState(ShooterStates.IDLE);
             setSpindexerState(SpindexerStates.OFF);
             this.driveState = DriveStates.FIELD;
-            if (this.intakeState == IntakePivotStates.PIVOT_AGITATING){
-                setIntakePivotState(IntakePivotStates.PIVOT_TRAVEL);
-                setIntakeRollerState(IntakeRollerStates.ROLLER_OFF);
-            }
         });
+        
+    //     return runOnce(() -> {
+    //         setShooterState(ShooterStates.JAM);
+    //         setSpindexerState(SpindexerStates.JAM);
+    //         this.driveState = dState;
+    //     })
+    //     .andThen(
+    //         Commands.waitSeconds(0.1).unless(()->intakeState == IntakePivotStates.PIVOT_DEPLOYED)
+    //         .andThen(runOnce(()->{
+    //             setShooterState(sState);
+    //             setSpindexerState(spinState);
+    //         })).unless(()->intakeState == IntakePivotStates.PIVOT_DEPLOYED)
+    //         ).andThen(
+    //         Commands.either(
+    //             Commands.waitSeconds(0.65).unless(()->intakeState == IntakePivotStates.PIVOT_DEPLOYED)
+    //                 .andThen(runOnce(() -> {
+    //                     setIntakePivotState(IntakePivotStates.PIVOT_AGITATING);
+    //                     setIntakeRollerState(IntakeRollerStates.ROLLER_SLOW);
+    //                 })).unless(()->intakeState == IntakePivotStates.PIVOT_DEPLOYED),
+    //             Commands.none(),
+    //             () -> this.intakeState == IntakePivotStates.PIVOT_TRAVEL && sState == ShooterStates.SHOOTING
+    //         )
+    //     )
+    //     .andThen(Commands.idle()) 
+    //     .finallyDo((interrupted) -> {
+    //         setShooterState(ShooterStates.IDLE);
+    //         setSpindexerState(SpindexerStates.OFF);
+    //         this.driveState = DriveStates.FIELD;
+    //         if (this.intakeState == IntakePivotStates.PIVOT_AGITATING){
+    //             setIntakePivotState(IntakePivotStates.PIVOT_TRAVEL);
+    //             setIntakeRollerState(IntakeRollerStates.ROLLER_OFF);
+    //         }
+    //     });
     }
 }
 
