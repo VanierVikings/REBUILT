@@ -119,8 +119,12 @@ public final class Constants {
     public static final double deadband = 0.01;
   }
 
-  public static Transform3d robotToShooter = new Transform3d(Units.inchesToMeters(4.818), Units.inchesToMeters(5.975), Units.inchesToMeters(17.834), Rotation3d.kZero);
-
+public static Transform3d robotToShooter = new Transform3d(
+    Units.inchesToMeters(-5.76), 
+    Units.inchesToMeters(7.786), 
+    Units.inchesToMeters(17.93), 
+    new Rotation3d(0, 0, Units.degreesToRadians(-90))
+);
 
    public class fieldPoses{
         public static final Pose2d blueAllianceHub = new Pose2d(
