@@ -82,7 +82,7 @@ public final class Constants {
     public static final int rollerMotorID = 15;
     public static final int CANcoderID = 16;
 
-    public static final double CANcoderOffset = -0.4497; //TEST
+    public static final double CANcoderOffset = 0.345; //TEST
 
     public static final double rollerRPM = 2500.0;
     public static final double rollerSlow = 300.0;

@@ -6,6 +6,7 @@ package frc.robot;
 
 import frc.AlectronaLib.SwerveDriveInput;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.IntakeConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.spindexerSubsystem;
@@ -13,6 +14,7 @@ import frc.robot.subsystems.SuperStructure;
 import frc.robot.subsystems.intakeSubsystem;
 import frc.robot.subsystems.SuperStructure.DriveStates;
 import frc.robot.subsystems.SuperStructure.IntakePivotStates;
+import frc.robot.subsystems.SuperStructure.IntakeRollerStates;
 import frc.robot.subsystems.SuperStructure.ShooterStates;
 import frc.robot.subsystems.SuperStructure.SpindexerStates;
 import frc.robot.subsystems.shooter.shooterSubsystem;
@@ -31,6 +33,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -57,7 +60,7 @@ public class RobotContainer {
   private final intakeSubsystem m_intake = new intakeSubsystem();
 
   private final SuperStructure m_SuperStructure = new SuperStructure(m_ShooterSubsystem,m_spindexer,m_intake,drivetrain);
-
+  
   
 
   private final SendableChooser<Command> autoChooser;
@@ -72,21 +75,29 @@ public class RobotContainer {
   private Translation2d modifiedDriveInput = new Translation2d(0,0);
   private Translation2d modifiedRotInput = new Translation2d(0,0);
 
+
   public void updateDriveInput(){
       modifiedDriveInput = m_DriveInput.getShapedInput(()-> driver.getLeftX(), ()-> driver.getLeftY());
       modifiedRotInput = m_RotInput.getShapedInput(()-> driver.getRightX(), ()-> driver.getRightY());
 
     }
 
-  
+
   //Cnvert driver input into field-relative ChassisSpeeds - controlled by angular velocity
-  SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivetrain.getSwerveDrive(),
-            () -> -modifiedDriveInput.getY()*SwerveSubsystem.getInvert(), // (-) is blue alliance
-            () -> -modifiedDriveInput.getX()*SwerveSubsystem.getInvert()) // (-) is blue alliance
-            .withControllerRotationAxis(() -> -modifiedRotInput.getX()) // Axis which give the desired angular velocity.
+    SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivetrain.getSwerveDrive(),
+            () -> modifiedDriveInput.getY(), // (-) is blue alliance
+            () -> modifiedDriveInput.getX()) // (-) is blue alliance
+            .withControllerRotationAxis(() -> modifiedRotInput.getX()) // Axis which give the desired angular velocity.
             .deadband(0.00)                 // Controller deadband
             .scaleTranslation(0.8)           // Scaled controller translation axis
-            .allianceRelativeControl(true);  // Alliance relative controls.
+            .allianceRelativeControl(false);  // Alliance relative controls.
+ 
+  
+
+
+
+
+
 
 
   //Clones angular velocity input steam, converts to a fieldRelative input stream
@@ -124,10 +135,10 @@ public class RobotContainer {
     Command driveRobotOrientedAngularVelocity = drivetrain.driveFieldOriented(driveRobotOriented);
     Command driveSetpointGen = drivetrain.driveWithSetpointGeneratorFieldRelative(driveDirectAngle);
 
-    // driver.leftBumper().whileTrue(m_shooter.setState(ShooterStates.TEST));
+    driver.leftBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.TEST).alongWith(m_spindexer.setState(SpindexerStates.FEED)));
     // driver.leftBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.SHOOTING).alongWith(m_spindexer.setState(SpindexerStates.FEED)));
       // driver.a().onTrue(drivetrain.run(()-> drivetrain.setInverted()));
-      driver.leftBumper().whileTrue(m_intake.setPivotState(IntakePivotStates.PIVOT_TEST));
+      // driver.leftBumper().whileTrue(m_intake.setPivotState(IntakePivotStates.PIVOT_TEST));
 
       //aiming
       Command aiming = m_SuperStructure.firingCommand(ShooterStates.AIMING, SpindexerStates.OFF, DriveStates.AIMING);
@@ -136,56 +147,35 @@ public class RobotContainer {
       Command shooting = m_SuperStructure.firingCommand(ShooterStates.SHOOTING, SpindexerStates.FEED, DriveStates.AIMING);
 
       //aims
-      driver.a().whileTrue(
-            drivetrain.SwerveControllerDrive(
-                ()-> null, 
-                ()->modifiedDriveInput.getX(), 
-                ()->modifiedDriveInput.getY(),
-                ()-> Rotation2d.fromRadians(shotCalculator.getInstance().getParameters().robotHeadingRadians()), 
-                null)
-        );
+      // driver.a().whileTrue(
+      //       drivetrain.SwerveControllerDrive(
+      //           ()-> null, 
+      //           ()->modifiedDriveInput.getX(), 
+      //           ()->modifiedDriveInput.getY(),
+      //           ()-> Rotation2d.fromRadians(shotCalculator.getInstance().getParameters().robotHeadingRadians()), 
+      //           null)
+      //   );
 
 
-      driver.leftTrigger().whileTrue(aiming);
+      // driver.leftTrigger().whileTrue(aiming);
 
-      driver.rightTrigger().whileTrue(shooting);
+      // driver.rightTrigger().whileTrue(shooting);
 
       // driver.y().onTrue(m_ShooterSubsystem.setState(ShooterStates.REZERO)); //Hood rezero
 
-      driver.leftBumper().onTrue(
-            Commands.defer(() -> {
-                if (m_intake.isDeployed()) {
-                    return m_SuperStructure.intakeRequest(IntakePivotStates.PIVOT_HOME);
-                } else {
-                    return m_SuperStructure.intakeRequest(IntakePivotStates.PIVOT_DEPLOYED);
-                }
-            }, Set.of(m_intake, m_SuperStructure)) 
-        );
+      // driver.rightBumper().onTrue(
+      //       Commands.defer(() -> {
+      //           if (m_intake.isDeployed()) {
+      //               return m_SuperStructure.intakeRequest(IntakePivotStates.PIVOT_HOME);
+      //           } else {
+      //               return m_SuperStructure.intakeRequest(IntakePivotStates.PIVOT_DEPLOYED);
+      //           }
+      //       }, Set.of(m_intake, m_SuperStructure)) 
+      //   );
+
+      driver.rightBumper().onTrue(m_intake.setRollerState(IntakeRollerStates.ROLLER_TEST));
 
         // driver.rightBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.IDLE));
-
-    drivetrain.setDefaultCommand(
-    drivetrain.SwerveControllerDrive(
-            null,
-            () -> modifiedDriveInput.getX(),
-            () -> modifiedDriveInput.getY(),
-            () -> {
-                if (Math.abs(driver.getRightX()) > DriveConstants.deadband) {
-                    return null;
-                } else {
-                    return drivetrain.getLastHeldRotation();
-                }
-            },
-            () -> {
-                if (Math.abs(driver.getRightX()) > DriveConstants.deadband) {
-                    return modifiedRotInput.getX();
-                } else {
-                    return 0.0;
-                }
-            }
-        )
-    )
-    ;
 
      if (RobotBase.isSimulation()) {
       drivetrain.setDefaultCommand(driveFieldOrientedAnglularVelocity);
@@ -193,34 +183,16 @@ public class RobotContainer {
       drivetrain.visionEnabled = false;
     } 
     else {
-      drivetrain.setDefaultCommand(
-        drivetrain.SwerveControllerDrive(
-            null,
-            () -> modifiedDriveInput.getX(),
-            () -> modifiedDriveInput.getY(),
-            () -> {
-                if (Math.abs(driver.getRightX()) > DriveConstants.deadband) {
-                    return null;
-                } else {
-                    return drivetrain.getLastHeldRotation();
-                }
-            },
-            () -> {
-                if (Math.abs(driver.getRightX()) > DriveConstants.deadband) {
-                    return modifiedRotInput.getX();
-                } else {
-                    return 0.0;
-                }
-            }
-        )
-        
-        );
+        drivetrain.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+
     }
 
     driver.rightTrigger().onTrue(drivetrain.runOnce(drivetrain::zeroGyro)); //TESTING PURPOSES ONLY!!!
 
     // driver.rightTrigger().whileTrue(m_shooter.setState(ShooterStates.TEST)); //testing for lut values
-    // driver.rightBumper().onTrue(m_shooter.setState(ShooterStates.REZERO)); //rezero hood
+    // driver.rightBumper().onTrue(m_shooter.set[]\
+    
+    State(ShooterStates.REZERO)); //rezero hood
   }
 
   /**

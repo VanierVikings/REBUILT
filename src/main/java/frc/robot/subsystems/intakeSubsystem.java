@@ -83,7 +83,8 @@ public class intakeSubsystem extends SubsystemBase {
 
         pivotConfig.Feedback.RotorToSensorRatio = (4.0*5.0*(42.0/36.0));
         pivotConfig.Feedback.SensorToMechanismRatio = (32.0/14.0); 
-        pivotConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        pivotConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive
+        ;
         pivotConfig.Feedback.FeedbackRemoteSensorID = pivotEncoder.getDeviceID();
         pivotConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
         pivotConfig.ClosedLoopGeneral.ContinuousWrap = true;
@@ -152,7 +153,7 @@ public class intakeSubsystem extends SubsystemBase {
 
     public void stopRoller(){
         // rollerMotor.getClosedLoopController().setSetpoint(0, ControlType.kVelocity);
-        rollerMotor.stopMotor();
+        rollerMotor.stopMotor(); 
     }
 
     public boolean isDeployed(){
@@ -243,8 +244,8 @@ public class intakeSubsystem extends SubsystemBase {
             case PIVOT_TEST:
             command = runOnce(()->{
                 // setPivotPosition(testAngle);
-                inputPivotAngle = SmartDashboard.getNumber("Intake Inputs/Input Pivot Degrees", pivotMotor.getPosition().getValueAsDouble()*360);
-                setPivotPosition(inputPivotAngle);
+                // inputPivotAngle = SmartDashboard.getNumber("Intake Inputs/Input Pivot Degrees", pivotMotor.getPosition().getValueAsDouble()*360);
+                // setPivotPosition(inputPivotAngle);
             });
             break;
 

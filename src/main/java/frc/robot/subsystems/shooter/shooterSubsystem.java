@@ -86,7 +86,7 @@ public class shooterSubsystem extends SubsystemBase{
         hoodConfig = new TalonFXConfiguration();
 
         hoodConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-        hoodConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        hoodConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
         hoodConfig.MotionMagic.MotionMagicCruiseVelocity = 1.0;
         hoodConfig.MotionMagic.MotionMagicAcceleration = 3.0;
@@ -97,7 +97,7 @@ public class shooterSubsystem extends SubsystemBase{
         hoodConfig.Slot0.kP = 200;
         hoodConfig.Slot0.kD = 0;
 
-        hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 35.0 / 360.0; // 45 degrees
+        hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 60.0 / 360.0; // 45 degrees
         hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
         hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0.0; // 0 degrees
         hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
