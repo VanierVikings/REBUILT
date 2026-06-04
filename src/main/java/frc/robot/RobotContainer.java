@@ -68,6 +68,7 @@ public class RobotContainer {
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController driver =
       new CommandXboxController(DriveConstants.DriverPort);
+    private final CommandXboxController operator = new CommandXboxController(1);
 
   private SwerveDriveInput m_DriveInput = new SwerveDriveInput();
   private SwerveDriveInput m_RotInput = new SwerveDriveInput();
@@ -139,6 +140,14 @@ public class RobotContainer {
     // driver.leftBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.SHOOTING).alongWith(m_spindexer.setState(SpindexerStates.FEED)));
       // driver.a().onTrue(drivetrain.run(()-> drivetrain.setInverted()));
       // driver.leftBumper().whileTrue(m_intake.setPivotState(IntakePivotStates.PIVOT_TEST));
+    operator.a().whileTrue(m_intake.opRoller());
+    operator.leftTrigger().whileTrue(m_ShooterSubsystem.opSlowShot());
+    operator.rightTrigger().whileTrue(m_ShooterSubsystem.opFastShot());
+    operator.leftBumper().onTrue(m_ShooterSubsystem.opLowAngle());
+    operator.rightBumper().onTrue(m_ShooterSubsystem.opHighAngle());
+
+    driver.y().onTrue(drivetrain.runOnce(drivetrain::zeroGyro)); 
+
 
       //aiming
       Command aiming = m_SuperStructure.firingCommand(ShooterStates.AIMING, SpindexerStates.OFF, DriveStates.AIMING);
@@ -173,7 +182,7 @@ public class RobotContainer {
       //       }, Set.of(m_intake, m_SuperStructure)) 
       //   );
 
-      driver.rightBumper().onTrue(m_intake.setRollerState(IntakeRollerStates.ROLLER_TEST));
+    //   driver.rightBumper().onTrue(m_intake.setRollerState(IntakeRollerStates.ROLLER_TEST));
 
         // driver.rightBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.IDLE));
 
@@ -187,12 +196,11 @@ public class RobotContainer {
 
     }
 
-    driver.rightTrigger().onTrue(drivetrain.runOnce(drivetrain::zeroGyro)); //TESTING PURPOSES ONLY!!!
 
     // driver.rightTrigger().whileTrue(m_shooter.setState(ShooterStates.TEST)); //testing for lut values
     // driver.rightBumper().onTrue(m_shooter.set[]\
     
-    State(ShooterStates.REZERO)); //rezero hood
+    // State(ShooterStates.REZERO)); //rezero hood
   }
 
   /**
