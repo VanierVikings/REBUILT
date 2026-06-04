@@ -189,6 +189,23 @@ public class shooterSubsystem extends SubsystemBase{
 
     }
 
+    //STEM Orientation op controls
+    public Command opSlowShot(){
+        return this.runEnd(() -> setShooterRPS(20), () -> stopShooterMotors());
+    }
+
+    public Command opFastShot(){
+        return this.runEnd(()->setShooterRPS(40), ()->stopShooterMotors());
+    }
+
+    public Command opLowAngle(){
+        return this.run(()-> setHoodAngle(30));
+    }
+
+    public Command opHighAngle(){
+        return this.run(()->setHoodAngle(5));
+    }
+
 
     public Command setState(SuperStructure.ShooterStates state){
         this.currentState = state;

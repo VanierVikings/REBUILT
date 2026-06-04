@@ -164,7 +164,9 @@ public class intakeSubsystem extends SubsystemBase {
         return pivotMotor.getPosition().getValueAsDouble()*360; //degrees
     }
     
-
+    public Command opRoller(){
+        return this.runEnd(() -> setRollerRPM(6000), () -> stopRoller());
+    }
 
 
     public Command setRollerState(SuperStructure.IntakeRollerStates state){
@@ -262,4 +264,3 @@ public class intakeSubsystem extends SubsystemBase {
     
 
 }
-
