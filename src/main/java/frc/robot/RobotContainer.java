@@ -136,20 +136,22 @@ public class RobotContainer {
     Command driveRobotOrientedAngularVelocity = drivetrain.driveFieldOriented(driveRobotOriented);
     Command driveSetpointGen = drivetrain.driveWithSetpointGeneratorFieldRelative(driveDirectAngle);
 
-    driver.leftBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.TEST).alongWith(m_spindexer.setState(SpindexerStates.FEED)));
+    // driver.leftBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.TEST).alongWith(m_spindexer.setState(SpindexerStates.FEED)));
     // driver.leftBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.SHOOTING).alongWith(m_spindexer.setState(SpindexerStates.FEED)));
       // driver.a().onTrue(drivetrain.run(()-> drivetrain.setInverted()));
-      // driver.leftBumper().whileTrue(m_intake.setPivotState(IntakePivotStates.PIVOT_TEST));
-    operator.a().whileTrue(m_intake.opRoller());
-    operator.leftTrigger().whileTrue(m_ShooterSubsystem.opSlowShot());
-    operator.rightTrigger().whileTrue(m_ShooterSubsystem.opFastShot());
-    operator.leftBumper().onTrue(m_ShooterSubsystem.opLowAngle());
-    operator.rightBumper().onTrue(m_ShooterSubsystem.opHighAngle());
+    driver.leftBumper().onTrue(m_intake.setPivotState(IntakePivotStates.PIVOT_TEST));
+    // operator.a().whileTrue(m_intake.opRoller());
+    // operator.leftTrigger().whileTrue(m_ShooterSubsystem.runFeeder().alongWith(m_spindexer.runEndSpindexer()));
+    // operator.rightBumper().whileTrue(m_ShooterSubsystem.opSlowShot().andThen(m_ShooterSubsystem.runFeeder()));
+    // operator.rightTrigger().whileTrue(m_ShooterSubsystem.opFastShot());
+    // operator.povDown().onTrue(m_ShooterSubsystem.opLowAngle());
+    // operator.povUp().onTrue(m_ShooterSubsystem.opHighAngle());
 
     driver.y().onTrue(drivetrain.runOnce(drivetrain::zeroGyro)); 
 
 
-      //aiming
+      //aiming[]\
+
       Command aiming = m_SuperStructure.firingCommand(ShooterStates.AIMING, SpindexerStates.OFF, DriveStates.AIMING);
 
       //shooting

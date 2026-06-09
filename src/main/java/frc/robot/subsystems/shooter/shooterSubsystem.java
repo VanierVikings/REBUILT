@@ -206,6 +206,10 @@ public class shooterSubsystem extends SubsystemBase{
         return this.run(()->setHoodAngle(5));
     }
 
+    public Command runFeeder(){
+        return this.runEnd(()->setFeederVoltage(10), ()->stopFeeder());
+    }
+
 
     public Command setState(SuperStructure.ShooterStates state){
         this.currentState = state;

@@ -46,6 +46,10 @@ public class spindexerSubsystem extends SubsystemBase {
         spindexerMotor.stopMotor();
     }
 
+    public Command runEndSpindexer(){
+        return this.runEnd(()->runSpindexer(7), ()->stopSpindexer());
+    }
+
 
     public Command setState(SuperStructure.SpindexerStates state){
         Command command;

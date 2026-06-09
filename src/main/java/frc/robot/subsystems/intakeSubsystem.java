@@ -78,25 +78,25 @@ public class intakeSubsystem extends SubsystemBase {
         var pivotConfig = new TalonFXConfiguration();
         pivotConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
         pivotConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-        pivotConfig.CurrentLimits.SupplyCurrentLimit = 60;
+        pivotConfig.CurrentLimits.SupplyCurrentLimit = 80;
         pivotConfig.CurrentLimits.StatorCurrentLimit  = 120;
 
         pivotConfig.Feedback.RotorToSensorRatio = (4.0*5.0*(42.0/36.0));
         pivotConfig.Feedback.SensorToMechanismRatio = (32.0/14.0); 
-        pivotConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive
-        ;
+        pivotConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         pivotConfig.Feedback.FeedbackRemoteSensorID = pivotEncoder.getDeviceID();
         pivotConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
         pivotConfig.ClosedLoopGeneral.ContinuousWrap = true;
         pivotConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
-        pivotConfig.MotionMagic.MotionMagicCruiseVelocity = 2;
+        pivotConfig.MotionMagic.MotionMagicCruiseVelocity = 2; 
         pivotConfig.MotionMagic.MotionMagicAcceleration = 3.5;
 
 
         pivotConfig.Slot0.kS = 0.25;
         pivotConfig.Slot0.kV = (0.12*(4.0*3.0*(42.0/36.0)*(32.0/14.0)));
         pivotConfig.Slot0.kP = 1;
+        // pivotConfig.Slot0.kD = 0.01;
         pivotConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
 
         // pivotConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
@@ -246,8 +246,8 @@ public class intakeSubsystem extends SubsystemBase {
             case PIVOT_TEST:
             command = runOnce(()->{
                 // setPivotPosition(testAngle);
-                // inputPivotAngle = SmartDashboard.getNumber("Intake Inputs/Input Pivot Degrees", pivotMotor.getPosition().getValueAsDouble()*360);
-                // setPivotPosition(inputPivotAngle);
+                inputPivotAngle = SmartDashboard.getNumber("Intake Inputs/Input Pivot Degrees", pivotMotor.getPosition().getValueAsDouble()*360);
+                setPivotPosition(inputPivotAngle);
             });
             break;
 
