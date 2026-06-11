@@ -68,7 +68,7 @@ public class intakeSubsystem extends SubsystemBase {
 
         /*  --- WCP THROUGBORE ENCODER VIA CANCODER --- */   
         var encoderConfig = new CANcoderConfiguration();
-        encoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive; //subject to change
+        encoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive; //subject to change
         encoderConfig.MagnetSensor.MagnetOffset = IntakeConstants.CANcoderOffset;
         pivotEncoder.getConfigurator().apply(encoderConfig);
 
@@ -83,7 +83,7 @@ public class intakeSubsystem extends SubsystemBase {
 
         pivotConfig.Feedback.RotorToSensorRatio = (4.0*5.0*(42.0/36.0));
         pivotConfig.Feedback.SensorToMechanismRatio = (32.0/14.0); 
-        pivotConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        pivotConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         pivotConfig.Feedback.FeedbackRemoteSensorID = pivotEncoder.getDeviceID();
         pivotConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
         pivotConfig.ClosedLoopGeneral.ContinuousWrap = true;
@@ -94,9 +94,10 @@ public class intakeSubsystem extends SubsystemBase {
 
 
         pivotConfig.Slot0.kS = 0.25;
-        pivotConfig.Slot0.kV = (0.12*(4.0*3.0*(42.0/36.0)*(32.0/14.0)));
-        pivotConfig.Slot0.kP = 1;
-        // pivotConfig.Slot0.kD = 0.01;
+        pivotConfig.Slot0.kV = (0.12*(4.0*5.0*(42.0/36.0)*(32.0/14.0)));
+        pivotConfig.Slot0.kP = 0;
+        pivotConfig.Slot0.kG = 0; 
+         pivotConfig.Slot0.kD = 0;
         pivotConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
 
         // pivotConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
