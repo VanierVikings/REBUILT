@@ -78,7 +78,7 @@ public class intakeSubsystem extends SubsystemBase {
         var pivotConfig = new TalonFXConfiguration();
         pivotConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
         pivotConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-        pivotConfig.CurrentLimits.SupplyCurrentLimit = 80;
+        pivotConfig.CurrentLimits.SupplyCurrentLimit = 60;
         pivotConfig.CurrentLimits.StatorCurrentLimit  = 120;
 
         pivotConfig.Feedback.RotorToSensorRatio = (4.0*5.0*(42.0/36.0));
@@ -94,11 +94,11 @@ public class intakeSubsystem extends SubsystemBase {
 
 
         pivotConfig.Slot0.kS = 0.25;
-        pivotConfig.Slot0.kV = (0.12*(4.0*5.0*(42.0/36.0)*(32.0/14.0)));
-        pivotConfig.Slot0.kP = 0;
-        pivotConfig.Slot0.kG = 0; 
-         pivotConfig.Slot0.kD = 0;
         pivotConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
+        pivotConfig.Slot0.kV = (0.12*(4.0*5.0*(42.0/36.0)*(32.0/14.0)));
+        pivotConfig.Slot0.kP = 60;
+        // pivotConfig.Slot0.kG = 0.35; 
+        //  pivotConfig.Slot0.kD = 0;
 
         // pivotConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
         // pivotConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 90/360; //degrees TEST
@@ -107,6 +107,7 @@ public class intakeSubsystem extends SubsystemBase {
 
 
         pivotMotor.getConfigurator().apply(pivotConfig);
+
         isDeployed = false;
 
 
