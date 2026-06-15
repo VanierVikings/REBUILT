@@ -98,7 +98,7 @@ public class RobotContainer {
             .withControllerRotationAxis(() -> modifiedRotInput.getX()) // Axis which give the desired angular velocity.
             .deadband(0.00)                 // Controller deadband
             .scaleTranslation(0.8)           // Scaled controller translation axis
-            .allianceRelativeControl(false);  // Alliance relative controls.
+            .allianceRelativeControl(true);  // Alliance relative controls.
  
   
 
@@ -115,8 +115,8 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    NamedCommands.registerCommand("aimAndSpinup", m_SuperStructure.aimingCommand(ShooterStates.AIMING, SpindexerStates.OFF, DriveStates.AIMING));
-    NamedCommands.registerCommand("shootingCommand", m_SuperStructure.aimingCommand(ShooterStates.SHOOTING, SpindexerStates.FEED, DriveStates.AIMING));
+    // NamedCommands.registerCommand("aimAndSpinup", m_SuperStructure.aimingCommand(ShooterStates.AIMING, SpindexerStates.OFF, DriveStates.AIMING));
+    // NamedCommands.registerCommand("shootingCommand", m_SuperStructure.aimingCommand(ShooterStates.SHOOTING, SpindexerStates.FEED, DriveStates.AIMING));
 
     // Configure the trigger bindings
     configureBindings();
@@ -161,10 +161,10 @@ public class RobotContainer {
 
       //aiming[]\
 
-    Command aiming = m_SuperStructure.aimingCommand(ShooterStates.AIMING, SpindexerStates.OFF, DriveStates.AIMING);
+    Command aiming = m_SuperStructure.aimingCommand(ShooterStates.AIMING, SpindexerStates.OFF);
 
     //shooting
-    Command shooting = m_SuperStructure.firingCommand(ShooterStates.SHOOTING, SpindexerStates.FEED, DriveStates.AIMING);
+    Command shooting = m_SuperStructure.firingCommand(ShooterStates.SHOOTING, SpindexerStates.FEED);
     
     Command rotate = drivetrain.SwerveControllerDrive(
                 null, 
@@ -178,20 +178,20 @@ public class RobotContainer {
             //             drivetrain.lockp
             //         ).until(()->!enterXLock());
 
-    driver.rightTrigger().or(driver.leftTrigger())
-      .whileTrue(
-        new RepeatCommand(rotate)
-        .finallyDo((interrupted) -> drivetrain.SwerveControllerDrive(
-            null, 
-            () -> modifiedDriveInput.getX(), 
-            () -> modifiedDriveInput.getY(), 
-            null, 
-            () -> modifiedRotInput.getX()
-        )
-        .andThen(() -> drivetrain.resetLatestHeading()))
-      );
+    // driver.rightTrigger().or(driver.leftTrigger())
+    //   .whileTrue(
+    //     new RepeatCommand(rotate)
+    //     .finallyDo((interrupted) -> drivetrain.SwerveControllerDrive(
+    //         null, 
+    //         () -> modifiedDriveInput.getX(), 
+    //         () -> modifiedDriveInput.getY(), 
+    //         null, 
+    //         () -> modifiedRotInput.getX()
+    //     )
+    //     .andThen(() -> drivetrain.resetLatestHeading()))
+      // );
       driver.leftTrigger().whileTrue(aiming); //double binded bullshit?
-      driver.rightTrigger().whileTrue(shooting);
+      driver.rightTrigger().whileTrue(m_ShooterSubsystem.runShooterParams());
       //aims
       // driver.a().whileTrue(
       //       drivetrain.SwerveControllerDrive(

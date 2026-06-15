@@ -138,11 +138,10 @@ public class SuperStructure extends SubsystemBase{
 
     
 
-    public Command aimingCommand(ShooterStates sState, SpindexerStates spinState, DriveStates dState) {
+    public Command aimingCommand(ShooterStates sState, SpindexerStates spinState) {
         return runOnce(() -> {
             setShooterState(ShooterStates.JAM);
             // setSpindexerState(SpindexerStates.JAM);
-            this.driveState = dState;
             //unjamming sequence
         })
         .andThen(
@@ -156,13 +155,11 @@ public class SuperStructure extends SubsystemBase{
         .finallyDo((interrupted) -> {
             setShooterState(ShooterStates.IDLE);
             setSpindexerState(SpindexerStates.OFF);
-            this.driveState = DriveStates.FIELD;
         });
     }
 
-    public Command firingCommand(ShooterStates sState, SpindexerStates spinState, DriveStates dState) {
+    public Command firingCommand(ShooterStates sState, SpindexerStates spinState ) {
         return runOnce(() -> {
-                this.driveState = dState;
                 setShooterState(sState);
                 setSpindexerState(spinState);
             })
@@ -170,7 +167,6 @@ public class SuperStructure extends SubsystemBase{
         .finallyDo((interrupted) -> {
             setShooterState(ShooterStates.IDLE);
             setSpindexerState(SpindexerStates.OFF);
-            this.driveState = DriveStates.FIELD;
         });
     }
 

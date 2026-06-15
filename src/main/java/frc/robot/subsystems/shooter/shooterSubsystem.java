@@ -1,6 +1,8 @@
 package frc.robot.subsystems.shooter;
 
 
+import java.lang.reflect.Parameter;
+
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
@@ -208,6 +210,10 @@ public class shooterSubsystem extends SubsystemBase{
 
     public Command runFeeder(){
         return this.runEnd(()->setFeederVoltage(10), ()->stopFeeder());
+    }
+
+    public Command runShooterParams(){
+        return this.runEnd(()-> setShooterRPS(shotCalculator.getInstance().getParameters().flywheelSpeed()), ()-> stopShooterMotors());
     }
 
 

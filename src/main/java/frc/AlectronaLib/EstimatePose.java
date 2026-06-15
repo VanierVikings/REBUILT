@@ -36,7 +36,7 @@ public class EstimatePose {
     public EstimatePose(String name) {
         this.m_name = name;
         this.m_lastTagTimestamp = Timer.getFPGATimestamp();
-        LimelightHelpers.setCameraPose_RobotSpace(m_name, Units.inchesToMeters(-11.280053), Units.inchesToMeters(-7.113254), Units.inchesToMeters(21.548526), 0, 19.0, 0); //found in cad, pitch is the up/down angle
+        LimelightHelpers.setCameraPose_RobotSpace(m_name, Units.inchesToMeters(-11.280053), Units.inchesToMeters(-7.113254), Units.inchesToMeters(21.548526), 0, 19.0, 270); //found in cad, pitch is the up/down angle
 
         // LimelightHelpers.setCameraPose_RobotSpace(m_name, Units.inchesToMeters(-2.882148), Units.inchesToMeters(11.308846), Units.inchesToMeters(20.186866), 0, (19.437423), 0); 
         LimelightHelpers.SetIMUMode(m_name, 0); 

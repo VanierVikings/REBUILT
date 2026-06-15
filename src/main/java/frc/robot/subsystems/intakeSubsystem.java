@@ -87,10 +87,10 @@ public class intakeSubsystem extends SubsystemBase {
         pivotConfig.Feedback.FeedbackRemoteSensorID = pivotEncoder.getDeviceID();
         pivotConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
         pivotConfig.ClosedLoopGeneral.ContinuousWrap = true;
-        pivotConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        pivotConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
         pivotConfig.MotionMagic.MotionMagicCruiseVelocity = 2; 
-        pivotConfig.MotionMagic.MotionMagicAcceleration = 3.5;
+        pivotConfig.MotionMagic.MotionMagicAcceleration = 2;
 
 
         pivotConfig.Slot0.kS = 0.25;
@@ -170,6 +170,8 @@ public class intakeSubsystem extends SubsystemBase {
     public Command opRoller(){
         return this.runEnd(() -> setRollerRPM(6000), () -> stopRoller());
     }
+
+    
 
 
     public Command setRollerState(SuperStructure.IntakeRollerStates state){
