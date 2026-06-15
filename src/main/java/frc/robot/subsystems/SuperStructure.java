@@ -132,39 +132,77 @@ public class SuperStructure extends SubsystemBase{
     }
 
 
-    public Command firingCommand(ShooterStates sState, SpindexerStates spinState, DriveStates dState) {
+    public Command aimingCommand(ShooterStates sState, SpindexerStates spinState, DriveStates dState) {
         return runOnce(() -> {
             setShooterState(ShooterStates.JAM);
-            setSpindexerState(SpindexerStates.JAM);
+            // setSpindexerState(SpindexerStates.JAM);
             this.driveState = dState;
+            //unjamming sequence
         })
         .andThen(
-            Commands.waitSeconds(0.1).unless(()->intakeState == IntakePivotStates.PIVOT_DEPLOYED)
-            .andThen(runOnce(()->{
+            Commands.waitSeconds(0.1)
+            .andThen(runOnce(() -> {
                 setShooterState(sState);
                 setSpindexerState(spinState);
-            })).unless(()->intakeState == IntakePivotStates.PIVOT_DEPLOYED)
-            ).andThen(
-            Commands.either(
-                Commands.waitSeconds(0.65).unless(()->intakeState == IntakePivotStates.PIVOT_DEPLOYED)
-                    .andThen(runOnce(() -> {
-                        setIntakePivotState(IntakePivotStates.PIVOT_AGITATING);
-                        setIntakeRollerState(IntakeRollerStates.ROLLER_SLOW);
-                    })).unless(()->intakeState == IntakePivotStates.PIVOT_DEPLOYED),
-                Commands.none(),
-                () -> this.intakeState == IntakePivotStates.PIVOT_TRAVEL && sState == ShooterStates.SHOOTING
-            )
+            }))
         )
-        .andThen(Commands.idle()) 
+        .andThen(Commands.idle())
         .finallyDo((interrupted) -> {
             setShooterState(ShooterStates.IDLE);
             setSpindexerState(SpindexerStates.OFF);
             this.driveState = DriveStates.FIELD;
-            if (this.intakeState == IntakePivotStates.PIVOT_AGITATING){
-                setIntakePivotState(IntakePivotStates.PIVOT_TRAVEL);
-                setIntakeRollerState(IntakeRollerStates.ROLLER_OFF);
-            }
         });
     }
+
+    public Command firingCommand(ShooterStates sState, SpindexerStates spinState, DriveStates dState) {
+        return runOnce(() -> {
+                this.driveState = dState;
+                setShooterState(sState);
+                setSpindexerState(spinState);
+            })
+        .andThen(Commands.idle())
+        .finallyDo((interrupted) -> {
+            setShooterState(ShooterStates.IDLE);
+            setSpindexerState(SpindexerStates.OFF);
+            this.driveState = DriveStates.FIELD;
+        });
+    }
+
+
+
+    // public Command firingCommand(ShooterStates sState, SpindexerStates spinState, DriveStates dState) {
+    //     return runOnce(() -> {
+    //         setShooterState(ShooterStates.JAM);
+    //         setSpindexerState(SpindexerStates.JAM);
+    //         this.driveState = dState;
+    //     })
+    //     .andThen(
+    //         Commands.waitSeconds(0.1).unless(()->intakeState == IntakePivotStates.PIVOT_DEPLOYED)
+    //         .andThen(runOnce(()->{
+    //             setShooterState(sState);
+    //             setSpindexerState(spinState);
+    //         })).unless(()->intakeState == IntakePivotStates.PIVOT_DEPLOYED)
+    //         ).andThen(
+    //         Commands.either(
+    //             Commands.waitSeconds(0.65).unless(()->intakeState == IntakePivotStates.PIVOT_DEPLOYED)
+    //                 .andThen(runOnce(() -> {
+    //                     setIntakePivotState(IntakePivotStates.PIVOT_AGITATING);
+    //                     setIntakeRollerState(IntakeRollerStates.ROLLER_SLOW);
+    //                 })).unless(()->intakeState == IntakePivotStates.PIVOT_DEPLOYED),
+    //             Commands.none(),
+    //             () -> this.intakeState == IntakePivotStates.PIVOT_TRAVEL && sState == ShooterStates.SHOOTING
+    //         )
+    //     )
+    //     .andThen(Commands.idle()) 
+    //     .finallyDo((interrupted) -> {
+    //         setShooterState(ShooterStates.IDLE);
+    //         setSpindexerState(SpindexerStates.OFF);
+    //         this.driveState = DriveStates.FIELD;
+    //         if (this.intakeState == IntakePivotStates.PIVOT_AGITATING){
+    //             setIntakePivotState(IntakePivotStates.PIVOT_TRAVEL);
+    //             setIntakeRollerState(IntakeRollerStates.ROLLER_OFF);
+    //         }
+    //     });
+    // }
 }
 

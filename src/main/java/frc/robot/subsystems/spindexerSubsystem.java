@@ -32,7 +32,8 @@ public class spindexerSubsystem extends SubsystemBase {
         spindexerConfig
             .smartCurrentLimit(SpindexerConstants.SPINDEXER_CURRENT_LIMIT)
             .idleMode(IdleMode.kBrake)
-            .inverted(false);
+            .inverted(false)
+            .smartCurrentLimit(30);
 
         spindexerMotor.configure(spindexerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }

@@ -120,10 +120,12 @@ public class intakeSubsystem extends SubsystemBase {
             .idleMode(IdleMode.kCoast)
             .closedLoop
                     .p(0)
+                    
                     .feedForward
                         .kS(0) //TEST
                         .kV((1.0/565.0));
-        
+            rollerConfig.encoder.velocityConversionFactor(1.0/3.0); //3:1 MAX Plantary drivees the rollers that are 1:1
+
         rollerMotor.configure(rollerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         //INPUT VALUES

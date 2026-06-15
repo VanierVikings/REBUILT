@@ -95,12 +95,6 @@ public class RobotContainer {
  
   
 
-
-
-
-
-
-
   //Clones angular velocity input steam, converts to a fieldRelative input stream
   SwerveInputStream driveDirectAngle = driveAngularVelocity.copy().withControllerHeadingAxis(() -> Math.cos(Math.PI/3), () -> Math.sin(Math.PI/3)).headingWhile(true);
 
@@ -109,6 +103,8 @@ public class RobotContainer {
   SwerveInputStream driveRobotOriented = driveAngularVelocity.copy().robotRelative(true)
       .allianceRelativeControl(false);
   
+  private DriveStates currentState;
+  // public 
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -135,6 +131,8 @@ public class RobotContainer {
     Command driveFieldOrientedDirectAngle = drivetrain.driveFieldOriented(driveDirectAngle);
     Command driveRobotOrientedAngularVelocity = drivetrain.driveFieldOriented(driveRobotOriented);
     Command driveSetpointGen = drivetrain.driveWithSetpointGeneratorFieldRelative(driveDirectAngle);
+
+
 
     // driver.leftBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.TEST).alongWith(m_spindexer.setState(SpindexerStates.FEED)));
     // driver.leftBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.SHOOTING).alongWith(m_spindexer.setState(SpindexerStates.FEED)));
