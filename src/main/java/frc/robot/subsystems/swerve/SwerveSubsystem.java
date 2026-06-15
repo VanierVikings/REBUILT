@@ -495,6 +495,10 @@ public class SwerveSubsystem extends SubsystemBase {
     return Timer.getFPGATimestamp() - m_EstimatePose.getLastTagTimestamp();
   };
 
+  public void resetLatestHeading(){
+    lastHeldPosition = this.getPose().getRotation();
+  }
+
   
 
 public Command SwerveControllerDrive(

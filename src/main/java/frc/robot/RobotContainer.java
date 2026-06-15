@@ -25,6 +25,7 @@ import frc.robot.subsystems.shooter.shotCalculator;
 import java.io.File;
 import java.util.Set;
 
+import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.fasterxml.jackson.annotation.JsonFormat.Feature;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -39,6 +40,9 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.RepeatCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -75,6 +79,7 @@ public class RobotContainer {
 
   private Translation2d modifiedDriveInput = new Translation2d(0,0);
   private Translation2d modifiedRotInput = new Translation2d(0,0);
+  private boolean enterXLock = false;
 
 
   public void updateDriveInput(){
@@ -151,11 +156,29 @@ public class RobotContainer {
 
       //aiming[]\
 
-      Command aiming = m_SuperStructure.firingCommand(ShooterStates.AIMING, SpindexerStates.OFF, DriveStates.AIMING);
+      Command aiming = m_SuperStructure.aimingCommand(ShooterStates.AIMING, SpindexerStates.OFF, DriveStates.AIMING);
 
       //shooting
       Command shooting = m_SuperStructure.firingCommand(ShooterStates.SHOOTING, SpindexerStates.FEED, DriveStates.AIMING);
+      
+      Command rotate = drivetrain.SwerveControllerDrive(
+                  null, 
+                  ()->modifiedDriveInput.getX(), 
+                  ()->modifiedDriveInput.getY(),
+                  ()-> Rotation2d.fromRadians(m_ShotCalculator.getParameters().robotHeadingRadians()), 
+                  null);
 
+              // Command lockDrive =  new SequentialCommandGroup(
+              //         new WaitCommand(0.01), // Wait 200ms before braking
+              //             drivetrain.lockp
+              //         ).until(()->!enterXLock());
+
+      driver.rightTrigger().or(driver.leftTrigger())
+                  .whileTrue(
+                      drivetrain.SwerveControllerDrive(null, ()->modifiedDriveInput.getX(), ()->modifiedDriveInput.getY(),null,()-> modifiedRotInput.getX()).andThen(()->drivetrain.resetLatestHeading()));
+
+              driver.rightTrigger()
+                  .whileTrue(aiming);
       //aims
       // driver.a().whileTrue(
       //       drivetrain.SwerveControllerDrive(

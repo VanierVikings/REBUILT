@@ -131,6 +131,7 @@ public class SuperStructure extends SubsystemBase{
         return run(()-> setIntakePivotState(requestedState));
     }
 
+    
 
     public Command aimingCommand(ShooterStates sState, SpindexerStates spinState, DriveStates dState) {
         return runOnce(() -> {

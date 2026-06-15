@@ -120,7 +120,6 @@ public class intakeSubsystem extends SubsystemBase {
             .idleMode(IdleMode.kCoast)
             .closedLoop
                     .p(0)
-                    
                     .feedForward
                         .kS(0) //TEST
                         .kV((1.0/565.0));

@@ -68,7 +68,6 @@ public class shooterSubsystem extends SubsystemBase{
         flywheelConfig.CurrentLimits.SupplyCurrentLimit = 40;
         // flywheelConfig.CurrentLimits.SupplyCurrentLowerTime = 2;
         // flywheelConfig.CurrentLimits.SupplyCurrentLowerLimit = 40;
-        flywheelConfig.Feedback.SensorToMechanismRatio = (24.0/18.0);
 
         flywheelConfig.Slot0.kS = 0.26;
         flywheelConfig.Slot0.kV = 0.12;
@@ -92,7 +91,7 @@ public class shooterSubsystem extends SubsystemBase{
         hoodConfig.MotionMagic.MotionMagicCruiseVelocity = 1.0;
         hoodConfig.MotionMagic.MotionMagicAcceleration = 3.0;
 
-        hoodConfig.Feedback.SensorToMechanismRatio = (4.0*(16.0/15.0)*(189.0/8.0)); // 4:1 maxplanetary + 16:15 pulley + 189:8 rack & pinion
+        hoodConfig.Feedback.SensorToMechanismRatio = (4.0*(365.0/30.0)); // 4:1 maxplanetary + 365:30 rack and pinion
         hoodConfig.Slot0.kS = 0.2;
         hoodConfig.Slot0.kV = (0.12*(4.0*(365.0/30.0)));
         hoodConfig.Slot0.kP = 200;
