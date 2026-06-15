@@ -29,6 +29,8 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.fasterxml.jackson.annotation.JsonFormat.Feature;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+
 import choreo.auto.AutoChooser;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -113,6 +115,9 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    NamedCommands.registerCommand("aimAndSpinup", m_SuperStructure.aimingCommand(ShooterStates.AIMING, SpindexerStates.OFF, DriveStates.AIMING));
+    NamedCommands.registerCommand("shootingCommand", m_SuperStructure.aimingCommand(ShooterStates.SHOOTING, SpindexerStates.FEED, DriveStates.AIMING));
+
     // Configure the trigger bindings
     configureBindings();
     
@@ -142,7 +147,7 @@ public class RobotContainer {
     // driver.leftBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.TEST).alongWith(m_spindexer.setState(SpindexerStates.FEED)));
     // driver.leftBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.SHOOTING).alongWith(m_spindexer.setState(SpindexerStates.FEED)));
       // driver.a().onTrue(drivetrain.run(()-> drivetrain.setInverted()));
-          driver.rightTrigger().whileTrue(m_ShooterSubsystem.setState(ShooterStates.TEST).alongWith(m_spindexer.setState(SpindexerStates.FEED)));
+    driver.rightTrigger().whileTrue(m_ShooterSubsystem.setState(ShooterStates.TEST).alongWith(m_spindexer.setState(SpindexerStates.FEED)));
     driver.leftBumper().onTrue(m_intake.setPivotState(IntakePivotStates.PIVOT_TEST));
     driver.a().whileTrue(m_intake.opRoller());
     // operator.leftTrigger().whileTrue(m_ShooterSubsystem.runFeeder().alongWith(m_spindexer.runEndSpindexer()));
@@ -156,29 +161,37 @@ public class RobotContainer {
 
       //aiming[]\
 
-      Command aiming = m_SuperStructure.aimingCommand(ShooterStates.AIMING, SpindexerStates.OFF, DriveStates.AIMING);
+    Command aiming = m_SuperStructure.aimingCommand(ShooterStates.AIMING, SpindexerStates.OFF, DriveStates.AIMING);
 
-      //shooting
-      Command shooting = m_SuperStructure.firingCommand(ShooterStates.SHOOTING, SpindexerStates.FEED, DriveStates.AIMING);
-      
-      Command rotate = drivetrain.SwerveControllerDrive(
-                  null, 
-                  ()->modifiedDriveInput.getX(), 
-                  ()->modifiedDriveInput.getY(),
-                  ()-> Rotation2d.fromRadians(m_ShotCalculator.getParameters().robotHeadingRadians()), 
-                  null);
+    //shooting
+    Command shooting = m_SuperStructure.firingCommand(ShooterStates.SHOOTING, SpindexerStates.FEED, DriveStates.AIMING);
+    
+    Command rotate = drivetrain.SwerveControllerDrive(
+                null, 
+                ()->modifiedDriveInput.getX(), 
+                ()->modifiedDriveInput.getY(),
+                ()-> Rotation2d.fromRadians(m_ShotCalculator.getParameters().robotHeadingRadians()), 
+                null);
 
-              // Command lockDrive =  new SequentialCommandGroup(
-              //         new WaitCommand(0.01), // Wait 200ms before braking
-              //             drivetrain.lockp
-              //         ).until(()->!enterXLock());
+            // Command lockDrive =  new SequentialCommandGroup(
+            //         new WaitCommand(0.01), // Wait 200ms before braking
+            //             drivetrain.lockp
+            //         ).until(()->!enterXLock());
 
-      driver.rightTrigger().or(driver.leftTrigger())
-                  .whileTrue(
-                      drivetrain.SwerveControllerDrive(null, ()->modifiedDriveInput.getX(), ()->modifiedDriveInput.getY(),null,()-> modifiedRotInput.getX()).andThen(()->drivetrain.resetLatestHeading()));
-
-              driver.rightTrigger()
-                  .whileTrue(aiming);
+    driver.rightTrigger().or(driver.leftTrigger())
+      .whileTrue(
+        new RepeatCommand(rotate)
+        .finallyDo((interrupted) -> drivetrain.SwerveControllerDrive(
+            null, 
+            () -> modifiedDriveInput.getX(), 
+            () -> modifiedDriveInput.getY(), 
+            null, 
+            () -> modifiedRotInput.getX()
+        )
+        .andThen(() -> drivetrain.resetLatestHeading()))
+      );
+      driver.leftTrigger().whileTrue(aiming); //double binded bullshit?
+      driver.rightTrigger().whileTrue(shooting);
       //aims
       // driver.a().whileTrue(
       //       drivetrain.SwerveControllerDrive(
@@ -196,15 +209,15 @@ public class RobotContainer {
 
       // driver.y().onTrue(m_ShooterSubsystem.setState(ShooterStates.REZERO)); //Hood rezero
 
-      // driver.rightBumper().onTrue(
-      //       Commands.defer(() -> {
-      //           if (m_intake.isDeployed()) {
-      //               return m_SuperStructure.intakeRequest(IntakePivotStates.PIVOT_HOME);
-      //           } else {
-      //               return m_SuperStructure.intakeRequest(IntakePivotStates.PIVOT_DEPLOYED);
-      //           }
-      //       }, Set.of(m_intake, m_SuperStructure)) 
-      //   );
+      driver.leftBumper().onTrue(
+            Commands.defer(() -> {
+                if (m_intake.isDeployed()) {
+                    return m_SuperStructure.intakeRequest(IntakePivotStates.PIVOT_HOME, IntakeRollerStates.ROLLER_OFF);
+                } else {
+                    return m_SuperStructure.intakeRequest(IntakePivotStates.PIVOT_DEPLOYED, IntakeRollerStates.ROLLER_ACTIVE);
+                }
+            }, Set.of(m_intake, m_SuperStructure)) 
+        );
 
     //   driver.rightBumper().onTrue(m_intake.setRollerState(IntakeRollerStates.ROLLER_TEST));
 

@@ -51,6 +51,7 @@ public class SuperStructure extends SubsystemBase{
     private ShooterStates shooterState = ShooterStates.HOME;
     private SpindexerStates spindexerState = SpindexerStates.OFF;
     private IntakePivotStates intakeState = IntakePivotStates.PIVOT_START_POS;
+    private IntakeRollerStates rollerState = IntakeRollerStates.ROLLER_OFF;
     private DriveStates driveState = DriveStates.FIELD;
 
     public boolean intaking;
@@ -126,9 +127,13 @@ public class SuperStructure extends SubsystemBase{
         });
     }
 
-    public Command intakeRequest(IntakePivotStates requestedState){
-        this.intakeState = requestedState;
-        return run(()-> setIntakePivotState(requestedState));
+    public Command intakeRequest(IntakePivotStates requestedPivotState, IntakeRollerStates requestedRollerState){
+        this.intakeState = requestedPivotState;
+        this.rollerState = requestedRollerState;
+        return run(()-> {
+            setIntakePivotState(requestedPivotState);
+            setIntakeRollerState(requestedRollerState);
+        });
     }
 
     
