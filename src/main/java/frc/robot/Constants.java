@@ -37,7 +37,7 @@ public final class Constants {
 
   public static class SwerveConstants{
     public static final double maxSpeed = Units.feetToMeters(10); 
-    public static final PIDController translationController = new PIDController(4, 0, 0.15);  //OP ROBOTICS PID : 4, 0, 0.15
+    public static final PIDController translationController = new PIDController(4, 0, 0,0.15);  //OP ROBOTICS PID : 4, 0, 0.15
     public static final PIDController rotationController = new PIDController(4,0,0.15);
     public static final double jerkRateLimit = 45;
     public static final double slewRateLimit = 20;

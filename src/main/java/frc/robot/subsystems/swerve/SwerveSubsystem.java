@@ -86,7 +86,9 @@ public class SwerveSubsystem extends SubsystemBase {
     SwerveConstants.translationController, 
     SwerveConstants.rotationController, 
     SwerveConstants.maxSpeed, 
-    SwerveConstants.maxAngularRate, false,false, 
+    SwerveConstants.maxAngularRate, 
+    false,
+    false, 
     SwerveConstants.slewRateLimit, 
     SwerveConstants.jerkRateLimit,
     SwerveConstants.autonSlewRateLimit,
@@ -97,6 +99,7 @@ public class SwerveSubsystem extends SubsystemBase {
   private boolean isSettlingAfterRelease = false;
   private static final double ROTATION_SETTLE_TIME = 0.3; // 300 ms
   private double rotationReleaseStartTime = -1.0;
+  private Pose2d currentPose = ;
 
 
 
@@ -142,11 +145,18 @@ public class SwerveSubsystem extends SubsystemBase {
   public SwerveSubsystem(SwerveDriveConfiguration driveCfg, SwerveControllerConfiguration controllerCfg)
   {
     swerveDrive = new SwerveDrive(driveCfg,controllerCfg, SwerveConstants.maxSpeed, new Pose2d(new Translation2d(Meter.of(2), Meter.of(0)), Rotation2d.fromDegrees(0)));
+    currentPose = this.getPose();
+    lastHeldPosition = currentPose.getRotation();
   }
 
   @Override
   public void periodic() {
+    currentPose = this.getPose();
+
+
+
     var currentState = new EstimatePose.RobotState(getFieldVelocity(), getPose());
+    
 
     m_EstimatePose.update(currentState, (visionPose, timestamp, stdDevs) -> {
       swerveDrive.setVisionMeasurementStdDevs(stdDevs);
@@ -509,8 +519,6 @@ public Command SwerveControllerDrive(
     DoubleSupplier vR
 ) {
     return run(() -> {
-        // 1. Get the current pose directly from YAGSL
-        Pose2d currentPose = swerveDrive.getPose();
         Rotation2d currentHeading = currentPose.getRotation();
         
         boolean hasManualRotation = false;
@@ -585,7 +593,7 @@ public Command SwerveControllerDrive(
             speeds.vy(), 
             speeds.vr()
         );
-        swerveDrive.setChassisSpeeds(desiredSpeeds);
+        swerveDrive.driveFieldOriented(desiredSpeeds);
 
     }).withName("SwerveControllerDrive");
   }   
