@@ -4,7 +4,7 @@
 
 package frc.robot;
 
-import frc.AlectronaLib.SwerveDriveInput;
+import frc.VikingsLib.SwerveDriveInput;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.commands.Autos;
@@ -12,11 +12,11 @@ import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.spindexerSubsystem;
 import frc.robot.subsystems.SuperStructure;
 import frc.robot.subsystems.intakeSubsystem;
-import frc.robot.subsystems.SuperStructure.DriveStates;
 import frc.robot.subsystems.SuperStructure.IntakePivotStates;
 import frc.robot.subsystems.SuperStructure.IntakeRollerStates;
 import frc.robot.subsystems.SuperStructure.ShooterStates;
 import frc.robot.subsystems.SuperStructure.SpindexerStates;
+import frc.robot.subsystems.SuperStructure.SwerveStates;
 import frc.robot.subsystems.shooter.shooterSubsystem;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 import frc.robot.subsystems.shooter.shotCalculator;
@@ -25,13 +25,11 @@ import frc.robot.subsystems.shooter.shotCalculator;
 import java.io.File;
 import java.util.Set;
 
-import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.fasterxml.jackson.annotation.JsonFormat.Feature;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
-import choreo.auto.AutoChooser;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -69,7 +67,7 @@ public class RobotContainer {
   
   
 
-  private final SendableChooser<Command> autoChooser;
+  private final SendableChooser<Command> autoChooser = new SendableChooser<>();
    
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController driver =
@@ -79,9 +77,10 @@ public class RobotContainer {
   private SwerveDriveInput m_DriveInput = new SwerveDriveInput();
   private SwerveDriveInput m_RotInput = new SwerveDriveInput();
 
-  private Translation2d modifiedDriveInput = new Translation2d(0,0);
-  private Translation2d modifiedRotInput = new Translation2d(0,0);
-  private boolean enterXLock = false;
+  private Translation2d modifiedDriveInput;
+  private Translation2d modifiedRotInput;
+  
+
 
 
   public void updateDriveInput(){
@@ -100,48 +99,21 @@ public class RobotContainer {
             .scaleTranslation(0.8)           // Scaled controller translation axis
             .allianceRelativeControl(true);  // Alliance relative controls.
  
-  
+  private final Command driveFieldOrientedAnglularVelocity = drivetrain.driveFieldOriented(driveAngularVelocity)
+      .alongWith(Commands.runOnce(() -> drivetrain.setState(SwerveStates.OPERATED)));
 
-  //Clones angular velocity input steam, converts to a fieldRelative input stream
-  SwerveInputStream driveDirectAngle = driveAngularVelocity.copy().withControllerHeadingAxis(() -> Math.cos(Math.PI/3), () -> Math.sin(Math.PI/3)).headingWhile(true);
 
-  
-  //Clones angular velocity input steam, converts to a robotRelative input stream
-  SwerveInputStream driveRobotOriented = driveAngularVelocity.copy().robotRelative(true)
-      .allianceRelativeControl(false);
-  
-  private DriveStates currentState;
-  // public 
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    // NamedCommands.registerCommand("aimAndSpinup", m_SuperStructure.aimingCommand(ShooterStates.AIMING, SpindexerStates.OFF, DriveStates.AIMING));
-    // NamedCommands.registerCommand("shootingCommand", m_SuperStructure.aimingCommand(ShooterStates.SHOOTING, SpindexerStates.FEED, DriveStates.AIMING));
-
     // Configure the trigger bindings
     configureBindings();
-    
-    autoChooser = AutoBuilder.buildAutoChooser();
-
   }
 
   
-  /**
-   * Use this method to define your trigger->command mappings. Triggers can be created via the
-   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
-   * predicate, or via the named factories in {@link
-   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for {@link
-   * CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-   * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
-   * joysticks}.
-   */
   private void configureBindings() {
-    Command driveAngle = drivetrain.driveFieldOriented(driveDirectAngle);
     Command driveFieldOrientedAnglularVelocity = drivetrain.driveFieldOriented(driveAngularVelocity);
-    Command driveFieldOrientedDirectAngle = drivetrain.driveFieldOriented(driveDirectAngle);
-    Command driveRobotOrientedAngularVelocity = drivetrain.driveFieldOriented(driveRobotOriented);
-    Command driveSetpointGen = drivetrain.driveWithSetpointGeneratorFieldRelative(driveDirectAngle);
-
+   
 
 
     // driver.leftBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.TEST).alongWith(m_spindexer.setState(SpindexerStates.FEED)));
@@ -157,21 +129,13 @@ public class RobotContainer {
     // operator.povUp().onTrue(m_ShooterSubsystem.opHighAngle());
 
     driver.y().onTrue(drivetrain.runOnce(drivetrain::zeroGyro)); 
-
-
-      //aiming[]\
-
     Command aiming = m_SuperStructure.aimingCommand(ShooterStates.AIMING, SpindexerStates.OFF);
 
     //shooting
     Command shooting = m_SuperStructure.firingCommand(ShooterStates.SHOOTING, SpindexerStates.FEED);
     
-    Command rotate = drivetrain.SwerveControllerDrive(
-                null, 
-                ()->modifiedDriveInput.getX(), 
-                ()->modifiedDriveInput.getY(),
-                ()-> Rotation2d.fromRadians(m_ShotCalculator.getParameters().robotHeadingRadians()), 
-                null);
+    Command rotate = drivetrain.swerveControllerDrive(
+                null,Rotation2d.fromRadians(m_ShotCalculator.getParameters().robotHeadingRadians()));
 
             // Command lockDrive =  new SequentialCommandGroup(
             //         new WaitCommand(0.01), // Wait 200ms before braking
@@ -190,8 +154,8 @@ public class RobotContainer {
     //     )
     //     .andThen(() -> drivetrain.resetLatestHeading()))
       // );
-      driver.leftTrigger().whileTrue(aiming); //double binded bullshit?
-      driver.rightTrigger().whileTrue(m_ShooterSubsystem.runShooterParams());
+      driver.leftTrigger().whileTrue(rotate); //double binded bullshit?
+      // driver.rightTrigger().whileTrue(m_ShooterSubsystem.runShooterParams());
       //aims
       // driver.a().whileTrue(
       //       drivetrain.SwerveControllerDrive(

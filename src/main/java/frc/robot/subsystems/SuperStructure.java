@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.subsystems.SuperStructure.DriveStates;
+import frc.robot.subsystems.SuperStructure.SwerveStates;
 import frc.robot.subsystems.SuperStructure.ShooterStates;
 import frc.robot.subsystems.shooter.shooterSubsystem;
 import frc.robot.subsystems.shooter.shotCalculator;
@@ -38,8 +38,8 @@ public class SuperStructure extends SubsystemBase{
         FEED, OFF, SLOW, JAM
     }
 
-    public enum DriveStates{
-        FIELD, AIMING, SOFT
+    public enum SwerveStates{
+        AIMING, OPERATED, LOCKED, AIMED, LOCKED_AND_AIMED;
     }
 
     private shooterSubsystem m_shooter;
@@ -52,7 +52,7 @@ public class SuperStructure extends SubsystemBase{
     private SpindexerStates spindexerState = SpindexerStates.OFF;
     private IntakePivotStates intakeState = IntakePivotStates.PIVOT_START_POS;
     private IntakeRollerStates rollerState = IntakeRollerStates.ROLLER_OFF;
-    private DriveStates driveState = DriveStates.FIELD;
+    private SwerveStates driveState = SwerveStates.OPERATED;
 
     public boolean intaking;
 
@@ -111,11 +111,11 @@ public class SuperStructure extends SubsystemBase{
     
     /* --- COMMANDS --- */
 
-    public Command driveRequest(DriveStates requestedState) {
+    public Command driveRequest(SwerveStates requestedState) {
         return run(() -> {
             this.driveState = requestedState;
         }).finallyDo((interrupted) -> {
-            this.driveState = DriveStates.FIELD;
+            this.driveState = SwerveStates.OPERATED;
         });
     }
 

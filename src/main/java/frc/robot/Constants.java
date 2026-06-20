@@ -7,15 +7,31 @@ package frc.robot;
 
 import com.pathplanner.lib.config.PIDConstants;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
-// import frc.robot.subsystems.shooter.shooterSubsystem;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
+
+
+
 
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+
+import java.util.Optional;
+
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 /**
@@ -36,6 +52,7 @@ public final class Constants {
 
 
   public static class SwerveConstants{
+    public static final Angle aimToleranceDegrees = Degrees.of(2);
     public static final double maxSpeed = Units.feetToMeters(10); 
     public static final PIDController translationController = new PIDController(4, 0, 0,0.15);  //OP ROBOTICS PID : 4, 0, 0.15
     public static final PIDController rotationController = new PIDController(4,0,0.15);
@@ -127,7 +144,7 @@ public static Transform3d robotToShooter = new Transform3d(
 );
 
    public class fieldPoses{
-        public static final Pose2d blueAllianceHub = new Pose2d(
+       public static final Pose2d blueAllianceHub = new Pose2d(
             FieldConstants.Hub.topCenterPoint.getX(),
             FieldConstants.Hub.topCenterPoint.getY(),
             new Rotation2d()
@@ -138,8 +155,23 @@ public static Transform3d robotToShooter = new Transform3d(
             FieldConstants.Hub.oppTopCenterPoint.getY(),
             new Rotation2d()
         );
+
+      public static final AprilTagFieldLayout K_APRIL_TAG_FIELD_LAYOUT = AprilTagFieldLayout
+            .loadField(AprilTagFields.k2026RebuiltWelded);
+
+      public static final Distance kFieldLength = Meters.of(K_APRIL_TAG_FIELD_LAYOUT.getFieldLength());
+      public static final Distance kFieldWidth = Meters.of(K_APRIL_TAG_FIELD_LAYOUT.getFieldWidth());
+
+      public static final Distance kAllianceFieldLength = Inches.of(182.105);
+      public static final Optional<Alliance> kAlliance = DriverStation.getAlliance();
+    
+      public static Translation2d hubPosition() {
+              if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Blue) {
+                  return new Translation2d(kAllianceFieldLength, Inches.of(158.845));
+              } else {
+                  return new Translation2d(kFieldLength.minus(kAllianceFieldLength), Inches.of(158.845));
+              }
+          }
+
   }
-
-
-
 }

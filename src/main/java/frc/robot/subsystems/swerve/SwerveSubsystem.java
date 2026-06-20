@@ -8,10 +8,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.SwerveConstants;
 // import frc.robot.Constants.limelight; 
 import frc.robot.subsystems.SuperStructure;
+import frc.robot.subsystems.SuperStructure.SwerveStates;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,18 +25,21 @@ import java.util.function.Supplier;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import swervelib.parser.SwerveControllerConfiguration;
 import swervelib.parser.SwerveDriveConfiguration;
 import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
-import swervelib.SwerveController;
+// import swervelib.SwerveController;
 import swervelib.SwerveDrive;
 import swervelib.SwerveDriveTest;
 import swervelib.math.SwerveMath;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.math.util.Units;
+
 import org.json.simple.parser.ParseException;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -42,10 +47,14 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.Matrix;
+
 
 import static edu.wpi.first.units.Units.Meter;
 
-import com.ctre.phoenix6.Utils;
+// import com.ctre.phoenix6.Utils;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.commands.PathfindingCommand;
@@ -56,9 +65,10 @@ import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 
-import frc.AlectronaLib.EstimatePose;
-import frc.AlectronaLib.AlectronaSwerveController;
-import frc.AlectronaLib.LimelightHelpers;
+import frc.VikingsLib.EstimatePose;
+import frc.VikingsLib.SwerveController;
+import frc.VikingsLib.SwerveController.Speeds;
+import frc.VikingsLib.LimelightHelpers;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 
@@ -79,27 +89,29 @@ public class SwerveSubsystem extends SubsystemBase {
   //Disable vision when simulating
   public boolean visionEnabled = !SwerveDriveTelemetry.isSimulation;
 
-  public SwerveController controller;
-
   private final EstimatePose m_EstimatePose = new EstimatePose("limelight");
-  private final AlectronaSwerveController m_SwerveController = new AlectronaSwerveController(
+
+  private final SwerveController swerveController= new SwerveController(
     SwerveConstants.translationController, 
     SwerveConstants.rotationController, 
-    SwerveConstants.maxSpeed, 
-    SwerveConstants.maxAngularRate, 
     false,
     false, 
     SwerveConstants.slewRateLimit, 
     SwerveConstants.jerkRateLimit,
     SwerveConstants.autonSlewRateLimit,
-    SwerveConstants.autonJerkRateLimit);
+    SwerveConstants.autonJerkRateLimit
+    );
+  
+  private final Field2d kField = new Field2d();
+
+  private SwerveStates swerveState = SwerveStates.OPERATED;
     
   private Rotation2d lastHeldPosition = Rotation2d.fromDegrees(0);
   private boolean wasRotating = false;
   private boolean isSettlingAfterRelease = false;
   private static final double ROTATION_SETTLE_TIME = 0.3; // 300 ms
   private double rotationReleaseStartTime = -1.0;
-  private Pose2d currentPose = ;
+  // private Pose2d currentPose = ;
 
 
 
@@ -145,13 +157,21 @@ public class SwerveSubsystem extends SubsystemBase {
   public SwerveSubsystem(SwerveDriveConfiguration driveCfg, SwerveControllerConfiguration controllerCfg)
   {
     swerveDrive = new SwerveDrive(driveCfg,controllerCfg, SwerveConstants.maxSpeed, new Pose2d(new Translation2d(Meter.of(2), Meter.of(0)), Rotation2d.fromDegrees(0)));
-    currentPose = this.getPose();
-    lastHeldPosition = currentPose.getRotation();
+  }
+
+  public void setState(SwerveStates state){
+    this.swerveState = swerveState;
+  }
+
+  public SwerveStates getState(){
+    return swerveState;
   }
 
   @Override
   public void periodic() {
-    currentPose = this.getPose();
+    Pose2d currentPose = swerveDrive.getPose();
+    kField.setRobotPose(currentPose);
+
 
 
 
@@ -474,16 +494,13 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   public SwerveController getSwerveController() {
-    return swerveDrive.swerveController;
+    return swerveController;
   }
 
   public SwerveDriveConfiguration getSwerveDriveConfiguration() {
     return swerveDrive.swerveDriveConfiguration;
   }
 
-  public void lock() {
-    swerveDrive.lockPose();
-  }
 
     public Rotation2d getPitch() {
     return swerveDrive.getPitch();
@@ -497,8 +514,9 @@ public class SwerveSubsystem extends SubsystemBase {
       return swerveDrive;
   }
 
-  public void addVisionMeasurement(Pose2d visionRobotPoseMeters, double timestampSeconds){
-    swerveDrive.addVisionMeasurement(visionRobotPoseMeters, Utils.fpgaToCurrentTime(timestampSeconds));
+ public void addVisionMeasurement(
+      Pose2d visionMeasurement, double timestampSeconds, Matrix<N3, N1> curStdDevs) {
+    swerveDrive.addVisionMeasurement(visionMeasurement, timestampSeconds, curStdDevs);
   }
 
   public double getTimeSinceLastTagSeen(){
@@ -509,115 +527,75 @@ public class SwerveSubsystem extends SubsystemBase {
     lastHeldPosition = this.getPose().getRotation();
   }
 
+  public Rotation2d getTargetHeadingInFieldFrame(){
+    final Translation2d hubPosition = Constants.fieldPoses.hubPosition();
+    final Translation2d robotPosition = swerveDrive.getPose().getTranslation();
+    return hubPosition.minus(robotPosition).getAngle();
+
+  }
+
+  public boolean isAimed(){
+    return Math.abs(getTargetHeadingInFieldFrame().minus(getHeading()).getDegrees()) < SwerveConstants.aimToleranceDegrees.magnitude();
+  }
+
+  public void lock() {
+    swerveDrive.lockPose();
+  }
+
+  public Command swerveLockCommand(DoubleSupplier supplier){
+    return runOnce(
+      () -> setState(SwerveStates.LOCKED))
+      .andThen(()-> swerveDrive.lockPose()).repeatedly()
+      .until(()-> supplier.getAsDouble() > Constants.DriveConstants.deadband);
+  }
+
+  @Override
+  public String toString(){
+    switch (swerveState) {
+      case LOCKED:
+        return "LOCKED";
+      case AIMED:
+      case LOCKED_AND_AIMED:
+        return "AIM: READY";
+      case AIMING:
+        return "AIM: NOT READY";
+      case OPERATED:
+      default:
+        return "OPERATED";
+    }
+  } 
+
+
   
-
-public Command SwerveControllerDrive(
-    Supplier<Pose2d> targetSupplier, 
-    DoubleSupplier xInput, 
-    DoubleSupplier yInput, 
-    Supplier<Rotation2d> rotSupplier, 
-    DoubleSupplier vR
-) {
+  public Command swerveControllerDrive(Translation2d targetTranslation, Rotation2d targetRotation) {
     return run(() -> {
-        Rotation2d currentHeading = currentPose.getRotation();
-        
-        boolean hasManualRotation = false;
-        double manualRot = 0.0;
-        
-        if (DriverStation.isAutonomous()){
-            lastHeldPosition = currentHeading;
-        } else {
-            if (vR != null) {
-                manualRot = vR.getAsDouble();
+      Rotation2d currentRotation = getPose().getRotation();
+      Speeds speeds = swerveController.calculate(
+          swerveDrive::getPose,
+          () -> new Pose2d(
+          targetTranslation == null ? getPose().getTranslation() : targetTranslation,
+          targetRotation == null ? getPose().getRotation() : targetRotation
+          )
+      );
+      ChassisSpeeds finalSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds.vx(), speeds.vy(), speeds.vr(),
+          currentRotation);
+      drive(finalSpeeds);
+    });
+  }
 
-                boolean isRotating = Math.abs(manualRot) > DriveConstants.deadband;
-                double now = Timer.getFPGATimestamp();
-                
-                if (isRotating) {
-                    // Continuously update heading while rotating
-                    lastHeldPosition = currentHeading;
-                    hasManualRotation = true;
-
-                    // Cancel any settle window
-                    isSettlingAfterRelease = false;
-                    rotationReleaseStartTime = -1.0;
-                }
-                if (!isRotating && wasRotating) {
-                    rotationReleaseStartTime = now;
-                    isSettlingAfterRelease = true;
-                }
-                if (isSettlingAfterRelease) {
-                    double elapsed = now - rotationReleaseStartTime;
-
-                    if (elapsed < ROTATION_SETTLE_TIME) {
-                        // Continue updating heading while robot coasts
-                        lastHeldPosition = currentHeading;
-                    } else {
-                        // Lock heading after settle time
-                        isSettlingAfterRelease = false;
-                        hasManualRotation = false;
-
-                        System.out.println("Heading locked at: " 
-                            + lastHeldPosition.getDegrees());
-                    }
-                }
-
-                wasRotating = isRotating;
-            } 
-            if (rotSupplier != null) {
-                Rotation2d target = rotSupplier.get();
-
-                if (target != null) {
-                    double errorDeg = target.minus(currentHeading).getDegrees();
-
-                    if (Math.abs(errorDeg) > 0.5) {
-                        lastHeldPosition = target;
-                    }
-                }
-            }
-        }
-        
-        var speeds = m_SwerveController.calculate(
-            () -> currentPose, 
-            targetSupplier,
-            xInput, 
-            yInput, 
-            rotSupplier, 
-            vR,
-            null,
-            false
-        );      
-        
-        ChassisSpeeds desiredSpeeds = new ChassisSpeeds(
-            speeds.vx(), 
-            speeds.vy(), 
-            speeds.vr()
-        );
-        swerveDrive.driveFieldOriented(desiredSpeeds);
-
-    }).withName("SwerveControllerDrive");
-  }   
 
   
 
   public double getDistanceError(){
-    return m_SwerveController.getDistanceError();
+    return swerveController.getDistanceError();
   }
 
   public double getRotationalError(){
-    return m_SwerveController.getRotationalError();
+    return swerveController.getRotationalError();
   }
 
   public Rotation2d getLastHeldRotation() {
         return lastHeldPosition;
     }
-
-  public void setInverted(){
-    invert = invert*-1;
-  }
-
-  public static int getInvert(){
-    return invert;
-  }
 
 }
