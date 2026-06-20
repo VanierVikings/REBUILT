@@ -99,7 +99,7 @@ public class SwerveSubsystem extends SubsystemBase {
   private boolean isSettlingAfterRelease = false;
   private static final double ROTATION_SETTLE_TIME = 0.3; // 300 ms
   private double rotationReleaseStartTime = -1.0;
-  private Pose2d currentPose = ;
+  private Pose2d currentPose;
 
 
 

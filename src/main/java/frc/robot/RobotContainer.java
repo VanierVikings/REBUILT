@@ -190,8 +190,8 @@ public class RobotContainer {
     //     )
     //     .andThen(() -> drivetrain.resetLatestHeading()))
       // );
-      driver.leftTrigger().whileTrue(aiming); //double binded bullshit?
-      driver.rightTrigger().whileTrue(m_ShooterSubsystem.runShooterParams());
+      driver.leftTrigger().whileTrue(rotate); //double binded bullshit?
+      // driver.rightTrigger().whileTrue(m_ShooterSubsystem.runShooterParams());
       //aims
       // driver.a().whileTrue(
       //       drivetrain.SwerveControllerDrive(
