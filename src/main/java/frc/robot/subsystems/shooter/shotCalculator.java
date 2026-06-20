@@ -244,6 +244,8 @@ import frc.robot.subsystems.swerve.SwerveSubsystem;
         double hoodAngle = currentShotHoodAngleMap.get(lookaheadDistance).getDegrees();
         double flywheelSpeed = currentShotFlywheelSpeedMap.get(lookaheadDistance);
         Rotation2d driveAngle = virtualTarget.minus(shooterPosition.getTranslation()).getAngle();
+        Rotation2d shooterYawOffset = Constants.robotToShooter.getRotation().toRotation2d();
+        Rotation2d robotHeading = driveAngle.minus(shooterYawOffset); // compensate for shooter mount angle
 
         if (Double.isNaN(lastHoodAngle)) lastHoodAngle = hoodAngle;
         double filteredHoodVel = hoodVelocityFilter.calculate((hoodAngle - lastHoodAngle) / LOOP_PERIOD);
@@ -254,7 +256,7 @@ import frc.robot.subsystems.swerve.SwerveSubsystem;
             lookaheadDistance,
             hoodAngle,
             flywheelSpeed,
-            driveAngle.getRadians(),
+            robotHeading.getRadians(),
             filteredHoodVel,
             isPassing,
             lookaheadDistance > 1.0 && lookaheadDistance < 6.0
