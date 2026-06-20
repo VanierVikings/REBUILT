@@ -512,11 +512,13 @@ public class SwerveSubsystem extends SubsystemBase {
   
 
 public Command SwerveControllerDrive(
+    //Control based on what you give it (i.e x,y inputs and desired heading for lock-on while moving)
     Supplier<Pose2d> targetSupplier, 
     DoubleSupplier xInput, 
     DoubleSupplier yInput, 
     Supplier<Rotation2d> rotSupplier, 
-    DoubleSupplier vR
+    DoubleSupplier vR,
+    boolean allianceRelative
 ) {
     return run(() -> {
         Rotation2d currentHeading = currentPose.getRotation();
@@ -534,11 +536,8 @@ public Command SwerveControllerDrive(
                 double now = Timer.getFPGATimestamp();
                 
                 if (isRotating) {
-                    // Continuously update heading while rotating
                     lastHeldPosition = currentHeading;
                     hasManualRotation = true;
-
-                    // Cancel any settle window
                     isSettlingAfterRelease = false;
                     rotationReleaseStartTime = -1.0;
                 }
@@ -550,10 +549,8 @@ public Command SwerveControllerDrive(
                     double elapsed = now - rotationReleaseStartTime;
 
                     if (elapsed < ROTATION_SETTLE_TIME) {
-                        // Continue updating heading while robot coasts
                         lastHeldPosition = currentHeading;
                     } else {
-                        // Lock heading after settle time
                         isSettlingAfterRelease = false;
                         hasManualRotation = false;
 
@@ -576,12 +573,17 @@ public Command SwerveControllerDrive(
                 }
             }
         }
+
+        //ALliance relative control logic
+        double allianceSign = (allianceRelative && isRedAlliance()) ? -1.0 : 1.0;
+        DoubleSupplier adjustedXInput = (xInput == null) ? null : () -> xInput.getAsDouble() * allianceSign;
+        DoubleSupplier adjustedYInput = (yInput == null) ? null : () -> yInput.getAsDouble() * allianceSign;
         
         var speeds = m_SwerveController.calculate(
             () -> currentPose, 
             targetSupplier,
-            xInput, 
-            yInput, 
+            adjustedXInput, 
+            adjustedYInput, 
             rotSupplier, 
             vR,
             null,
@@ -596,7 +598,7 @@ public Command SwerveControllerDrive(
         swerveDrive.driveFieldOriented(desiredSpeeds);
 
     }).withName("SwerveControllerDrive");
-  }   
+}
 
   
 

@@ -100,18 +100,6 @@ public class RobotContainer {
             .scaleTranslation(0.8)           // Scaled controller translation axis
             .allianceRelativeControl(true);  // Alliance relative controls.
  
-  
-
-  //Clones angular velocity input steam, converts to a fieldRelative input stream
-  SwerveInputStream driveDirectAngle = driveAngularVelocity.copy().withControllerHeadingAxis(() -> Math.cos(Math.PI/3), () -> Math.sin(Math.PI/3)).headingWhile(true);
-
-  
-  //Clones angular velocity input steam, converts to a robotRelative input stream
-  SwerveInputStream driveRobotOriented = driveAngularVelocity.copy().robotRelative(true)
-      .allianceRelativeControl(false);
-  
-  private DriveStates currentState;
-  // public 
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -136,11 +124,7 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    Command driveAngle = drivetrain.driveFieldOriented(driveDirectAngle);
     Command driveFieldOrientedAnglularVelocity = drivetrain.driveFieldOriented(driveAngularVelocity);
-    Command driveFieldOrientedDirectAngle = drivetrain.driveFieldOriented(driveDirectAngle);
-    Command driveRobotOrientedAngularVelocity = drivetrain.driveFieldOriented(driveRobotOriented);
-    Command driveSetpointGen = drivetrain.driveWithSetpointGeneratorFieldRelative(driveDirectAngle);
 
 
 
@@ -171,7 +155,9 @@ public class RobotContainer {
                 ()->modifiedDriveInput.getX(), 
                 ()->modifiedDriveInput.getY(),
                 ()-> Rotation2d.fromRadians(m_ShotCalculator.getParameters().robotHeadingRadians()), 
-                null);
+                null,
+                true
+                );
 
             // Command lockDrive =  new SequentialCommandGroup(
             //         new WaitCommand(0.01), // Wait 200ms before braking
@@ -229,7 +215,28 @@ public class RobotContainer {
       drivetrain.visionEnabled = false;
     } 
     else {
-        drivetrain.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+        drivetrain.setDefaultCommand(
+          drivetrain.SwerveControllerDrive(
+                null,
+                () -> modifiedDriveInput.getX(),
+                () -> modifiedDriveInput.getY(),
+                () -> {
+                    if (Math.abs(driver.getRightX()) > DriveConstants.deadband) {
+                        return null;
+                    } else {
+                        return drivetrain.getLastHeldRotation();
+                    }
+                },
+                () -> {
+                    if (Math.abs(driver.getRightX()) > DriveConstants.deadband) {
+                        return modifiedRotInput.getX();
+                    } else {
+                        return 0.0;
+                    }
+                },
+              true
+            )
+        );
 
     }
 
