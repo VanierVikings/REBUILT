@@ -172,10 +172,9 @@ public class SuperStructure extends SubsystemBase{
 
 
 
-    public Command firingCommand(ShooterStates sState, SpindexerStates spinSate, DriveStates dState) {  
+    public Command firingCommand(ShooterStates sState, SpindexerStates spinSate) {  
         return Commands.sequence(
             Commands.run(() -> {
-                this.driveState = dState;
                 setShooterState(ShooterStates.JAM);
                 setSpindexerState(SpindexerStates.JAM);
             }).withTimeout(0.5), // Forces this block to run repeatedly for exactly 1.0 second
@@ -184,7 +183,6 @@ public class SuperStructure extends SubsystemBase{
                 setSpindexerState(spinSate);
             }))
             .finallyDo((interrupted) -> {
-                this.driveState = DriveStates.FIELD;
                 setShooterState(ShooterStates.IDLE);
                 setSpindexerState(SpindexerStates.OFF);
         });

@@ -14,6 +14,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
 // import frc.robot.subsystems.shooter.shooterSubsystem;
+import edu.wpi.first.units.Unit;
 
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
@@ -38,7 +39,7 @@ public final class Constants {
   public static class SwerveConstants{
     public static final double maxSpeed = Units.feetToMeters(10); 
     public static final PIDController translationController = new PIDController(4, 0, 0,0.15);  //OP ROBOTICS PID : 4, 0, 0.15
-    public static final PIDController rotationController = new PIDController(4,0,0.15);
+    public static final PIDController rotationController = new PIDController(0.1,0,0);
     public static final double jerkRateLimit = 45;
     public static final double slewRateLimit = 20;
     public static final double maxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond);
@@ -82,7 +83,7 @@ public final class Constants {
     public static final int rollerMotorID = 15;
     public static final int CANcoderID = 16;
 
-    public static final double CANcoderOffset = -0.2480; //TEST
+    public static final double CANcoderOffset = 0.0620; //TEST
 
     public static final double rollerRPM = 5500.0;
     public static final double rollerSlow = 300.0;
@@ -120,10 +121,10 @@ public final class Constants {
   }
 
 public static Transform3d robotToShooter = new Transform3d(
-    Units.inchesToMeters(-5.76), 
-    Units.inchesToMeters(7.786), 
-    Units.inchesToMeters(17.93), 
-    new Rotation3d(0, 0, Units.degreesToRadians(-90))
+    Units.inchesToMeters(0),//-5.791250 
+    Units.inchesToMeters(0), //8.168697
+    Units.inchesToMeters(0), //19.686204
+    new Rotation3d(0, Units.degreesToRadians(0), Units.degreesToRadians(0))
 );
 
    public class fieldPoses{

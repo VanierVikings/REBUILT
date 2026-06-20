@@ -49,7 +49,7 @@ import frc.robot.subsystems.swerve.SwerveSubsystem;
         private static InterpolatingTreeMap<Double, Rotation2d> currentShotHoodAngleMap;
         private static InterpolatingDoubleTreeMap currentShotFlywheelSpeedMap;
         private static InterpolatingDoubleTreeMap currentTimeOfFlightMap;
-                Translation2d shooterOffset = Constants.robotToShooter.getTranslation().toTranslation2d();
+        Translation2d shooterOffset = Constants.robotToShooter.getTranslation().toTranslation2d();
         StructPublisher<Pose2d> shooterPublisher = NetworkTableInstance.getDefault()
             .getStructTopic("ShooterTargetPose", Pose2d.struct).publish();
 
@@ -166,7 +166,6 @@ import frc.robot.subsystems.swerve.SwerveSubsystem;
         // Dashboard Debugging
         SmartDashboard.putNumber("Shot Calculator/Distance", params.initialDistance);
         SmartDashboard.putNumber("Shot Calculator/Desired RPS", params.flywheelSpeed);
-        SmartDashboard.putNumber("Shot Calculator/Desired HoodAngle", params.hoodAngle);
         SmartDashboard.putNumber("Shot Calculator/Desired Hood Angle", params.hoodAngle);
         SmartDashboard.putNumber("Shot Calculator/Desired Robot Heading", Units.radiansToDegrees(params.robotHeadingRadians));
         SmartDashboard.putNumber("Shot Calculator/Actual robot Heading", (drive.getPose().getRotation().getDegrees()));

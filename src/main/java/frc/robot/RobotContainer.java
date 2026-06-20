@@ -131,7 +131,7 @@ public class RobotContainer {
     // driver.leftBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.TEST).alongWith(m_spindexer.setState(SpindexerStates.FEED)));
     // driver.leftBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.SHOOTING).alongWith(m_spindexer.setState(SpindexerStates.FEED)));
       // driver.a().onTrue(drivetrain.run(()-> drivetrain.setInverted()));
-    driver.rightTrigger().whileTrue(m_ShooterSubsystem.setState(ShooterStates.TEST).alongWith(m_spindexer.setState(SpindexerStates.FEED)));
+    // driver.rightTrigger().whileTrue(m_ShooterSubsystem.setState(ShooterStates.TEST).alongWith(m_spindexer.setState(SpindexerStates.FEED)));
     driver.leftBumper().onTrue(m_intake.setPivotState(IntakePivotStates.PIVOT_TEST));
     driver.a().whileTrue(m_intake.opRoller());
     // operator.leftTrigger().whileTrue(m_ShooterSubsystem.runFeeder().alongWith(m_spindexer.runEndSpindexer()));
@@ -145,7 +145,7 @@ public class RobotContainer {
 
       //aiming[]\
 
-    Command aiming = m_SuperStructure.aimingCommand(ShooterStates.AIMING, SpindexerStates.OFF);
+    // Command aiming = m_SuperStructure.aimingCommand(ShooterStates.AIMING, SpindexerStates.OFF);
 
     //shooting
     Command shooting = m_SuperStructure.firingCommand(ShooterStates.SHOOTING, SpindexerStates.FEED);
@@ -177,6 +177,7 @@ public class RobotContainer {
     //     .andThen(() -> drivetrain.resetLatestHeading()))
       // );
       driver.leftTrigger().whileTrue(rotate); //double binded bullshit?
+      driver.rightTrigger().whileTrue(m_ShooterSubsystem.shootHighAngle().alongWith(m_spindexer.runEndSpindexer()));
       // driver.rightTrigger().whileTrue(m_ShooterSubsystem.runShooterParams());
       //aims
       // driver.a().whileTrue(
@@ -215,27 +216,27 @@ public class RobotContainer {
       drivetrain.visionEnabled = false;
     } 
     else {
-        drivetrain.setDefaultCommand(
-          drivetrain.SwerveControllerDrive(
-                null,
-                () -> modifiedDriveInput.getX(),
-                () -> modifiedDriveInput.getY(),
-                () -> {
-                    if (Math.abs(driver.getRightX()) > DriveConstants.deadband) {
-                        return null;
-                    } else {
-                        return drivetrain.getLastHeldRotation();
-                    }
-                },
-                () -> {
-                    if (Math.abs(driver.getRightX()) > DriveConstants.deadband) {
-                        return modifiedRotInput.getX();
-                    } else {
-                        return 0.0;
-                    }
-                },
-              true
-            )
+        drivetrain.setDefaultCommand(driveFieldOrientedAnglularVelocity
+        //   drivetrain.SwerveControllerDrive(
+        //         null,
+        //         () -> modifiedDriveInput.getX(),
+        //         () -> modifiedDriveInput.getY(),
+        //         () -> {
+        //             if (Math.abs(driver.getRightX()) > DriveConstants.deadband) {
+        //                 return null;
+        //             } else {
+        //                 return drivetrain.getLastHeldRotation();
+        //             }
+        //         },
+        //         () -> {
+        //             if (Math.abs(driver.getRightX()) > DriveConstants.deadband) {
+        //                 return modifiedRotInput.getX();
+        //             } else {
+        //                 return 0.0;
+        //             }
+        //         },
+        //       true
+        //     )
         );
 
     }

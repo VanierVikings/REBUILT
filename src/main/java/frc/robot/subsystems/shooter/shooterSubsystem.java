@@ -93,9 +93,9 @@ public class shooterSubsystem extends SubsystemBase{
         hoodConfig.MotionMagic.MotionMagicCruiseVelocity = 1.0;
         hoodConfig.MotionMagic.MotionMagicAcceleration = 3.0;
 
-        hoodConfig.Feedback.SensorToMechanismRatio = (4.0*(365.0/30.0)); // 4:1 maxplanetary + 365:30 rack and pinion
+        hoodConfig.Feedback.SensorToMechanismRatio = (4.0*(189.0/8.0)); // 4:1 maxplanetary + 365:30 rack and pinion
         hoodConfig.Slot0.kS = 0.2;
-        hoodConfig.Slot0.kV = (0.12*(4.0*(365.0/30.0)));
+        hoodConfig.Slot0.kV = (0.12*(4.0*(189.0/8.0)));
         hoodConfig.Slot0.kP = 200;
         hoodConfig.Slot0.kD = 0;
 
@@ -204,17 +204,28 @@ public class shooterSubsystem extends SubsystemBase{
         return this.run(()-> setHoodAngle(30));
     }
 
-    public Command opHighAngle(){
-        return this.run(()->setHoodAngle(5));
-    }
+    
 
     public Command runFeeder(){
         return this.runEnd(()->setFeederVoltage(10), ()->stopFeeder());
     }
 
-    public Command runShooterParams(){
-        return this.runEnd(()-> setShooterRPS(shotCalculator.getInstance().getParameters().flywheelSpeed()), ()-> stopShooterMotors());
-    }
+ public Command shootHighAngle() {
+    return this.runEnd(
+        () -> {
+            // Both periodic actions run together here
+            setHoodAngle(shotCalculator.getInstance().getParameters().hoodAngle());
+            setShooterRPS(shotCalculator.getInstance().getParameters().flywheelSpeed());
+            setFeederVoltage(7);
+        }, 
+        () -> {
+            // This runs when the trigger is released
+            stopShooterMotors();
+            stopFeeder();
+            // If you need to stop the hood motor too, add it here
+        }
+    );
+}
 
 
     public Command setState(SuperStructure.ShooterStates state){
