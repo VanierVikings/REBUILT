@@ -210,7 +210,7 @@ public class shooterSubsystem extends SubsystemBase{
         return this.runEnd(()->setFeederVoltage(10), ()->stopFeeder());
     }
 
- public Command shootHighAngle() {
+    public Command shootHighAngle() {
     return this.runEnd(
         () -> {
             // Both periodic actions run together here
@@ -225,7 +225,7 @@ public class shooterSubsystem extends SubsystemBase{
             // If you need to stop the hood motor too, add it here
         }
     );
-}
+    }
 
 
     public Command setState(SuperStructure.ShooterStates state){
@@ -233,12 +233,12 @@ public class shooterSubsystem extends SubsystemBase{
         Command command;
         switch (state) {
             case AIMING:
-            command = run(()->{
-                var params = shotCalculator.getInstance().getParameters();
-                setHoodAngle(params.hoodAngle());
-                setShooterRPS(params.flywheelSpeed());
-                stopFeeder();
-            });
+                command = run(()->{
+                    var params = shotCalculator.getInstance().getParameters();
+                    setHoodAngle(params.hoodAngle());
+                    setShooterRPS(params.flywheelSpeed());
+                    stopFeeder();
+                });
             break;
 
             case SHOOTING:
@@ -288,16 +288,15 @@ public class shooterSubsystem extends SubsystemBase{
                     m_currentDebouncer.calculate(false);
                     driveHoodVoltage(-2);
                     setSoftLimits(false);
-                    
                 });
                 break;
 
             default:
-            command = run(()->{
-                setHoodAngle(0);
-                stopShooterMotors();
-                stopFeeder();
-            });
+                command = run(()->{
+                    setHoodAngle(0);
+                    stopShooterMotors();
+                    stopFeeder();
+                });
                 break;
         };
         return command;

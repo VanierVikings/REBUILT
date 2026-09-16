@@ -36,6 +36,8 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Force;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -297,6 +299,32 @@ public class SwerveDrive implements AutoCloseable
     if (SwerveDriveTelemetry.verbosity.ordinal() >= TelemetryVerbosity.POSE.ordinal())
     {
       SmartDashboard.putData("Field", field);
+      // SmartDashboard.putData("Swerve",
+      //   builder -> {
+      //     builder.setSmartDashboardType("SwerveDrive");
+
+      //     builder.addDoubleProperty("Front Left Angle", () -> SwerveMath.getSwerveModule(swerveModules, true,
+      //                                                                                      false).moduleLocation.getAngle().getRadians(), null);
+      //     //builder.addDoubleProperty("Front Left Velocity", () -> SwerveMath.getSwerveModule(swerveModules, true,
+      //     //                                                                                  true).driveMotor.getVelocity(), null);
+
+      //     builder.addDoubleProperty("Front Right Angle",  () -> SwerveMath.getSwerveModule(swerveModules, true,
+      //                                                                                      false).moduleLocation.getAngle().getRadians(), null);
+      //     //builder.addDoubleProperty("Front Right Velocity", () -> SwerveMath.getSwerveModule(swerveModules, true,
+      //     //                                                                                  true).driveMotor.getVelocity(), null);
+
+      //     builder.addDoubleProperty("Back Left Angle",  () -> SwerveMath.getSwerveModule(swerveModules, false,
+      //                                                                                      true).moduleLocation.getAngle().getRadians(), null);
+      //     //builder.addDoubleProperty("Back Left Velocity", () -> SwerveMath.getSwerveModule(swerveModules, true,
+      //     //                                                                                  true).driveMotor.getVelocity(), null);
+                                                                                          
+      //     builder.addDoubleProperty("Back Right Angle",  () -> SwerveMath.getSwerveModule(swerveModules, false,
+      //                                                                                      false).moduleLocation.getAngle().getRadians(), null);
+      //     //builder.addDoubleProperty("Back Right Velocity", () -> SwerveMath.getSwerveModule(swerveModules, true,
+      //     //                                                                                 true).driveMotor.getVelocity(), null);
+
+      //     builder.addDoubleProperty("Robot Angle",  () -> getOdometryHeading().getRadians(), null);
+      //   });
     }
 
     if (SwerveDriveTelemetry.verbosity.ordinal() >= TelemetryVerbosity.INFO.ordinal())
@@ -346,7 +374,6 @@ public class SwerveDrive implements AutoCloseable
       module.close();
     }
   }
-
   /**
    * Update the cache validity period for the robot.
    *
@@ -1608,6 +1635,6 @@ public class SwerveDrive implements AutoCloseable
                                                     chassisVelocityCorrection,
                                                     angularVelocityCorrection);
     }
-    return kinematics.toSwerveModuleStates(robotRelativeVelocity);
+    return kinematics.toSwerveModuleStates(robotRelativeVelocity); 
   }
 }

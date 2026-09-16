@@ -42,6 +42,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -85,10 +86,9 @@ public class RobotContainer {
 
 
   public void updateDriveInput(){
-      modifiedDriveInput = m_DriveInput.getShapedInput(()-> driver.getLeftX(), ()-> driver.getLeftY());
+      modifiedDriveInput = m_DriveInput.getShapedInput(()-> -driver.getLeftX(), ()-> -driver.getLeftY());
       modifiedRotInput = m_RotInput.getShapedInput(()-> driver.getRightX(), ()-> driver.getRightY());
-
-    }
+  }
 
 
   //Cnvert driver input into field-relative ChassisSpeeds - controlled by angular velocity
@@ -132,15 +132,18 @@ public class RobotContainer {
     // driver.leftBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.SHOOTING).alongWith(m_spindexer.setState(SpindexerStates.FEED)));
       // driver.a().onTrue(drivetrain.run(()-> drivetrain.setInverted()));
     // driver.rightTrigger().whileTrue(m_ShooterSubsystem.setState(ShooterStates.TEST).alongWith(m_spindexer.setState(SpindexerStates.FEED)));
-    driver.leftBumper().onTrue(m_intake.setPivotState(IntakePivotStates.PIVOT_TEST));
+    /////////////////
+    /// TEMPORASRY TURN ON LATER
+    //driver.leftBumper().onTrue(m_intake.setPivotState(IntakePivotStates.PIVOT_TEST));
     driver.a().whileTrue(m_intake.opRoller());
     // operator.leftTrigger().whileTrue(m_ShooterSubsystem.runFeeder().alongWith(m_spindexer.runEndSpindexer()));
     // operator.rightBumper().whileTrue(m_ShooterSubsystem.opSlowShot().andThen(m_ShooterSubsystem.runFeeder()));
     // operator.rightTrigger().whileTrue(m_ShooterSubsystem.opFastShot());
     // operator.povDown().onTrue(m_ShooterSubsystem.opLowAngle());
     // operator.povUp().onTrue(m_ShooterSubsystem.opHighAngle());
-
-    driver.y().onTrue(drivetrain.runOnce(drivetrain::zeroGyro)); 
+///////////////////////////
+    //driver.y().onTrue(drivetrain.runOnce(drivetrain::zeroGyro));
+    driver.y().onTrue(drivetrain.runOnce(drivetrain::zeroGyro));
 
 
       //aiming[]\
@@ -175,9 +178,11 @@ public class RobotContainer {
     //         () -> modifiedRotInput.getX()
     //     )
     //     .andThen(() -> drivetrain.resetLatestHeading()))
-      // );
-      driver.leftTrigger().whileTrue(rotate); //double binded bullshit?
-      driver.rightTrigger().whileTrue(m_ShooterSubsystem.shootHighAngle().alongWith(m_spindexer.runEndSpindexer()));
+    //    );
+      //TEMPORARY TURN ON LATER, DISABLED TO TEST SWERVE
+      //driver.leftTrigger().whileTrue(rotate); //double binded bullshit?
+      //driver.rightTrigger().whileTrue(m_ShooterSubsystem.shootHighAngle().alongWith(m_spindexer.runEndSpindexer()));
+      ////////////////////
       // driver.rightTrigger().whileTrue(m_ShooterSubsystem.runShooterParams());
       //aims
       // driver.a().whileTrue(
@@ -190,13 +195,14 @@ public class RobotContainer {
       //   );
 
 
-      // driver.leftTrigger().whileTrue(aiming);
+    //driver.leftTrigger().whileTrue(aiming);
 
-      // driver.rightTrigger().whileTrue(shooting);
+    driver.rightTrigger().whileTrue(shooting);
 
       // driver.y().onTrue(m_ShooterSubsystem.setState(ShooterStates.REZERO)); //Hood rezero
-
-      driver.leftBumper().onTrue(
+//////////////////////////////////
+//TEMPORARY TURN ON LATER
+      /**driver.leftBumper().onTrue(
             Commands.defer(() -> {
                 if (m_intake.isDeployed()) {
                     return m_SuperStructure.intakeRequest(IntakePivotStates.PIVOT_HOME, IntakeRollerStates.ROLLER_OFF);
@@ -204,8 +210,8 @@ public class RobotContainer {
                     return m_SuperStructure.intakeRequest(IntakePivotStates.PIVOT_DEPLOYED, IntakeRollerStates.ROLLER_ACTIVE);
                 }
             }, Set.of(m_intake, m_SuperStructure)) 
-        );
-
+        );**/
+//////////////////////////
     //   driver.rightBumper().onTrue(m_intake.setRollerState(IntakeRollerStates.ROLLER_TEST));
 
         // driver.rightBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.IDLE));

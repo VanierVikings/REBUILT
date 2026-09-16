@@ -35,6 +35,9 @@ import swervelib.math.SwerveMath;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
+
 import org.json.simple.parser.ParseException;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -46,6 +49,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import static edu.wpi.first.units.Units.Meter;
 
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.swerve.SwerveModule;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.commands.PathfindingCommand;
@@ -61,6 +65,7 @@ import frc.AlectronaLib.AlectronaSwerveController;
 import frc.AlectronaLib.LimelightHelpers;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 
 
@@ -389,6 +394,29 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public void drive(ChassisSpeeds velocity) {
     swerveDrive.drive(velocity);
+    //SmartDashboard.putData("Swerve Drive", new Sendable() {
+
+
+    //  @Override
+    //  public void initSendable(SendableBuilder builder) {
+    //   builder.setSmartDashboardType("SwerveDrive");
+
+    //     builder.addDoubleProperty("Front Left Angle",  SwerveMath.getSwerveModule(swerveModules, true,
+    //                                                                                        false).getAngle().getRadians(), null);
+    //     builder.addDoubleProperty("Front Left Velocity",  frontLeftModule.getVelocity(), null);
+
+    //         builder.addDoubleProperty("Front Right Angle",  frontRightModule.getAngle().getRadians(), null);
+    //         builder.addDoubleProperty("Front Right Velocity",  frontRightModule.getVelocity(), null);
+
+    //         builder.addDoubleProperty("Back Left Angle",  backLefdule.getAngle().getRadians(), null);
+    //         builder.addDoubleProperty("Back Left Velocity",  backLeftModule.getVelocity(), null);
+
+    //         builder.addDoubleProperty("Back Right Angle",  backRightModule.getAngle().getRadians(), null);
+    //         builder.addDoubleProperty("Back Right Velocity",  backRightModule.getVelocity(), null);
+
+    //         builder.addDoubleProperty("Robot Angle",  getRotation().getRadians(), null);
+    //         }
+    //});
   }
 
    public SwerveDriveKinematics getKinematics() {

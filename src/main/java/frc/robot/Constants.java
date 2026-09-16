@@ -140,7 +140,4 @@ public static Transform3d robotToShooter = new Transform3d(
             new Rotation2d()
         );
   }
-
-
-
 }
