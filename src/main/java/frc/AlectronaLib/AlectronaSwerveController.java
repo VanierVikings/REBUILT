@@ -47,8 +47,10 @@ public class AlectronaSwerveController {
         this.invertRot = invertRot ? -1 : 1;
         this.translationLimiter = new OPRSlewRateLimiter(driveRateLimit, driveJerkLimit);
         this.autonTranslationLimiter = new OPRSlewRateLimiter(autonRateLimit, autonJerkLimit);
-        this.translationController.calculate(Double.MAX_VALUE,0);
-        this.rotationController.calculate(Double.MAX_VALUE, 0);
+        // Initialize controller history with finite values; Double.MAX_VALUE poisons the
+        // first real derivative calculation and can produce NaN chassis speeds.
+        this.translationController.calculate(0, 0);
+        this.rotationController.calculate(0, 0);
         this.rotationController.setTolerance(Units.degreesToRadians(3));
         rotationController.enableContinuousInput(0, 2 * Math.PI);
 

@@ -1,191 +1,142 @@
 package frc.robot.subsystems;
 
+import java.util.function.DoubleSupplier;
+
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
-import frc.robot.subsystems.SuperStructure.DriveStates;
-import frc.robot.subsystems.SuperStructure.ShooterStates;
 import frc.robot.subsystems.shooter.shooterSubsystem;
 import frc.robot.subsystems.shooter.shotCalculator;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 
-
-public class SuperStructure extends SubsystemBase{
-
-    public enum LedStates {
-        RED_GR, BLUE_GR, Off
-    }
-
-    public enum ShooterStates{
-        HOME, AIMING, SHOOTING, TEST, IDLE, REZERO, JAM
-    }
-
-    public enum CLimberStates{
-        HOME, EXTENDED, RETRACTED, REZERO, TEST
-    }
-
-    public enum IntakePivotStates{
+/** Coordinates mechanism requests without scheduling child commands from execute loops. */
+public class SuperStructure extends SubsystemBase {
+    public enum LedStates { RED_GR, BLUE_GR, Off }
+    public enum ShooterStates { HOME, AIMING, SHOOTING, TEST, IDLE, REZERO, JAM }
+    public enum CLimberStates { HOME, EXTENDED, RETRACTED, REZERO, TEST }
+    public enum IntakePivotStates {
         PIVOT_START_POS, PIVOT_HOME, PIVOT_DEPLOYED, PIVOT_TRAVEL, PIVOT_AGITATING, PIVOT_TEST
     }
+    public enum IntakeRollerStates {
+        ROLLER_ACTIVE, ROLLER_OFF, ROLLER_SLOW, ROLLER_OUTTAKE, ROLLER_TEST
+    }
+    public enum SpindexerStates { FEED, OFF, SLOW, JAM }
+    public enum DriveStates { FIELD, AIMING, SOFT }
 
-    public enum IntakeRollerStates{
-        ROLLER_ACTIVE, ROLLER_OFF, ROLLER_SLOW,ROLLER_OUTTAKE, ROLLER_TEST
+    public static final double FLYWHEEL_TOLERANCE_RPS = 2.0;
+    public static final double HOOD_TOLERANCE_DEGREES = 2.0;
+    public static final double HEADING_TOLERANCE_DEGREES = 3.0;
+    private static final double READY_DEBOUNCE_SECONDS = 0.100;
+
+    private final shooterSubsystem shooter;
+    private final spindexerSubsystem spindexer;
+    private final intakeSubsystem intake;
+    private final SwerveSubsystem drive;
+    private final Debouncer readyDebouncer =
+        new Debouncer(READY_DEBOUNCE_SECONDS, Debouncer.DebounceType.kRising);
+
+    private boolean aimRequested;
+    private boolean shootRequested;
+    private boolean readyToFeed;
+    private boolean feedEnabled;
+
+    public SuperStructure(
+            shooterSubsystem shooter,
+            spindexerSubsystem spindexer,
+            intakeSubsystem intake,
+            SwerveSubsystem drive) {
+        this.shooter = shooter;
+        this.spindexer = spindexer;
+        this.intake = intake;
+        this.drive = drive;
+        shotCalculator.getInstance(drive);
     }
 
-    public enum SpindexerStates{
-        FEED, OFF, SLOW, JAM
+    public Command toggleIntakeCommand() {
+        return intake.toggleCommand();
     }
 
-    public enum DriveStates{
-        FIELD, AIMING, SOFT
+    public Command aimCommand(DoubleSupplier xInput, DoubleSupplier yInput) {
+        return coordinatedShotCommand(false, xInput, yInput);
     }
 
-    private shooterSubsystem m_shooter;
-    private spindexerSubsystem m_spindexer;
-    private intakeSubsystem m_intake;
-    // private climbSubsystem m_climber;
-    private SwerveSubsystem m_drive;
-
-    private ShooterStates shooterState = ShooterStates.HOME;
-    private SpindexerStates spindexerState = SpindexerStates.OFF;
-    private IntakePivotStates intakeState = IntakePivotStates.PIVOT_START_POS;
-    private IntakeRollerStates rollerState = IntakeRollerStates.ROLLER_OFF;
-    private DriveStates driveState = DriveStates.FIELD;
-
-    public boolean intaking;
-
-    // public SuperStructure(shooterSubsystem shooter, intakeSubsystem intake, climbSubsystem climber){
-
-    public SuperStructure(shooterSubsystem shooter, spindexerSubsystem spindexer, intakeSubsystem intake, SwerveSubsystem drive){
-        this.m_shooter = shooter;
-        this.m_spindexer = spindexer;
-        this.m_drive = drive;
-        this.m_intake = intake;
-        // this.m_climber = climber;
-        intaking = false;
-        shotCalculator.getInstance(m_drive);
+    public Command shootCommand(DoubleSupplier xInput, DoubleSupplier yInput) {
+        return coordinatedShotCommand(true, xInput, yInput);
     }
 
-    private void setShooterState(ShooterStates requestedState){
-        boolean isActionState = (requestedState == ShooterStates.AIMING || 
-                                requestedState == ShooterStates.SHOOTING || 
-                                requestedState == ShooterStates.TEST);
-        // boolean isIntakeSafe = (m_intake.getIntakeAngle() < 120);
+    private Command coordinatedShotCommand(
+            boolean shooting, DoubleSupplier xInput, DoubleSupplier yInput) {
+        Command readiness = Commands.run(() -> {
+            boolean rawReady = shooter.shooterAtSpeed(FLYWHEEL_TOLERANCE_RPS)
+                && shooter.hoodAtAngle(HOOD_TOLERANCE_DEGREES)
+                && driveAtHeading();
+            readyToFeed = readyDebouncer.calculate(rawReady);
+            feedEnabled = shooting && readyToFeed;
+        }, this);
 
-        ShooterStates finalState = (isActionState /*&& !isIntakeSafe*/) 
-                                        ? this.shooterState 
-                                        : requestedState;
+        Command shooterCommand = shooter.runEnd(
+            () -> shooter.applyState(
+                shooting ? ShooterStates.SHOOTING : ShooterStates.AIMING,
+                shooting && readyToFeed),
+            shooter::stopAndHome);
 
-         if (requestedState == ShooterStates.TEST){
-            this.shooterState = ShooterStates.TEST;
-        }
-        Command stateCommand = m_shooter.setState(finalState);
+        Command spindexerCommand = spindexer.runEnd(
+            () -> spindexer.applyState(
+                shooting && readyToFeed ? SpindexerStates.FEED : SpindexerStates.OFF),
+            () -> spindexer.applyState(SpindexerStates.OFF));
 
-        CommandScheduler.getInstance().schedule(stateCommand);
-    
+        Command alignCommand = drive.SwerveControllerDrive(
+            null, xInput, yInput, this::getTargetHeading, null, true);
+
+        return Commands.parallel(readiness, shooterCommand, spindexerCommand, alignCommand)
+            .beforeStarting(() -> {
+                aimRequested = !shooting;
+                shootRequested = shooting;
+                readyToFeed = false;
+                feedEnabled = false;
+                readyDebouncer.calculate(false);
+            })
+            .finallyDo(interrupted -> {
+                aimRequested = false;
+                shootRequested = false;
+                readyToFeed = false;
+                feedEnabled = false;
+                readyDebouncer.calculate(false);
+                shooter.stopAndHome();
+                spindexer.applyState(SpindexerStates.OFF);
+            });
     }
 
-    private void setSpindexerState(SpindexerStates requestedStates){
-        this.spindexerState = requestedStates;
-        Command stateCommand = m_spindexer.setState(requestedStates);
-
-        // stateCommand.schedule();
-        CommandScheduler.getInstance().schedule(stateCommand);
+    private Rotation2d getTargetHeading() {
+        return Rotation2d.fromRadians(
+            shotCalculator.getInstance().getParameters().robotHeadingRadians());
     }
 
-    private void setIntakePivotState(IntakePivotStates requestedState){
-        this.intakeState = requestedState;
-        Command stateCommand = m_intake.setPivotState(requestedState);
-        CommandScheduler.getInstance().schedule(stateCommand);
+    public boolean driveAtHeading() {
+        return Math.abs(getHeadingErrorDegrees()) <= HEADING_TOLERANCE_DEGREES;
     }
 
-    private void setIntakeRollerState(IntakeRollerStates rollerState){
-        this.intaking = (rollerState == IntakeRollerStates.ROLLER_ACTIVE);
-        Command stateCommand = m_intake.setRollerState(rollerState);
-        CommandScheduler.getInstance().schedule(stateCommand);
+    public double getHeadingErrorDegrees() {
+        return getTargetHeading().minus(drive.getHeading()).getDegrees();
     }
 
+    public boolean isReadyToFeed() { return readyToFeed; }
+    public boolean isFeedEnabled() { return feedEnabled; }
+    public boolean isAimRequested() { return aimRequested; }
+    public boolean isShootRequested() { return shootRequested; }
 
-    
-    /* --- COMMANDS --- */
-
-    public Command driveRequest(DriveStates requestedState) {
-        return run(() -> {
-            this.driveState = requestedState;
-        }).finallyDo((interrupted) -> {
-            this.driveState = DriveStates.FIELD;
-        });
-    }
-
-    public Command shooterRequest(ShooterStates requestedState) {
-        return run(() -> {
-            setShooterState(requestedState);
-        }).finallyDo((interrupted) -> {
-            setShooterState(ShooterStates.IDLE);
-        });
-    }
-
-    public Command intakeRequest(IntakePivotStates requestedPivotState, IntakeRollerStates requestedRollerState){
-        this.intakeState = requestedPivotState;
-        this.rollerState = requestedRollerState;
-        return run(()-> {
-            setIntakePivotState(requestedPivotState);
-            setIntakeRollerState(requestedRollerState);
-        });
-    }
-
-    
-
-    // public Command aimingCommand(ShooterStates sState, SpindexerStates spinState) {
-    //     return runOnce(() -> {
-    //         setShooterState(ShooterStates.JAM);
-    //         // setSpindexerState(SpindexerStates.JAM);
-    //         //unjamming sequence
-    //     })
-    //     .andThen(
-    //         Commands.waitSeconds(0.1)
-    //         .andThen(runOnce(() -> {
-    //             setShooterState(sState);
-    //             setSpindexerState(spinState);
-    //         }))
-    //     )
-    //     .andThen(Commands.idle())
-    //     .finallyDo((interrupted) -> {
-    //         setShooterState(ShooterStates.IDLE);
-    //         setSpindexerState(SpindexerStates.OFF);
-    //     });
-    // }
-
-    // public Command firingCommand(ShooterStates sState, SpindexerStates spinState ) {
-    //     return runOnce(() -> {
-    //             setShooterState(sState);
-    //             setSpindexerState(spinState);
-    //         })
-    //     .andThen(Commands.idle())
-    //     .finallyDo((interrupted) -> {
-    //         setShooterState(ShooterStates.IDLE);
-    //         setSpindexerState(SpindexerStates.OFF);
-    //     });
-    // }
-
-
-
-    public Command firingCommand(ShooterStates sState, SpindexerStates spinSate) {  
-        return Commands.sequence(
-            Commands.run(() -> {
-                setShooterState(ShooterStates.JAM);
-                setSpindexerState(SpindexerStates.JAM);
-            }).withTimeout(0.5), // Forces this block to run repeatedly for exactly 1.0 second
-            Commands.run(() -> {
-                setShooterState(sState);
-                setSpindexerState(spinSate);
-            }))
-            .finallyDo((interrupted) -> {
-                setShooterState(ShooterStates.IDLE);
-                setSpindexerState(SpindexerStates.OFF);
-        });
+    @Override
+    public void periodic() {
+        SmartDashboard.putNumber("AutoAlign/TargetHeadingDeg", getTargetHeading().getDegrees());
+        SmartDashboard.putNumber("AutoAlign/ActualHeadingDeg", drive.getHeading().getDegrees());
+        SmartDashboard.putNumber("AutoAlign/ErrorDeg", getHeadingErrorDegrees());
+        SmartDashboard.putBoolean("AutoAlign/AtHeading", driveAtHeading());
+        SmartDashboard.putBoolean("SuperStructure/AimRequested", aimRequested);
+        SmartDashboard.putBoolean("SuperStructure/ShootRequested", shootRequested);
+        SmartDashboard.putBoolean("SuperStructure/ReadyToFeed", readyToFeed);
+        SmartDashboard.putBoolean("SuperStructure/FeedEnabled", feedEnabled);
     }
 }
-

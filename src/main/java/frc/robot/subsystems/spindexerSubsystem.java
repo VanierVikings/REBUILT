@@ -18,15 +18,22 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.sim.SparkMaxSim;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class spindexerSubsystem extends SubsystemBase {
 
     private SparkMax spindexerMotor;
     private SparkMaxConfig spindexerConfig;
     SparkClosedLoopController spindexController;
+    private final SparkMaxSim spindexerMotorSim;
+    private SuperStructure.SpindexerStates requestedState = SuperStructure.SpindexerStates.OFF;
+    private double appliedVoltage;
    
     public spindexerSubsystem() {
         spindexerMotor = new SparkMax(SpindexerConstants.SPINDEXER_MOTOR_ID,MotorType.kBrushless);
+        spindexerMotorSim = new SparkMaxSim(spindexerMotor, DCMotor.getNEO(1));
         
         spindexerConfig = new SparkMaxConfig(); 
         spindexerConfig
@@ -39,10 +46,12 @@ public class spindexerSubsystem extends SubsystemBase {
     }
     
     public void runSpindexer(double voltage){
+        appliedVoltage = voltage;
         spindexerMotor.setVoltage(voltage); //voltage control yaay
     }
 
     public void stopSpindexer(){
+        appliedVoltage = 0;
         spindexerMotor.setVoltage(0);
         spindexerMotor.stopMotor();
     }
@@ -53,33 +62,31 @@ public class spindexerSubsystem extends SubsystemBase {
 
 
     public Command setState(SuperStructure.SpindexerStates state){
-        Command command;
+        return runOnce(() -> applyState(state));
+    }
+
+    public void applyState(SuperStructure.SpindexerStates state) {
+        requestedState = state;
         switch (state) {
-            case FEED:
-                command = runOnce(()->{
-                    runSpindexer(7);
-                });
-                break;
-
-            case OFF:
-                command = runOnce(()->{
-                    stopSpindexer();
-                });
-                break;
-            
-            case SLOW:
-            command = runOnce(()-> {
-                runSpindexer(1);
-            });
-            break;
-
-            default:
-                command = runOnce(()->{
-                    stopSpindexer();
-                });
-                break;
+            case FEED -> runSpindexer(7);
+            case SLOW -> runSpindexer(1);
+            case JAM -> runSpindexer(-7);
+            default -> stopSpindexer();
         }
-        return command;
+    }
+
+    public double getAppliedVoltage() { return appliedVoltage; }
+    public SuperStructure.SpindexerStates getRequestedState() { return requestedState; }
+
+    @Override
+    public void periodic() {
+        SmartDashboard.putString("Spindexer/RequestedState", requestedState.toString());
+        SmartDashboard.putNumber("Spindexer/AppliedVoltage", appliedVoltage);
+    }
+
+    @Override
+    public void simulationPeriodic() {
+        spindexerMotorSim.iterate(appliedVoltage == 0 ? 0 : Math.copySign(3000, appliedVoltage), 12.0, 0.02);
     }
 
 }

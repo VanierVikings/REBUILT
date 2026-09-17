@@ -135,7 +135,6 @@ public class RobotContainer {
     /////////////////
     /// TEMPORASRY TURN ON LATER
     //driver.leftBumper().onTrue(m_intake.setPivotState(IntakePivotStates.PIVOT_TEST));
-    driver.a().whileTrue(m_intake.opRoller());
     // operator.leftTrigger().whileTrue(m_ShooterSubsystem.runFeeder().alongWith(m_spindexer.runEndSpindexer()));
     // operator.rightBumper().whileTrue(m_ShooterSubsystem.opSlowShot().andThen(m_ShooterSubsystem.runFeeder()));
     // operator.rightTrigger().whileTrue(m_ShooterSubsystem.opFastShot());
@@ -150,17 +149,10 @@ public class RobotContainer {
 
     // Command aiming = m_SuperStructure.aimingCommand(ShooterStates.AIMING, SpindexerStates.OFF);
 
-    //shooting
-    Command shooting = m_SuperStructure.firingCommand(ShooterStates.SHOOTING, SpindexerStates.FEED);
-    
-    Command rotate = drivetrain.SwerveControllerDrive(
-                null, 
-                ()->modifiedDriveInput.getX(), 
-                ()->modifiedDriveInput.getY(),
-                ()-> Rotation2d.fromRadians(m_ShotCalculator.getParameters().robotHeadingRadians()), 
-                null,
-                true
-                );
+    Command aiming = m_SuperStructure.aimCommand(
+        () -> modifiedDriveInput.getX(), () -> modifiedDriveInput.getY());
+    Command shooting = m_SuperStructure.shootCommand(
+        () -> modifiedDriveInput.getX(), () -> modifiedDriveInput.getY());
 
             // Command lockDrive =  new SequentialCommandGroup(
             //         new WaitCommand(0.01), // Wait 200ms before braking
@@ -195,9 +187,10 @@ public class RobotContainer {
       //   );
 
 
-    //driver.leftTrigger().whileTrue(aiming);
-
-    driver.rightTrigger().whileTrue(shooting);
+    Trigger rightTrigger = driver.rightTrigger();
+    driver.leftTrigger().and(rightTrigger.negate()).whileTrue(aiming);
+    rightTrigger.whileTrue(shooting);
+    driver.leftBumper().onTrue(m_SuperStructure.toggleIntakeCommand());
 
       // driver.y().onTrue(m_ShooterSubsystem.setState(ShooterStates.REZERO)); //Hood rezero
 //////////////////////////////////
@@ -267,4 +260,10 @@ public class RobotContainer {
   public void setMotorBrake(boolean brake){
     drivetrain.setMotorBrake(brake);
   }
+
+  SuperStructure getSuperStructureForTest() { return m_SuperStructure; }
+  shooterSubsystem getShooterForTest() { return m_ShooterSubsystem; }
+  spindexerSubsystem getSpindexerForTest() { return m_spindexer; }
+  intakeSubsystem getIntakeForTest() { return m_intake; }
+  SwerveSubsystem getDrivetrainForTest() { return drivetrain; }
 }

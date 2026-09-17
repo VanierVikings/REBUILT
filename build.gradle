@@ -80,8 +80,8 @@ test {
     systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
 }
 
-// Simulation configuration (e.g. environment variables).
-wpi.sim.addGui().defaultEnabled = true
+// Simulation configuration. Pass -PheadlessSim for unattended validation.
+wpi.sim.addGui().defaultEnabled = !project.hasProperty("headlessSim")
 wpi.sim.addDriverstation()
 
 // Setting up my Jar File. In this case, adding all libraries into the main jar ('fat jar')
