@@ -149,9 +149,9 @@ public class EstimatePose {
     // If > 360 return MAX_VALUE
     if (omegaDegrees > 360) return VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
 
-    // Scaling factor for rotation
-    double rotationMultiplier = 1.0 + (omegaDegrees - 50.0) * (15.0 / 310.0); 
-    xyStdDev *= rotationMultiplier;
+    // Keep the base uncertainty below the 50 deg/s acceptance threshold. The previous
+    // (omega - 50) multiplier produced zero or negative standard deviations.
+    xyStdDev *= rotationUncertaintyMultiplier(omegaDegrees);
 
     // --- ADJUSTED PRIORITY WEIGHT ---
     // 1.0 (Base) * 0.6 (Priority) = 0.6 Total
@@ -167,5 +167,9 @@ public class EstimatePose {
     @FunctionalInterface
     public interface VisionUpdateConsumer {
         void accept(Pose2d pose, double timestamp, Matrix<N3, N1> stdDevs);
+    }
+
+    public static double rotationUncertaintyMultiplier(double omegaDegrees) {
+        return 1.0 + Math.max(0.0, omegaDegrees - 50.0) * (15.0 / 310.0);
     }
 }

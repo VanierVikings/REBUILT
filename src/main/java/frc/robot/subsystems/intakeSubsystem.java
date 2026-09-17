@@ -3,6 +3,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DutyCycle;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.IntakeConstants;
@@ -37,6 +38,8 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorOutputStatusValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
+import com.revrobotics.sim.SparkMaxSim;
+import edu.wpi.first.math.system.plant.DCMotor;
 
 
 public class intakeSubsystem extends SubsystemBase {
@@ -50,6 +53,12 @@ public class intakeSubsystem extends SubsystemBase {
     private boolean isDeployed;
     private double inputPivotAngle;
     private double inputRollerRPM;
+    private double pivotSetpointDegrees;
+    private double rollerSetpointRPM;
+    private double simulatedPivotDegrees;
+    private double simulatedPivotVelocityRps;
+    private double simulatedRollerRPM;
+    private final SparkMaxSim rollerMotorSim;
 
 
 
@@ -59,10 +68,14 @@ public class intakeSubsystem extends SubsystemBase {
         currentIntakeRollerState = IntakeRollerStates.ROLLER_OFF;
         inputPivotAngle = 0;
         inputRollerRPM = 0;
+        pivotSetpointDegrees = IntakeConstants.startingPosAngle;
+        rollerSetpointRPM = 0;
+        simulatedPivotDegrees = IntakeConstants.startingPosAngle;
 
         rollerMotor = new SparkMax(IntakeConstants.rollerMotorID, MotorType.kBrushless);
         pivotMotor = new TalonFX(IntakeConstants.pivotMotorID);
         pivotEncoder = new CANcoder(IntakeConstants.CANcoderID);
+        rollerMotorSim = new SparkMaxSim(rollerMotor, DCMotor.getNeoVortex(1));
         m_MotionMagicVoltage = new MotionMagicVoltage(0);
 
 
@@ -122,26 +135,35 @@ public class intakeSubsystem extends SubsystemBase {
                     .p(0)
                     .feedForward
                         .kS(0) //TEST
-                        .kV((1.0/565.0));
-            rollerConfig.encoder.velocityConversionFactor(1.0/3.0); //3:1 MAX Plantary drivees the rollers that are 1:1
+                        .kV(IntakeConstants.rollerKvVoltsPerOutputRPM);
+            rollerConfig.encoder.velocityConversionFactor(1.0 / IntakeConstants.rollerGearReduction);
 
         rollerMotor.configure(rollerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         //INPUT VALUES
         SmartDashboard.putNumber("Intake Inputs/Input Pivot Degrees", inputPivotAngle);
         SmartDashboard.putNumber("Intake Inputs/Input Roller RPM", inputRollerRPM);
+        SmartDashboard.setDefaultNumber("Intake/RollerActiveTargetRPM", IntakeConstants.rollerRPM);
 
     }
 
     @Override
     public void periodic(){
-        SmartDashboard.putNumber("Intake/Intake CANcoder Angle", pivotEncoder.getPosition().getValueAsDouble()*360);
-        SmartDashboard.putNumber("Intake/Intake Current Intake Angle", pivotMotor.getPosition().getValueAsDouble()*360);
-        SmartDashboard.putString("Intake/Current Pivot State", currentIntakePivotState.toString());
-        SmartDashboard.putString("Intake/Current Roller State", currentIntakeRollerState.toString());
+        if (currentIntakeRollerState == IntakeRollerStates.ROLLER_ACTIVE) {
+            setRollerRPM(SmartDashboard.getNumber(
+                "Intake/RollerActiveTargetRPM", IntakeConstants.rollerRPM));
+        }
+        SmartDashboard.putString("Intake/RequestedPivotState", currentIntakePivotState.toString());
+        SmartDashboard.putNumber("Intake/PivotSetpointDeg", pivotSetpointDegrees);
+        SmartDashboard.putNumber("Intake/PivotActualDeg", getIntakePivotAngle());
+        SmartDashboard.putBoolean("Intake/PivotAtSetpoint", pivotAtSetpoint(3.0));
+        SmartDashboard.putNumber("Intake/RollerSetpointRPM", rollerSetpointRPM);
+        SmartDashboard.putNumber("Intake/RollerActualRPM", getRollerRPM());
+        SmartDashboard.putNumber("Intake/RollerAppliedOutput", rollerMotor.getAppliedOutput());
     }
 
     public void setPivotPosition(double angleDegrees){
+        pivotSetpointDegrees = angleDegrees;
         angleDegrees = Units.degreesToRotations(angleDegrees);
         pivotMotor.setControl(m_MotionMagicVoltage.withPosition(angleDegrees));
     }
@@ -150,11 +172,15 @@ public class intakeSubsystem extends SubsystemBase {
         return this.currentIntakePivotState;
     }
 
+    public IntakeRollerStates getRollerState() { return currentIntakeRollerState; }
+
     public void setRollerRPM(double RPM){
+        rollerSetpointRPM = RPM;
         rollerMotor.getClosedLoopController().setSetpoint(RPM, ControlType.kVelocity);
     }
 
     public void stopRoller(){
+        rollerSetpointRPM = 0;
         // rollerMotor.getClosedLoopController().setSetpoint(0, ControlType.kVelocity);
         rollerMotor.stopMotor(); 
     }
@@ -164,107 +190,84 @@ public class intakeSubsystem extends SubsystemBase {
     }
 
     public double getIntakePivotAngle(){
+        if (RobotBase.isSimulation()) return simulatedPivotDegrees;
         return pivotMotor.getPosition().getValueAsDouble()*360; //degrees
     }
-    
-    public Command opRoller(){
-        return this.runEnd(() -> setRollerRPM(6000), () -> stopRoller());
+
+    public double getRollerRPM() {
+        if (RobotBase.isSimulation()) return simulatedRollerRPM;
+        return rollerMotor.getEncoder().getVelocity();
     }
 
-    
+    public double getRollerAppliedOutput() {
+        return rollerMotor.getAppliedOutput();
+    }
 
+    public boolean pivotAtSetpoint(double toleranceDegrees) {
+        return Math.abs(pivotSetpointDegrees - getIntakePivotAngle()) <= toleranceDegrees;
+    }
+    
+    public Command toggleCommand() {
+        return runOnce(() -> {
+            if (isDeployed) {
+                applyPivotState(IntakePivotStates.PIVOT_HOME);
+                applyRollerState(IntakeRollerStates.ROLLER_OFF);
+            } else {
+                applyPivotState(IntakePivotStates.PIVOT_DEPLOYED);
+                applyRollerState(IntakeRollerStates.ROLLER_ACTIVE);
+            }
+        });
+    }
+
+    public void applyRollerState(IntakeRollerStates state) {
+        currentIntakeRollerState = state;
+        switch (state) {
+            case ROLLER_ACTIVE -> setRollerRPM(
+                SmartDashboard.getNumber("Intake/RollerActiveTargetRPM", IntakeConstants.rollerRPM));
+            case ROLLER_SLOW -> setRollerRPM(IntakeConstants.rollerSlow);
+            case ROLLER_OUTTAKE -> setRollerRPM(IntakeConstants.rollerOutake);
+            case ROLLER_TEST -> setRollerRPM(
+                SmartDashboard.getNumber("Intake Inputs/Input Roller RPM", inputRollerRPM));
+            default -> stopRoller();
+        }
+    }
+
+    public void applyPivotState(IntakePivotStates state) {
+        currentIntakePivotState = state;
+        switch (state) {
+            case PIVOT_HOME -> { setPivotPosition(IntakeConstants.homeAngle); isDeployed = false; }
+            case PIVOT_TRAVEL -> { setPivotPosition(IntakeConstants.homeAngle); isDeployed = true; }
+            case PIVOT_DEPLOYED -> { setPivotPosition(IntakeConstants.deployedAngle); isDeployed = true; }
+            case PIVOT_TEST -> setPivotPosition(
+                SmartDashboard.getNumber("Intake Inputs/Input Pivot Degrees", getIntakePivotAngle()));
+            default -> setPivotPosition(IntakeConstants.startingPosAngle);
+        }
+    }
 
     public Command setRollerState(SuperStructure.IntakeRollerStates state){
-        this.currentIntakeRollerState = state;
-        Command command;
-        switch (state) {
-            case ROLLER_ACTIVE:
-                command = runOnce(()->{
-                    setRollerRPM(IntakeConstants.rollerRPM);
-                });
-                break;
-
-            case ROLLER_OFF:
-            command = runOnce(()->{
-                stopRoller();
-            });
-            break;
-
-            case ROLLER_SLOW:
-            command = runOnce(()->{
-                setRollerRPM(IntakeConstants.rollerSlow);
-            });
-            break;
-
-            case ROLLER_OUTTAKE:
-            command = runOnce(()->{
-                setRollerRPM(IntakeConstants.rollerOutake);
-            });
-            break;
-        
-            case ROLLER_TEST:
-            command = runOnce(()->{
-                inputRollerRPM = SmartDashboard.getNumber("Intake Inputs/Input Roller RPM", inputRollerRPM);
-                setRollerRPM(inputRollerRPM);
-            });
-            break;
-
-            default: //stop
-            command = runOnce(()->{
-                setRollerRPM(0);
-            });
-                break;
-        }
-
-        return command;
+        return runOnce(() -> applyRollerState(state));
     }
 
 
     public Command setPivotState(SuperStructure.IntakePivotStates state){
-        this.currentIntakePivotState = state;
-        Command command;
-        switch (state) {
-            case PIVOT_HOME:
-                command = runOnce(()->{
-                    setPivotPosition(IntakeConstants.homeAngle);
-                    stopRoller();
-                    isDeployed = false;
-                });
-                break;
+        return runOnce(() -> applyPivotState(state));
+    }
 
-            case PIVOT_TRAVEL:
-            command = runOnce(()->{
-                setPivotPosition(IntakeConstants.homeAngle);
-                stopRoller();
-                isDeployed = true;
-            });
-            break;
-
-            case PIVOT_DEPLOYED:
-            command = runOnce(()->{
-                setPivotPosition(IntakeConstants.deployedAngle);
-                stopRoller();
-                isDeployed = true;
-            });
-            break;
-
-            case PIVOT_TEST:
-            command = runOnce(()->{
-                // setPivotPosition(testAngle);
-                inputPivotAngle = SmartDashboard.getNumber("Intake Inputs/Input Pivot Degrees", pivotMotor.getPosition().getValueAsDouble()*360);
-                setPivotPosition(inputPivotAngle);
-            });
-            break;
-
-            default: //stop
-            command = runOnce(()->{
-                setPivotPosition(IntakeConstants.startingPosAngle);
-                stopRoller();
-            });
-                break;
-        }
-
-        return command;
+    @Override
+    public void simulationPeriodic() {
+        double error = pivotSetpointDegrees - simulatedPivotDegrees;
+        double step = Math.copySign(Math.min(Math.abs(error), 120.0 * 0.02), error);
+        simulatedPivotDegrees += step;
+        simulatedPivotVelocityRps = Units.degreesToRotations(step / 0.02);
+        double sensorRotations = Units.degreesToRotations(simulatedPivotDegrees) * (32.0 / 14.0);
+        pivotEncoder.getSimState().setRawPosition(sensorRotations);
+        pivotEncoder.getSimState().setVelocity(simulatedPivotVelocityRps * (32.0 / 14.0));
+        pivotMotor.getSimState().setRawRotorPosition(sensorRotations * (4.0 * 5.0 * (42.0 / 36.0)));
+        pivotMotor.getSimState().setRotorVelocity(
+            simulatedPivotVelocityRps * (32.0 / 14.0) * (4.0 * 5.0 * (42.0 / 36.0)));
+        rollerMotorSim.iterate(
+            rollerSetpointRPM * IntakeConstants.rollerGearReduction, 12.0, 0.02);
+        simulatedRollerRPM = rollerSetpointRPM;
     }
     
 

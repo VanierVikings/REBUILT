@@ -4,7 +4,12 @@
 
 package frc.robot;
 
+import java.io.File;
+
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -23,6 +28,14 @@ public class Robot extends TimedRobot {
    * initialization code.
    */
   public Robot() {
+    if (RobotBase.isSimulation()) {
+      File generatedLogDirectory = new File("logs/generated");
+      generatedLogDirectory.mkdirs();
+      DataLogManager.start(generatedLogDirectory.getPath());
+    } else {
+      DataLogManager.start();
+    }
+    DriverStation.startDataLog(DataLogManager.getLog(), true);
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
@@ -101,4 +114,8 @@ public class Robot extends TimedRobot {
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {}
+
+  RobotContainer getRobotContainerForTest() {
+    return m_robotContainer;
+  }
 }

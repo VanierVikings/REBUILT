@@ -85,7 +85,13 @@ public final class Constants {
 
     public static final double CANcoderOffset = 0.0620; //TEST
 
-    public static final double rollerRPM = 5500.0;
+    /** Initial roller-output speed target. Tune from SmartDashboard on controlled hardware. */
+    public static final double rollerRPM = 1800.0;
+    public static final double rollerGearReduction = 3.0;
+    public static final double neoVortexFreeSpeedRPM = 6784.0;
+    /** REV velocity feedforward in volts per roller-output RPM after encoder conversion. */
+    public static final double rollerKvVoltsPerOutputRPM =
+        12.0 / (neoVortexFreeSpeedRPM / rollerGearReduction);
     public static final double rollerSlow = 300.0;
     public static final double rollerOutake = -1000.0;
 
@@ -121,10 +127,10 @@ public final class Constants {
   }
 
 public static Transform3d robotToShooter = new Transform3d(
-    Units.inchesToMeters(0),//-5.791250 
-    Units.inchesToMeters(0), //8.168697
-    Units.inchesToMeters(0), //19.686204
-    new Rotation3d(0, Units.degreesToRadians(0), Units.degreesToRadians(0))
+    Units.inchesToMeters(-5.791250),
+    Units.inchesToMeters(8.168697),
+    Units.inchesToMeters(19.686204),
+    new Rotation3d(0, 0, Units.degreesToRadians(90))
 );
 
    public class fieldPoses{
