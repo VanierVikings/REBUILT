@@ -241,7 +241,7 @@ import frc.robot.subsystems.swerve.SwerveSubsystem;
         double lookaheadDistance = virtualTarget.getDistance(shooterPosition.getTranslation()) + ShooterConstants.hubOffset;
 
         // 5. LOOKUP & FILTERING
-        double hoodAngle = currentShotHoodAngleMap.get(lookaheadDistance).getDegrees();
+        double hoodAngle = currentShotHoodAngleMap.get(lookaheadDistance).getDegrees(); //hardcoding hood angle?
         double flywheelSpeed = currentShotFlywheelSpeedMap.get(lookaheadDistance);
         Rotation2d driveAngle = virtualTarget.minus(shooterPosition.getTranslation()).getAngle();
         Rotation2d shooterYawOffset = Constants.robotToShooter.getRotation().toRotation2d();

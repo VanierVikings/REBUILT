@@ -187,11 +187,16 @@ public class RobotContainer {
       //   );
 
 
-    Trigger rightTrigger = driver.rightTrigger();
-    driver.leftTrigger().and(rightTrigger.negate()).whileTrue(aiming);
-    rightTrigger.whileTrue(shooting);
+    //Trigger rightTrigger = driver.rightTrigger();
+    //driver.leftTrigger().and(rightTrigger.negate()).whileTrue(aiming);
+    //rightTrigger.whileTrue(shooting);
     driver.leftBumper().onTrue(m_SuperStructure.toggleIntakeCommand());
 
+    driver.leftTrigger().and(driver.rightTrigger().negate()).whileTrue(m_SuperStructure.aimCommand(() -> modifiedDriveInput.getY(), () -> modifiedDriveInput.getX()));
+
+    driver.rightTrigger().whileTrue(m_SuperStructure.shootCommand(() -> modifiedDriveInput.getY(), () -> modifiedDriveInput.getX()));
+    
+//
       // driver.y().onTrue(m_ShooterSubsystem.setState(ShooterStates.REZERO)); //Hood rezero
 //////////////////////////////////
 //TEMPORARY TURN ON LATER
@@ -199,7 +204,7 @@ public class RobotContainer {
             Commands.defer(() -> {
                 if (m_intake.isDeployed()) {
                     return m_SuperStructure.intakeRequest(IntakePivotStates.PIVOT_HOME, IntakeRollerStates.ROLLER_OFF);
-                } else {
+                } else {()
                     return m_SuperStructure.intakeRequest(IntakePivotStates.PIVOT_DEPLOYED, IntakeRollerStates.ROLLER_ACTIVE);
                 }
             }, Set.of(m_intake, m_SuperStructure)) 

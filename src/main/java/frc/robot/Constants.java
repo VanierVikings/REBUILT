@@ -32,8 +32,8 @@ public final class Constants {
   public static boolean disableHAL = false;
 
   public static void disableHAL() {
-        disableHAL = true;
-      }
+    disableHAL = true;
+  }
 
 
   public static class SwerveConstants{
@@ -66,6 +66,22 @@ public final class Constants {
     public static final double kHoodP = 0.0;
     public static final double kHoodI = 0.0;
     public static final double kHoodD = 0.0;
+
+    public static final double deltaY = 2.54; // Meters, 100 inch
+    public static final double deltaX = 4.57; // Meters, 15 feet // 4.57
+    public static final double deltaTime = 3.0; // Seconds
+    public static final double gravity = -9.8; // Meters per second squared
+    public static final double groundToHoodAngle = 36.5; // Degrees
+    // public final static double fuelMass = 0.227; // kg, Ignoring air resistance
+    public static final double velocityX = deltaX / deltaTime;
+    public static final double velocityY = deltaY - 0.5 * gravity * Math.pow(deltaTime, 2.0);
+    public static final double velocity = Math.sqrt(Math.pow(velocityX, 2.0) + Math.pow(velocityY, 2.0));
+    public static final double phetaAngle = Math.acos(velocityX / velocity);
+    public static final double actualHoodAngle = (Math.toDegrees(phetaAngle)) + 2 ; //- groundToHoodAngle;
+
+    public static final double flywheelRadius = 0.05; // m, 3.97 inch diameter
+    public static final double rotationPerMinute = velocity / flywheelRadius;
+    public static final double rotationPerSecond = rotationPerMinute * 0.045;
   
 
     public static final int SHOOTER_CURRENT_LIMIT = 40; //amps;
@@ -95,21 +111,20 @@ public final class Constants {
     public static final double rollerSlow = 300.0;
     public static final double rollerOutake = -1000.0;
 
-    public static final double homeAngle = 120;
-    public static final double deployedAngle = 2 ;
+    public static final double homeAngle = 132; // 120, 222 at 8:46 pm found by 
+    public static final double deployedAngle = -13; //2, 34, 222 at 8:46 pm found by Rushanthan
     public static final double startingPosAngle = 145;
-
   }
 
 
 
-    public static class SpindexerConstants {
-      public static final int SPINDEXER_MOTOR_ID = 13;
-      public static final int SPINDEXER_CURRENT_LIMIT = 40;
+  public static class SpindexerConstants {
+    public static final int SPINDEXER_MOTOR_ID = 13;
+    public static final int SPINDEXER_CURRENT_LIMIT = 40;
 
-      public static final double kP = 0.0;
-      public static final double kI = 0.0;
-      public static final double kD = 0.0;
+    public static final double kP = 0.0;
+    public static final double kI = 0.0;
+    public static final double kD = 0.0;
   }
 
   public static class ClimbConstants{
@@ -117,7 +132,6 @@ public final class Constants {
     public static final double kP = 0.0;
     public static final double kI = 0.0;
     public static final double kD = 0.0;
-    
   }
 
 

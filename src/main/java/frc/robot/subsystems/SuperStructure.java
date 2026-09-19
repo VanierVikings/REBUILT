@@ -17,12 +17,8 @@ public class SuperStructure extends SubsystemBase {
     public enum LedStates { RED_GR, BLUE_GR, Off }
     public enum ShooterStates { HOME, AIMING, SHOOTING, TEST, IDLE, REZERO, JAM }
     public enum CLimberStates { HOME, EXTENDED, RETRACTED, REZERO, TEST }
-    public enum IntakePivotStates {
-        PIVOT_START_POS, PIVOT_HOME, PIVOT_DEPLOYED, PIVOT_TRAVEL, PIVOT_AGITATING, PIVOT_TEST
-    }
-    public enum IntakeRollerStates {
-        ROLLER_ACTIVE, ROLLER_OFF, ROLLER_SLOW, ROLLER_OUTTAKE, ROLLER_TEST
-    }
+    public enum IntakePivotStates { PIVOT_START_POS, PIVOT_HOME, PIVOT_DEPLOYED, PIVOT_TRAVEL, PIVOT_AGITATING, PIVOT_TEST }
+    public enum IntakeRollerStates { ROLLER_ACTIVE, ROLLER_OFF, ROLLER_SLOW, ROLLER_OUTTAKE, ROLLER_TEST }
     public enum SpindexerStates { FEED, OFF, SLOW, JAM }
     public enum DriveStates { FIELD, AIMING, SOFT }
 
@@ -69,29 +65,31 @@ public class SuperStructure extends SubsystemBase {
 
     private Command coordinatedShotCommand(
             boolean shooting, DoubleSupplier xInput, DoubleSupplier yInput) {
+
         Command readiness = Commands.run(() -> {
-            boolean rawReady = shooter.shooterAtSpeed(FLYWHEEL_TOLERANCE_RPS)
+             boolean rawReady = shooter.shooterAtSpeed(FLYWHEEL_TOLERANCE_RPS)
                 && shooter.hoodAtAngle(HOOD_TOLERANCE_DEGREES)
-                && driveAtHeading();
+                 && driveAtHeading();
             readyToFeed = readyDebouncer.calculate(rawReady);
-            feedEnabled = shooting && readyToFeed;
+
+            feedEnabled = shooting && readyToFeed; 
         }, this);
 
         Command shooterCommand = shooter.runEnd(
             () -> shooter.applyState(
                 shooting ? ShooterStates.SHOOTING : ShooterStates.AIMING,
-                shooting && readyToFeed),
+                feedEnabled),
             shooter::stopAndHome);
 
         Command spindexerCommand = spindexer.runEnd(
             () -> spindexer.applyState(
-                shooting && readyToFeed ? SpindexerStates.FEED : SpindexerStates.OFF),
+                shooting ? SpindexerStates.FEED : SpindexerStates.OFF),
             () -> spindexer.applyState(SpindexerStates.OFF));
 
-        Command alignCommand = drive.SwerveControllerDrive(
-            null, xInput, yInput, this::getTargetHeading, null, true);
+        //Command alignCommand = drive.SwerveControllerDrive(
+           // null, xInput, yInput, this::getTargetHeading, null, true);
 
-        return Commands.parallel(readiness, shooterCommand, spindexerCommand, alignCommand)
+        return Commands.parallel(readiness, shooterCommand, spindexerCommand) // alignCommand
             .beforeStarting(() -> {
                 aimRequested = !shooting;
                 shootRequested = shooting;

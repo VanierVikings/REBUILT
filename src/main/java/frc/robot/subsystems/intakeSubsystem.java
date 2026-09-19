@@ -103,7 +103,7 @@ public class intakeSubsystem extends SubsystemBase {
         pivotConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
         pivotConfig.MotionMagic.MotionMagicCruiseVelocity = 3; 
-        pivotConfig.MotionMagic.MotionMagicAcceleration = 2.3;
+        pivotConfig.MotionMagic.MotionMagicAcceleration = 1.5; // 2.3 before
 
 
         pivotConfig.Slot0.kS = 0.25;

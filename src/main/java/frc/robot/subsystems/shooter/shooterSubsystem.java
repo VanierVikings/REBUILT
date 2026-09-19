@@ -102,7 +102,7 @@ public class shooterSubsystem extends SubsystemBase{
         hoodConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
         hoodConfig.MotionMagic.MotionMagicCruiseVelocity = 1.0;
-        hoodConfig.MotionMagic.MotionMagicAcceleration = 3.0;
+        hoodConfig.MotionMagic.MotionMagicAcceleration = 2.5; //3.0
 
         hoodConfig.Feedback.SensorToMechanismRatio = (4.0*(189.0/8.0)); // 4:1 maxplanetary + 365:30 rack and pinion
         hoodConfig.Slot0.kS = 0.2;
@@ -143,6 +143,7 @@ public class shooterSubsystem extends SubsystemBase{
     public void setShooterRPS(double rps){
         flywheelSetpointRPS = rps;
         shooterLeaderMotor.setControl(m_request.withVelocity(rps));
+        //shooterFollowerMotor.setControl(m_request.withVelocity(rps));
  }
 
     public void setFeederVoltage(double voltage){
@@ -177,6 +178,11 @@ public class shooterSubsystem extends SubsystemBase{
         shooterLeaderMotor.stopMotor();
     }
 
+    public void startFeeder(){
+        feederVoltage = 10;
+        feederMotor.setVoltage(feederVoltage);
+    }
+
     public void stopFeeder(){
         feederVoltage = 0;
         feederMotor.stopMotor();
@@ -209,12 +215,30 @@ public class shooterSubsystem extends SubsystemBase{
     public void applyState(ShooterStates state, boolean feedEnabled) {
         currentState = state;
         switch (state) {
-            case AIMING, SHOOTING -> {
+            case AIMING -> {
+                stopFeeder();
                 var params = shotCalculator.getInstance().getParameters();
-                setHoodAngle(params.hoodAngle());
-                setShooterRPS(params.flywheelSpeed());
-                setFeederVoltage(state == ShooterStates.SHOOTING && feedEnabled ? 7.0 : 0.0);
+                // setHoodAngle(45);
+                // setShooterRPS(35);
+                setHoodAngle(ShooterConstants.actualHoodAngle);
+                setShooterRPS(ShooterConstants.rotationPerSecond);
+                // setHoodAngle(params.hoodAngle());
+                // setShooterRPS(params.flywheelSpeed());
+                //setFeederVoltage(state == ShooterStates.SHOOTING && feedEnabled ? 7.0 : 0.0);
             }
+
+            case SHOOTING -> {
+                startFeeder();
+                var params = shotCalculator.getInstance().getParameters();
+                //setHoodAngle(25);
+                //setShooterRPS(30);
+                setHoodAngle(ShooterConstants.actualHoodAngle);
+                setShooterRPS(ShooterConstants.rotationPerSecond);
+                // setHoodAngle(params.hoodAngle());
+                // setShooterRPS(params.flywheelSpeed());
+                //setFeederVoltage(state == ShooterStates.SHOOTING && feedEnabled ? 7.0 : 0.0);
+            }
+
             case JAM -> {
                 var params = shotCalculator.getInstance().getParameters();
                 setHoodAngle(params.hoodAngle());
@@ -259,6 +283,8 @@ public class shooterSubsystem extends SubsystemBase{
         SmartDashboard.putBoolean("Shooter/HoodAtAngle", hoodAtAngle(2.0));
         SmartDashboard.putNumber("Shooter/FeederVoltage", feederVoltage);
         SmartDashboard.putBoolean("Shooter/HoodZeroAssumed", true);
+        SmartDashboard.putNumber("hooddeg", ShooterConstants.actualHoodAngle);
+        SmartDashboard.putNumber("rps", ShooterConstants.rotationPerSecond);
 
         if ((m_currentDebouncer.calculate(hoodMotor.getStatorCurrent().getValueAsDouble() > 20)&& hoodMotor.getVelocity().getValueAsDouble() < 1)&& currentState == ShooterStates.REZERO){
                 driveHoodVoltage(0);
