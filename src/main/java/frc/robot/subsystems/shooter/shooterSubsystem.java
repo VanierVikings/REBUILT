@@ -155,6 +155,7 @@ public class shooterSubsystem extends SubsystemBase{
         hoodSetpointDegrees = targetDegrees;
         targetDegrees = Units.degreesToRotations(targetDegrees);
         hoodMotor.setControl(m_motionMagic.withPosition(targetDegrees));
+        
     }
 
     public void driveHoodVoltage(double voltage){
@@ -283,8 +284,6 @@ public class shooterSubsystem extends SubsystemBase{
         SmartDashboard.putBoolean("Shooter/HoodAtAngle", hoodAtAngle(2.0));
         SmartDashboard.putNumber("Shooter/FeederVoltage", feederVoltage);
         SmartDashboard.putBoolean("Shooter/HoodZeroAssumed", true);
-        SmartDashboard.putNumber("hooddeg", ShooterConstants.actualHoodAngle);
-        SmartDashboard.putNumber("rps", ShooterConstants.rotationPerSecond);
 
         if ((m_currentDebouncer.calculate(hoodMotor.getStatorCurrent().getValueAsDouble() > 20)&& hoodMotor.getVelocity().getValueAsDouble() < 1)&& currentState == ShooterStates.REZERO){
                 driveHoodVoltage(0);
