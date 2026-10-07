@@ -86,10 +86,13 @@ public class SuperStructure extends SubsystemBase {
                 shooting ? SpindexerStates.FEED : SpindexerStates.OFF),
             () -> spindexer.applyState(SpindexerStates.OFF));
 
-        //Command alignCommand = drive.SwerveControllerDrive(
-           // null, xInput, yInput, this::getTargetHeading, null, true);
+        // Command alignCommand = drive.SwerveControllerDrive(
+        //     null, xInput, yInput, this::getTargetHeading, null, true);
 
-        return Commands.parallel(readiness, shooterCommand, spindexerCommand) // alignCommand
+        //Command alignCommand = driveAtHeading() ? drive.SwerveControllerDrive(
+             //null, xInput, yInput, this::getTargetHeading, null, true) : Commands.none();
+
+        return Commands.parallel(readiness, shooterCommand, spindexerCommand) //, alignCommand)
             .beforeStarting(() -> {
                 aimRequested = !shooting;
                 shootRequested = shooting;

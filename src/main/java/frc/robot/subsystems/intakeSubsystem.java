@@ -248,7 +248,6 @@ public class intakeSubsystem extends SubsystemBase {
         return runOnce(() -> applyRollerState(state));
     }
 
-
     public Command setPivotState(SuperStructure.IntakePivotStates state){
         return runOnce(() -> applyPivotState(state));
     }
@@ -269,6 +268,5 @@ public class intakeSubsystem extends SubsystemBase {
             rollerSetpointRPM * IntakeConstants.rollerGearReduction, 12.0, 0.02);
         simulatedRollerRPM = rollerSetpointRPM;
     }
-    
 
 }

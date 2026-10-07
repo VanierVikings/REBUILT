@@ -282,7 +282,14 @@ public class shooterSubsystem extends SubsystemBase{
         SmartDashboard.putNumber("Shooter/HoodSetpointDeg", hoodSetpointDegrees);
         SmartDashboard.putNumber("Shooter/HoodActualDeg", getHoodDegrees());
         SmartDashboard.putBoolean("Shooter/HoodAtAngle", hoodAtAngle(2.0));
+
+        SmartDashboard.putNumber("Shooter/VoltageIntoFeeder", feederMotor.getBusVoltage()); // The voltage fed into the motor controller.
         SmartDashboard.putNumber("Shooter/FeederVoltage", feederVoltage);
+        SmartDashboard.putNumber("Shooter/FeederAppliedOutput", feederMotor.getAppliedOutput()); // The motor controller's applied output duty cycle. percetange of power
+        SmartDashboard.putNumber("Shooter/FeederOutputCurrent", feederMotor.getOutputCurrent()); // The motor controller's output current in Amps.
+        SmartDashboard.putNumber("Shooter/FeederMotorID", feederMotor.getDeviceId());
+
+
         SmartDashboard.putBoolean("Shooter/HoodZeroAssumed", true);
 
         if ((m_currentDebouncer.calculate(hoodMotor.getStatorCurrent().getValueAsDouble() > 20)&& hoodMotor.getVelocity().getValueAsDouble() < 1)&& currentState == ShooterStates.REZERO){
@@ -291,8 +298,6 @@ public class shooterSubsystem extends SubsystemBase{
                 setSoftLimits(false);
                 this.currentState = ShooterStates.IDLE;
             }
-        
-
     }
 
     //STEM Orientation op controls
