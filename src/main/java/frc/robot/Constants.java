@@ -5,6 +5,9 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import com.pathplanner.lib.config.PIDConstants;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -13,11 +16,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
-// import frc.robot.subsystems.shooter.shooterSubsystem;
-import edu.wpi.first.units.Unit;
-
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -34,7 +32,6 @@ public final class Constants {
   public static void disableHAL() {
     disableHAL = true;
   }
-
 
   public static class SwerveConstants{
     public static final double maxSpeed = Units.feetToMeters(10); 
@@ -67,23 +64,41 @@ public final class Constants {
     public static final double kHoodI = 0.0;
     public static final double kHoodD = 0.0;
 
-    public static final double deltaY = 1.50; // m, 100 inch // 2.54
-    public static final double deltaX = 4.57; // m, 15 feet
+    // public static final double deltaY = 1.50; // 2.54; // m, 100 inch
+    // public static final double deltaX = 4.57; // m, 15 feet
+    // public static final double deltaTime = 3.0; // s
+    // public static final double gravity = -9.8; // m/s^2
+    // public static final double groundToHoodAngle = 2; // degrees
+    // public static final double adjustmentFactor = 0.045; // Used to adjust the rps, since the formula didn't consider the other motors' velocities
+    // // public static final double fuelMass = 0.227; // kg
+
+    // // The calculation is ignoring friction and air resistance
+    // public static final double velocityX = deltaX / deltaTime;
+    // public static final double velocityY = deltaY - 0.5 * gravity * Math.pow(deltaTime, 2.0);
+    // public static final double velocity = Math.sqrt(Math.pow(velocityX, 2.0) + Math.pow(velocityY, 2.0)); 
+    // public static final double phetaAngle = 0.14; // Setting to constant as the hoodmotor's built-in encoder is inaccurate; Original: Math.acos(velocityX / velocity); // rad 
+    // public static final double actualHoodAngle = Math.toDegrees(phetaAngle) - groundToHoodAngle;
+
+    // public static final double flywheelRadius = 0.05; // m, 3.97 inch diameter
+    // public static final double rotationPerSecond = velocity / flywheelRadius * adjustmentFactor;
+
+    //FIX
+    public static final double flywheelDiameter = 0.1; // m, 3.97 inch diameter
+    public static final double gravity = -9.8; // m/s^2
+    public static final double groundToHoodAngle = 2.0; // degrees
+    public static final double hoodAngle = 6.5 + groundToHoodAngle; // degrees
+    public static final double phetaAngle = 90 - hoodAngle; // As hood angle increase, trajectory lowers
+    public static final double initialVelocity = 49.0; // m/s^2
     public static final double deltaTime = 3.0; // s
-    public static final double gravity = -9.8; // m /s^2
-    public static final double groundToHoodAngle = 2; // degrees
-    public static final double adjustmentFactor = 0.045; // used to adjust the rps, since the formula didn't consider the other motors' velocities
-    // public final static double fuelMass = 0.227; // kg
+    // public static final double fuelMass = 0.227; // kg
+    // public static final double adjustmentFactor = 0.045; // Used to adjust the rps, since the formula didn't consider the other motors' velocities
 
     // The calculation is ignoring friction and air resistance
-    public static final double velocityX = deltaX / deltaTime;
-    public static final double velocityY = deltaY - 0.5 * gravity * Math.pow(deltaTime, 2.0);
-    public static final double velocity = Math.sqrt(Math.pow(velocityX, 2.0) + Math.pow(velocityY, 2.0));
-    public static final double phetaAngle = Math.acos(velocityX / velocity);
-    public static final double actualHoodAngle = Math.toDegrees(phetaAngle) + groundToHoodAngle;
-
-    public static final double flywheelRadius = 0.05; // m, 3.97 inch diameter
-    public static final double rotationPerSecond = velocity / flywheelRadius * adjustmentFactor;
+    public static final double initialVelocityX = initialVelocity * Math.toDegrees(Math.cos(phetaAngle)); // m/s
+    public static final double initialVelocityY = initialVelocity * Math.toDegrees(Math.sin(phetaAngle)); // m/s
+    public static final double deltaX = initialVelocityX * deltaTime; // m, 4.57m/15ft is half of the field
+    public static final double deltaY = initialVelocityY * deltaTime + 0.5 * gravity * Math.pow(deltaTime, 2.0); // m, 2.54m/100in is a bit taller than the hub
+    public static final double rotationPerSecond = initialVelocity / (Math.PI * flywheelDiameter);
 
     public static final int SHOOTER_CURRENT_LIMIT = 40; //amps;
     public static final int HOOD_CURRENT_LIMIT = 40; //made this up
@@ -92,7 +107,6 @@ public final class Constants {
     public static final int minDistance = 10;
 
     public static final int degreesPerRotation = 365/30*360; //no clue how to do this, probabaly wrong
-
   }
 
   public static class IntakeConstants{
@@ -116,8 +130,6 @@ public final class Constants {
     public static final double deployedAngle = -71;
     public static final double startingPosAngle = 145;
   }
-
-
 
   public static class SpindexerConstants {
     public static final int SPINDEXER_MOTOR_ID = 13;

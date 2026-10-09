@@ -1,8 +1,5 @@
 package frc.robot.subsystems.shooter;
 
-
-import java.lang.reflect.Parameter;
-
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
@@ -14,24 +11,22 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
-import com.revrobotics.spark.SparkMax;
+import com.revrobotics.sim.SparkMaxSim;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ShooterConstants;
-import frc.robot.subsystems.SuperStructure.ShooterStates;
 import frc.robot.subsystems.SuperStructure;
-import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj2.command.Command;
-import com.revrobotics.sim.SparkMaxSim;
-import edu.wpi.first.math.system.plant.DCMotor;
-
-
+import frc.robot.subsystems.SuperStructure.ShooterStates;
 
 public class shooterSubsystem extends SubsystemBase{
     public final TalonFX shooterLeaderMotor;
@@ -74,6 +69,7 @@ public class shooterSubsystem extends SubsystemBase{
         feederMotor = new SparkMax(ShooterConstants.feederMotorID, MotorType.kBrushless);
         feederMotorSim = new SparkMaxSim(feederMotor, DCMotor.getNEO(1));
 
+
         /* FLYWHEEL CONFIGS */
         flywheelConfig = new TalonFXConfiguration();
         flywheelConfig.CurrentLimits.StatorCurrentLimitEnable = true;
@@ -93,12 +89,10 @@ public class shooterSubsystem extends SubsystemBase{
         shooterFollowerMotor.setControl(new Follower(ShooterConstants.shooterLeaderMotor, MotorAlignmentValue.Opposed));
 
 
-
-
         /* HOOD CONFIGS */
         hoodConfig = new TalonFXConfiguration();
 
-        hoodConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        hoodConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         hoodConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
         hoodConfig.MotionMagic.MotionMagicCruiseVelocity = 1.0;
@@ -115,14 +109,9 @@ public class shooterSubsystem extends SubsystemBase{
         hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0.0; // 0 degrees
         hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
-
         hoodMotor.getConfigurator().apply(hoodConfig);
         hoodMotor.setPosition(0);
     
-        // //limit stuff
-        
-
-
 
         /* FEEDER CONFIGS */
         feederConfig = new SparkMaxConfig();
@@ -154,8 +143,7 @@ public class shooterSubsystem extends SubsystemBase{
     public void setHoodAngle(double targetDegrees){
         hoodSetpointDegrees = targetDegrees;
         targetDegrees = Units.degreesToRotations(targetDegrees);
-        hoodMotor.setControl(m_motionMagic.withPosition(targetDegrees));
-        
+        hoodMotor.setControl(m_motionMagic.withPosition(targetDegrees));  
     }
 
     public void driveHoodVoltage(double voltage){
@@ -171,8 +159,8 @@ public class shooterSubsystem extends SubsystemBase{
     }
 
     public void resetHoodEncoder(){
-            hoodMotor.setPosition(0);
-        }
+        hoodMotor.setPosition(0);
+    }
 
     public void stopShooterMotors(){
         flywheelSetpointRPS = 0;
@@ -197,21 +185,23 @@ public class shooterSubsystem extends SubsystemBase{
         return Math.abs(flywheelSetpointRPS - getFlywheelRPS()) <= tolerance;
     }
 
-    public boolean hoodAtAngle(double toleranceDegrees) {
+    public boolean hoodAtAngle(double toleranceDegrees){
         return Math.abs(hoodSetpointDegrees - getHoodDegrees()) <= toleranceDegrees;
     }
 
-    public double getFlywheelRPS() {
+    public double getFlywheelRPS(){
         return RobotBase.isSimulation() ? simulatedFlywheelRPS
             : shooterLeaderMotor.getVelocity().getValueAsDouble();
     }
 
-    public double getHoodDegrees() {
+    public double getHoodDegrees(){
         return RobotBase.isSimulation() ? simulatedHoodDegrees
             : hoodMotor.getPosition().getValueAsDouble() * 360.0;
     }
 
-    public double getFeederVoltage() { return feederVoltage; }
+    public double getFeederVoltage(){
+        return feederVoltage; 
+    }
 
     public void applyState(ShooterStates state, boolean feedEnabled) {
         currentState = state;
@@ -221,7 +211,7 @@ public class shooterSubsystem extends SubsystemBase{
                 var params = shotCalculator.getInstance().getParameters();
                 // setHoodAngle(45);
                 // setShooterRPS(35);
-                setHoodAngle(ShooterConstants.actualHoodAngle);
+                setHoodAngle(ShooterConstants.hoodAngle);
                 setShooterRPS(ShooterConstants.rotationPerSecond);
                 // setHoodAngle(params.hoodAngle());
                 // setShooterRPS(params.flywheelSpeed());
@@ -233,7 +223,7 @@ public class shooterSubsystem extends SubsystemBase{
                 var params = shotCalculator.getInstance().getParameters();
                 //setHoodAngle(25);
                 //setShooterRPS(30);
-                setHoodAngle(ShooterConstants.actualHoodAngle);
+                setHoodAngle(ShooterConstants.hoodAngle);
                 setShooterRPS(ShooterConstants.rotationPerSecond);
                 // setHoodAngle(params.hoodAngle());
                 // setShooterRPS(params.flywheelSpeed());
@@ -246,6 +236,7 @@ public class shooterSubsystem extends SubsystemBase{
                 setShooterRPS(params.flywheelSpeed());
                 setFeederVoltage(-7.0);
             }
+
             case TEST -> {
                 inputRPS = SmartDashboard.getNumber("Shooter Inputs/Input Shooter RPS", inputRPS);
                 inputAngle = SmartDashboard.getNumber("Shooter Inputs/Input Hood Angle", inputAngle);
@@ -254,11 +245,13 @@ public class shooterSubsystem extends SubsystemBase{
                 setHoodAngle(inputAngle);
                 setFeederVoltage(feederOn ? 10.0 : 0.0);
             }
+
             case REZERO -> {
                 m_currentDebouncer.calculate(false);
                 driveHoodVoltage(-2);
                 setSoftLimits(false);
             }
+            
             default -> stopAndHome();
         }
     }
@@ -279,25 +272,31 @@ public class shooterSubsystem extends SubsystemBase{
         SmartDashboard.putNumber("Shooter/FlywheelActualRPS", actualRPS);
         SmartDashboard.putNumber("Shooter/FlywheelErrorRPS", flywheelSetpointRPS - actualRPS);
         SmartDashboard.putBoolean("Shooter/FlywheelAtSpeed", shooterAtSpeed(2.0));
+
+        SmartDashboard.putNumber("Shooter/FlywheelHorizontalDisplacement", ShooterConstants.deltaX);
+        SmartDashboard.putNumber("Shooter/FlywheelVerticalDisplacement", ShooterConstants.deltaY);
+        SmartDashboard.putNumber("Shooter/FlywheelRPS", ShooterConstants.rotationPerSecond);
+
         SmartDashboard.putNumber("Shooter/HoodSetpointDeg", hoodSetpointDegrees);
         SmartDashboard.putNumber("Shooter/HoodActualDeg", getHoodDegrees());
         SmartDashboard.putBoolean("Shooter/HoodAtAngle", hoodAtAngle(2.0));
+        SmartDashboard.putNumber("Shooter/HoodMotorSpeed", hoodMotor.get());
+        SmartDashboard.putNumber("Shooter/HoodMotorCurrent", hoodMotor.getTorqueCurrent().getValueAsDouble());
+        SmartDashboard.putNumber("Shooter/HoodMotorVoltage", hoodMotor.getMotorVoltage().getValueAsDouble());
 
-        SmartDashboard.putNumber("Shooter/VoltageIntoFeeder", feederMotor.getBusVoltage()); // The voltage fed into the motor controller.
-        SmartDashboard.putNumber("Shooter/FeederVoltage", feederVoltage);
-        SmartDashboard.putNumber("Shooter/FeederAppliedOutput", feederMotor.getAppliedOutput()); // The motor controller's applied output duty cycle. percetange of power
-        SmartDashboard.putNumber("Shooter/FeederOutputCurrent", feederMotor.getOutputCurrent()); // The motor controller's output current in Amps.
-        SmartDashboard.putNumber("Shooter/FeederMotorID", feederMotor.getDeviceId());
-
+        SmartDashboard.putNumber("Shooter/VoltageIntoFeeder", feederMotor.getBusVoltage()); // The voltage fed into the feeder motor controller.
+        SmartDashboard.putNumber("Shooter/FeederVoltage", feederVoltage); // The voltage set to the feeder motor
+        SmartDashboard.putNumber("Shooter/FeederAppliedOutput", feederMotor.getAppliedOutput()); // The feeder motor controller's applied output duty cycle. Represents the percentage of the power.
+        SmartDashboard.putNumber("Shooter/FeederOutputCurrent", feederMotor.getOutputCurrent()); // The feeder motor controller's output current in Amps.
 
         SmartDashboard.putBoolean("Shooter/HoodZeroAssumed", true);
 
         if ((m_currentDebouncer.calculate(hoodMotor.getStatorCurrent().getValueAsDouble() > 20)&& hoodMotor.getVelocity().getValueAsDouble() < 1)&& currentState == ShooterStates.REZERO){
-                driveHoodVoltage(0);
-                resetHoodEncoder();
-                setSoftLimits(false);
-                this.currentState = ShooterStates.IDLE;
-            }
+            driveHoodVoltage(0);
+            resetHoodEncoder();
+            setSoftLimits(false);
+            this.currentState = ShooterStates.IDLE;
+        }
     }
 
     //STEM Orientation op controls
@@ -313,7 +312,6 @@ public class shooterSubsystem extends SubsystemBase{
         return this.run(()-> setHoodAngle(30));
     }
 
-    
 
     public Command runFeeder(){
         return this.runEnd(()->setFeederVoltage(10), ()->stopFeeder());
@@ -335,7 +333,6 @@ public class shooterSubsystem extends SubsystemBase{
         }
     );
     }
-
 
     public Command setState(SuperStructure.ShooterStates state){
         return runEnd(() -> applyState(state, state == ShooterStates.SHOOTING), this::stopAndHome);
