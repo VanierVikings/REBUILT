@@ -67,8 +67,8 @@ public final class Constants {
     public static final double kHoodI = 0.0;
     public static final double kHoodD = 0.0;
 
-    public static final double deltaY = 2.54; // m, 100 inch
-    public static final double deltaX = 4.57; // m, 15 feet // 4.57
+    public static final double deltaY = 1.50; // m, 100 inch // 2.54
+    public static final double deltaX = 4.57; // m, 15 feet
     public static final double deltaTime = 3.0; // s
     public static final double gravity = -9.8; // m /s^2
     public static final double groundToHoodAngle = 2; // degrees
@@ -112,8 +112,8 @@ public final class Constants {
     public static final double rollerSlow = 300.0;
     public static final double rollerOutake = -1000.0;
 
-    public static final double homeAngle = 224; // 120, 222 at 8:46 pm found by //132 8am found by gogua
-    public static final double deployedAngle = 113; //2, 34, 222 at 8:46 pm found by Rushanthan //-13 8am by gogula
+    public static final double homeAngle = 58;
+    public static final double deployedAngle = -71;
     public static final double startingPosAngle = 145;
   }
 

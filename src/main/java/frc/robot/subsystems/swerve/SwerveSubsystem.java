@@ -615,7 +615,7 @@ public Command SwerveControllerDrive(
             rotSupplier, 
             vR,
             null,
-            false
+            false // true is better so angular velocity is clamped?
         );      
         
         ChassisSpeeds desiredSpeeds = new ChassisSpeeds(
