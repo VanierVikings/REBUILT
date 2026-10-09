@@ -67,11 +67,6 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-
-
-
-
-
 public class SwerveSubsystem extends SubsystemBase {
 
 //SwerveDrive object
@@ -106,10 +101,6 @@ public class SwerveSubsystem extends SubsystemBase {
   private double rotationReleaseStartTime = -1.0;
   private Pose2d currentPose;
 
-
-
-
-
   
   public SwerveSubsystem(File directory) {
     
@@ -133,9 +124,9 @@ public class SwerveSubsystem extends SubsystemBase {
 
     swerveDrive.setCosineCompensator(true);// Disables cosine compensation for simulations since it causes discrepancies not seen in real life.
 
-     swerveDrive.setAngularVelocityCompensation(true, false, 0.1);// Correct for skew that gets worse as angular velocity increases. Start with a coefficient of 0.1.
+    swerveDrive.setAngularVelocityCompensation(true, false, 0.1);// Correct for skew that gets worse as angular velocity increases. Start with a coefficient of 0.1.
 
-     swerveDrive.setModuleEncoderAutoSynchronize(true,1); // Enable if you want to resynchronize your absolute encoders and motor encoders periodically when they are not moving.
+    swerveDrive.setModuleEncoderAutoSynchronize(true,1); // Enable if you want to resynchronize your absolute encoders and motor encoders periodically when they are not moving.
 
 
      //Stop odometry thread if using vision -> can synchronize updates better
