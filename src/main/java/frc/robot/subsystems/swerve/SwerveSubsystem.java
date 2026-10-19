@@ -167,6 +167,8 @@ public class SwerveSubsystem extends SubsystemBase {
     // if (visionEnabled){
     //   updateVision();
     // }
+
+    SmartDashboard.putBoolean("Swerve/isRedAliance", isRedAlliance());
   }
 
     @Override
@@ -607,7 +609,7 @@ public Command SwerveControllerDrive(
             vR,
             null,
             false // true is better so angular velocity is clamped?
-        );      
+        );
         
         ChassisSpeeds desiredSpeeds = new ChassisSpeeds(
             speeds.vx(), 

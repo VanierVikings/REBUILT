@@ -109,7 +109,7 @@ public class intakeSubsystem extends SubsystemBase {
         pivotConfig.Slot0.kS = 0.25;
         pivotConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
         pivotConfig.Slot0.kV = (0.12*(4.0*5.0*(42.0/36.0)*(32.0/14.0)));
-        pivotConfig.Slot0.kP = 60;
+        pivotConfig.Slot0.kP = 60; // 60
         // pivotConfig.Slot0.kG = 0.35; 
         //  pivotConfig.Slot0.kD = 0;
 

@@ -211,10 +211,10 @@ public class shooterSubsystem extends SubsystemBase{
                 var params = shotCalculator.getInstance().getParameters();
                 // setHoodAngle(45);
                 // setShooterRPS(35);
-                setHoodAngle(ShooterConstants.hoodAngle);
-                setShooterRPS(ShooterConstants.rotationPerSecond);
-                // setHoodAngle(params.hoodAngle());
-                // setShooterRPS(params.flywheelSpeed());
+                //setHoodAngle(ShooterConstants.finalHoodAngle);
+                //setShooterRPS(ShooterConstants.rotationPerSecond);
+                setHoodAngle(params.hoodAngle());
+                setShooterRPS(params.flywheelSpeed());
                 //setFeederVoltage(state == ShooterStates.SHOOTING && feedEnabled ? 7.0 : 0.0);
             }
 
@@ -223,10 +223,10 @@ public class shooterSubsystem extends SubsystemBase{
                 var params = shotCalculator.getInstance().getParameters();
                 //setHoodAngle(25);
                 //setShooterRPS(30);
-                setHoodAngle(ShooterConstants.hoodAngle);
-                setShooterRPS(ShooterConstants.rotationPerSecond);
-                // setHoodAngle(params.hoodAngle());
-                // setShooterRPS(params.flywheelSpeed());
+                //setHoodAngle(ShooterConstants.finalHoodAngle);
+                //setShooterRPS(ShooterConstants.rotationPerSecond);
+                setHoodAngle(params.hoodAngle());
+                setShooterRPS(params.flywheelSpeed());
                 //setFeederVoltage(state == ShooterStates.SHOOTING && feedEnabled ? 7.0 : 0.0);
             }
 
@@ -268,14 +268,20 @@ public class shooterSubsystem extends SubsystemBase{
         //Current Values
         double actualRPS = getFlywheelRPS();
         SmartDashboard.putString("Shooter/RequestedState", currentState.toString());
+
+        SmartDashboard.putNumber("Shooter/LaunchAngle", ShooterConstants.launchAngle);
+        SmartDashboard.putNumber("Shooter/FinalHoodAngle", ShooterConstants.finalHoodAngle);
+        SmartDashboard.putNumber("Shooter/TrajectoryRange", ShooterConstants.range);
+        SmartDashboard.putNumber("Shooter/TrajectoryMaxHeight", ShooterConstants.maxHeight);
+        SmartDashboard.putNumber("Shooter/TrajectoryTime", ShooterConstants.deltaTime);
+
+        SmartDashboard.putNumber("Shooter/InitialVelocity", ShooterConstants.initialVelocity);
+
+        SmartDashboard.putNumber("Shooter/FlywheelRPS", ShooterConstants.rotationPerSecond);
         SmartDashboard.putNumber("Shooter/FlywheelSetpointRPS", flywheelSetpointRPS);
         SmartDashboard.putNumber("Shooter/FlywheelActualRPS", actualRPS);
         SmartDashboard.putNumber("Shooter/FlywheelErrorRPS", flywheelSetpointRPS - actualRPS);
         SmartDashboard.putBoolean("Shooter/FlywheelAtSpeed", shooterAtSpeed(2.0));
-
-        SmartDashboard.putNumber("Shooter/FlywheelHorizontalDisplacement", ShooterConstants.deltaX);
-        SmartDashboard.putNumber("Shooter/FlywheelVerticalDisplacement", ShooterConstants.deltaY);
-        SmartDashboard.putNumber("Shooter/FlywheelRPS", ShooterConstants.rotationPerSecond);
 
         SmartDashboard.putNumber("Shooter/HoodSetpointDeg", hoodSetpointDegrees);
         SmartDashboard.putNumber("Shooter/HoodActualDeg", getHoodDegrees());
