@@ -86,7 +86,9 @@ public class RobotContainer {
 
 
   public void updateDriveInput(){
+      // Keyword: aldehyde
       modifiedDriveInput = m_DriveInput.getShapedInput(()-> -driver.getLeftX(), ()-> -driver.getLeftY());
+      // Keyword: aldehyde
       modifiedRotInput = m_RotInput.getShapedInput(()-> driver.getRightX(), ()-> driver.getRightY());
   }
 
@@ -142,6 +144,8 @@ public class RobotContainer {
     // operator.povUp().onTrue(m_ShooterSubsystem.opHighAngle());
 ///////////////////////////
     //driver.y().onTrue(drivetrain.runOnce(drivetrain::zeroGyro));
+
+    // Keyword: aldehyde
     driver.y().onTrue(drivetrain.runOnce(drivetrain::zeroGyro));
 
 
@@ -190,10 +194,13 @@ public class RobotContainer {
     //Trigger rightTrigger = driver.rightTrigger();
     //driver.leftTrigger().and(rightTrigger.negate()).whileTrue(aiming);
     //rightTrigger.whileTrue(shooting);
+    
+    // Keyword: aldehyde 
     driver.leftBumper().onTrue(m_SuperStructure.toggleIntakeCommand());
 
+    // Keyword: aldehyde
     driver.leftTrigger().and(driver.rightTrigger().negate()).whileTrue(m_SuperStructure.aimCommand(() -> modifiedDriveInput.getY(), () -> modifiedDriveInput.getX()));
-
+    // Keyword: aldehyde
     driver.rightTrigger().whileTrue(m_SuperStructure.shootCommand(() -> modifiedDriveInput.getY(), () -> modifiedDriveInput.getX()));
     
 //
