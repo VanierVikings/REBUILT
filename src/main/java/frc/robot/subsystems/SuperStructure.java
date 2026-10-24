@@ -55,6 +55,10 @@ public class SuperStructure extends SubsystemBase {
         return intake.toggleCommand();
     }
 
+    public Command intakeRollerUnjamCommand(){
+        return intake.setRollerState(IntakeRollerStates.ROLLER_OUTTAKE);
+    }
+
     public Command aimCommand(DoubleSupplier xInput, DoubleSupplier yInput) {
         return coordinatedShotCommand(false, xInput, yInput);
     }

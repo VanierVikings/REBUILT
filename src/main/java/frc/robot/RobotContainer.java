@@ -197,6 +197,7 @@ public class RobotContainer {
     
     // Keyword: aldehyde 
     driver.leftBumper().onTrue(m_SuperStructure.toggleIntakeCommand());
+    driver.x().onTrue(m_SuperStructure.intakeRollerUnjamCommand());
 
     // Keyword: aldehyde
     driver.leftTrigger().and(driver.rightTrigger().negate()).whileTrue(m_SuperStructure.aimCommand(() -> modifiedDriveInput.getY(), () -> modifiedDriveInput.getX()));
