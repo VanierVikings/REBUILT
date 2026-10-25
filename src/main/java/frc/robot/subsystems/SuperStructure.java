@@ -24,7 +24,7 @@ public class SuperStructure extends SubsystemBase {
 
     public static final double FLYWHEEL_TOLERANCE_RPS = 2.0;
     public static final double HOOD_TOLERANCE_DEGREES = 2.0;
-    public static final double HEADING_TOLERANCE_DEGREES = 1.0; // 3.0
+    public static final double HEADING_TOLERANCE_DEGREES = 30.0;
     private static final double READY_DEBOUNCE_SECONDS = 0.100;
 
     private final shooterSubsystem shooter;
@@ -53,6 +53,10 @@ public class SuperStructure extends SubsystemBase {
 
     public Command toggleIntakeCommand() {
         return intake.toggleCommand();
+    }
+
+    public Command intakeRollerUnjamCommand(){
+        return intake.setRollerState(IntakeRollerStates.ROLLER_OUTTAKE);
     }
 
     public Command aimCommand(DoubleSupplier xInput, DoubleSupplier yInput) {

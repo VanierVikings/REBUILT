@@ -104,6 +104,8 @@ public class RobotContainer {
     // rightTrigger.whileTrue(shooting);
     
     driver.leftBumper().onTrue(m_SuperStructure.toggleIntakeCommand());
+    driver.x().onTrue(m_SuperStructure.intakeRollerUnjamCommand());
+
     driver.leftTrigger().and(driver.rightTrigger().negate()).whileTrue(m_SuperStructure.aimCommand(() -> modifiedDriveInput.getY(), () -> modifiedDriveInput.getX()));
     driver.rightTrigger().whileTrue(m_SuperStructure.shootCommand(() -> modifiedDriveInput.getY(), () -> modifiedDriveInput.getX()));
 
