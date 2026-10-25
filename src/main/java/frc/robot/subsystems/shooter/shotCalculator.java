@@ -171,7 +171,7 @@ import frc.robot.subsystems.swerve.SwerveSubsystem;
         SmartDashboard.putNumber("Shot Calculator/Actual robot Heading", (drive.getPose().getRotation().getDegrees()));
     }
 
-    public ShootParameters getParameters() {
+    public ShootParameters getParameters() {    
         if (latestParameters != null) return latestParameters;
 
         Pose2d currentPose = drive.getPose();
@@ -210,6 +210,8 @@ import frc.robot.subsystems.swerve.SwerveSubsystem;
             currentShotFlywheelSpeedMap = shotFlywheelSpeedMap;
             currentTimeOfFlightMap = timeOfFlightMap;
         }
+        // this seems like the right thing, unlocking it from the ifelse above
+        // targetPose = isRed ? Constants.fieldPoses.redAllianceHub : Constants.fieldPoses.blueAllianceHub;
         shooterPublisher.set(targetPose);
         // If the robot is rotating, the shooter (being offset from center) has extra velocity
         double robotRotation = extrapolatedPose.getRotation().getRadians();
@@ -237,7 +239,8 @@ import frc.robot.subsystems.swerve.SwerveSubsystem;
             double virtualDistance = virtualTarget.getDistance(shooterPosition.getTranslation()) + ShooterConstants.hubOffset;
             predictedTOF = currentTimeOfFlightMap.get(virtualDistance);
         }
-
+        // // and this
+        // virtualTarget = targetPose.getTranslation(); 
         double lookaheadDistance = virtualTarget.getDistance(shooterPosition.getTranslation()) + ShooterConstants.hubOffset;
 
         // 5. LOOKUP & FILTERING

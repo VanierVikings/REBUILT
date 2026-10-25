@@ -4,51 +4,28 @@
 
 package frc.robot;
 
-import frc.AlectronaLib.SwerveDriveInput;
-import frc.robot.Constants.DriveConstants;
-import frc.robot.Constants.IntakeConstants;
-import frc.robot.commands.Autos;
-import frc.robot.commands.ExampleCommand;
-import frc.robot.subsystems.spindexerSubsystem;
-import frc.robot.subsystems.SuperStructure;
-import frc.robot.subsystems.intakeSubsystem;
-import frc.robot.subsystems.SuperStructure.DriveStates;
-import frc.robot.subsystems.SuperStructure.IntakePivotStates;
-import frc.robot.subsystems.SuperStructure.IntakeRollerStates;
-import frc.robot.subsystems.SuperStructure.ShooterStates;
-import frc.robot.subsystems.SuperStructure.SpindexerStates;
-import frc.robot.subsystems.shooter.shooterSubsystem;
-import frc.robot.subsystems.swerve.SwerveSubsystem;
-import frc.robot.subsystems.shooter.shotCalculator;
-
-
 import java.io.File;
-import java.util.Set;
 
-import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.fasterxml.jackson.annotation.JsonFormat.Feature;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
 
-import choreo.auto.AutoChooser;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RepeatCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-
+import frc.AlectronaLib.SwerveDriveInput;
+import frc.robot.Constants.DriveConstants;
+import frc.robot.subsystems.SuperStructure;
+import frc.robot.subsystems.intakeSubsystem;
+import frc.robot.subsystems.spindexerSubsystem;
+import frc.robot.subsystems.shooter.shooterSubsystem;
+import frc.robot.subsystems.shooter.shotCalculator;
+import frc.robot.subsystems.swerve.SwerveSubsystem;
 import swervelib.SwerveInputStream;
 // import swervelib.SwerveController;
 
@@ -68,32 +45,24 @@ public class RobotContainer {
 
   private final SuperStructure m_SuperStructure = new SuperStructure(m_ShooterSubsystem,m_spindexer,m_intake,drivetrain);
   
-  
-
   private final SendableChooser<Command> autoChooser;
    
   // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final CommandXboxController driver =
-      new CommandXboxController(DriveConstants.DriverPort);
-    private final CommandXboxController operator = new CommandXboxController(1);
+  private final CommandXboxController driver = new CommandXboxController(DriveConstants.DriverPort);
+  private final CommandXboxController operator = new CommandXboxController(1);
 
   private SwerveDriveInput m_DriveInput = new SwerveDriveInput();
   private SwerveDriveInput m_RotInput = new SwerveDriveInput();
 
   private Translation2d modifiedDriveInput = new Translation2d(0,0);
   private Translation2d modifiedRotInput = new Translation2d(0,0);
-  private boolean enterXLock = false;
-
 
   public void updateDriveInput(){
-      // Keyword: aldehyde
       modifiedDriveInput = m_DriveInput.getShapedInput(()-> -driver.getLeftX(), ()-> -driver.getLeftY());
-      // Keyword: aldehyde
       modifiedRotInput = m_RotInput.getShapedInput(()-> driver.getRightX(), ()-> driver.getRightY());
   }
 
-
-  //Cnvert driver input into field-relative ChassisSpeeds - controlled by angular velocity
+  // Convert driver input into field-relative ChassisSpeeds - controlled by angular velocity
     SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivetrain.getSwerveDrive(),
             () -> modifiedDriveInput.getY(), // (-) is blue alliance
             () -> modifiedDriveInput.getX()) // (-) is blue alliance
@@ -102,7 +71,6 @@ public class RobotContainer {
             .scaleTranslation(0.8)           // Scaled controller translation axis
             .allianceRelativeControl(true);  // Alliance relative controls.
  
-
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // NamedCommands.registerCommand("aimAndSpinup", m_SuperStructure.aimingCommand(ShooterStates.AIMING, SpindexerStates.OFF, DriveStates.AIMING));
@@ -110,9 +78,8 @@ public class RobotContainer {
 
     // Configure the trigger bindings
     configureBindings();
-    
     autoChooser = AutoBuilder.buildAutoChooser();
-
+    SmartDashboard.putData("Auto Choices", autoChooser);
   }
 
   
@@ -128,105 +95,25 @@ public class RobotContainer {
   private void configureBindings() {
     Command driveFieldOrientedAnglularVelocity = drivetrain.driveFieldOriented(driveAngularVelocity);
 
-
-
-    // driver.leftBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.TEST).alongWith(m_spindexer.setState(SpindexerStates.FEED)));
-    // driver.leftBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.SHOOTING).alongWith(m_spindexer.setState(SpindexerStates.FEED)));
-      // driver.a().onTrue(drivetrain.run(()-> drivetrain.setInverted()));
-    // driver.rightTrigger().whileTrue(m_ShooterSubsystem.setState(ShooterStates.TEST).alongWith(m_spindexer.setState(SpindexerStates.FEED)));
-    /////////////////
-    /// TEMPORASRY TURN ON LATER
-    //driver.leftBumper().onTrue(m_intake.setPivotState(IntakePivotStates.PIVOT_TEST));
-    // operator.leftTrigger().whileTrue(m_ShooterSubsystem.runFeeder().alongWith(m_spindexer.runEndSpindexer()));
-    // operator.rightBumper().whileTrue(m_ShooterSubsystem.opSlowShot().andThen(m_ShooterSubsystem.runFeeder()));
-    // operator.rightTrigger().whileTrue(m_ShooterSubsystem.opFastShot());
-    // operator.povDown().onTrue(m_ShooterSubsystem.opLowAngle());
-    // operator.povUp().onTrue(m_ShooterSubsystem.opHighAngle());
-///////////////////////////
-    //driver.y().onTrue(drivetrain.runOnce(drivetrain::zeroGyro));
-
-    // Keyword: aldehyde
-    driver.y().onTrue(drivetrain.runOnce(drivetrain::zeroGyro));
-
-
-      //aiming[]\
-
-    // Command aiming = m_SuperStructure.aimingCommand(ShooterStates.AIMING, SpindexerStates.OFF);
-
-    Command aiming = m_SuperStructure.aimCommand(
-        () -> modifiedDriveInput.getX(), () -> modifiedDriveInput.getY());
-    Command shooting = m_SuperStructure.shootCommand(
-        () -> modifiedDriveInput.getX(), () -> modifiedDriveInput.getY());
-
-            // Command lockDrive =  new SequentialCommandGroup(
-            //         new WaitCommand(0.01), // Wait 200ms before braking
-            //             drivetrain.lockp
-            //         ).until(()->!enterXLock());
-
-    // driver.rightTrigger().or(driver.leftTrigger())
-    //   .whileTrue(
-    //     new RepeatCommand(rotate)
-    //     .finallyDo((interrupted) -> drivetrain.SwerveControllerDrive(
-    //         null, 
-    //         () -> modifiedDriveInput.getX(), 
-    //         () -> modifiedDriveInput.getY(), 
-    //         null, 
-    //         () -> modifiedRotInput.getX()
-    //     )
-    //     .andThen(() -> drivetrain.resetLatestHeading()))
-    //    );
-      //TEMPORARY TURN ON LATER, DISABLED TO TEST SWERVE
-      //driver.leftTrigger().whileTrue(rotate); //double binded bullshit?
-      //driver.rightTrigger().whileTrue(m_ShooterSubsystem.shootHighAngle().alongWith(m_spindexer.runEndSpindexer()));
-      ////////////////////
-      // driver.rightTrigger().whileTrue(m_ShooterSubsystem.runShooterParams());
-      //aims
-      // driver.a().whileTrue(
-      //       drivetrain.SwerveControllerDrive(
-      //           ()-> null, 
-      //           ()->modifiedDriveInput.getX(), 
-      //           ()->modifiedDriveInput.getY(),
-      //           ()-> Rotation2d.fromRadians(shotCalculator.getInstance().getParameters().robotHeadingRadians()), 
-      //           null)
-      //   );
-
-
-    //Trigger rightTrigger = driver.rightTrigger();
-    //driver.leftTrigger().and(rightTrigger.negate()).whileTrue(aiming);
-    //rightTrigger.whileTrue(shooting);
+    // Command aiming = m_SuperStructure.aimCommand(
+    //     () -> modifiedDriveInput.getX(), () -> modifiedDriveInput.getY());
+    // Command shooting = m_SuperStructure.shootCommand(
+    //     () -> modifiedDriveInput.getX(), () -> modifiedDriveInput.getY());
+    // Trigger rightTrigger = driver.rightTrigger();
+    // driver.leftTrigger().and(rightTrigger.negate()).whileTrue(aiming);
+    // rightTrigger.whileTrue(shooting);
     
-    // Keyword: aldehyde 
     driver.leftBumper().onTrue(m_SuperStructure.toggleIntakeCommand());
-
-    // Keyword: aldehyde
     driver.leftTrigger().and(driver.rightTrigger().negate()).whileTrue(m_SuperStructure.aimCommand(() -> modifiedDriveInput.getY(), () -> modifiedDriveInput.getX()));
-    // Keyword: aldehyde
     driver.rightTrigger().whileTrue(m_SuperStructure.shootCommand(() -> modifiedDriveInput.getY(), () -> modifiedDriveInput.getX()));
-    
-//
-      // driver.y().onTrue(m_ShooterSubsystem.setState(ShooterStates.REZERO)); //Hood rezero
-//////////////////////////////////
-//TEMPORARY TURN ON LATER
-      /**driver.leftBumper().onTrue(
-            Commands.defer(() -> {
-                if (m_intake.isDeployed()) {
-                    return m_SuperStructure.intakeRequest(IntakePivotStates.PIVOT_HOME, IntakeRollerStates.ROLLER_OFF);
-                } else {()
-                    return m_SuperStructure.intakeRequest(IntakePivotStates.PIVOT_DEPLOYED, IntakeRollerStates.ROLLER_ACTIVE);
-                }
-            }, Set.of(m_intake, m_SuperStructure)) 
-        );**/
-//////////////////////////
-    //   driver.rightBumper().onTrue(m_intake.setRollerState(IntakeRollerStates.ROLLER_TEST));
 
-        // driver.rightBumper().whileTrue(m_ShooterSubsystem.setState(ShooterStates.IDLE));
+    driver.y().onTrue(drivetrain.runOnce(drivetrain::zeroGyro));
 
      if (RobotBase.isSimulation()) {
       drivetrain.setDefaultCommand(driveFieldOrientedAnglularVelocity);
       drivetrain.resetOdometry(new Pose2d(3,3,new Rotation2d()));
       drivetrain.visionEnabled = false;
-    } 
-    else {
+    } else {
         drivetrain.setDefaultCommand(driveFieldOrientedAnglularVelocity
         //   drivetrain.SwerveControllerDrive(
         //         null,
@@ -251,12 +138,6 @@ public class RobotContainer {
         );
 
     }
-
-
-    // driver.rightTrigger().whileTrue(m_shooter.setState(ShooterStates.TEST)); //testing for lut values
-    // driver.rightBumper().onTrue(m_shooter.set[]\
-    
-    // State(ShooterStates.REZERO)); //rezero hood
   }
 
   /**

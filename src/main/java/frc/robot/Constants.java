@@ -64,33 +64,9 @@ public final class Constants {
     public static final double kHoodI = 0.0;
     public static final double kHoodD = 0.0;
 
-    /* Variable Hood Shooter Calculation
-    * The calculation is super inaccurate, but it does feed?? 
-    */
-    // public static final double maxHeight = 1.50; // 2.54; // m, 100 inch
-    // public static final double range = 4.57; // m, 15 feet
-    // public static final double deltaTime = 3.0; // s
-    // public static final double gravity = -9.8; // m/s^2
-    // public static final double groundToHoodAngle = 2; // degrees
-    // public static final double adjustmentFactor = 0.045; // Used to adjust the rps, since the formula didn't consider the other motors' velocities
-    // // public static final double fuelMass = 0.227; // kg
-
-    // // The calculation is ignoring friction and air resistance
-    // public static final double velocityX = range / deltaTime;
-    // public static final double velocityY = maxHeight - 0.5 * gravity * Math.pow(deltaTime, 2.0);
-    // public static final double initialVelocity = Math.sqrt(Math.pow(velocityX, 2.0) + Math.pow(velocityY, 2.0)); 
-    // public static final double phetaAngle = 0.14; // Setting to constant as the hoodmotor's built-in encoder is inaccurate; Original: Math.acos(velocityX / velocity); // rad 
-    // public static final double launchAngle = Math.toDegrees(phetaAngle);
-    // public static final double finalHoodAngle = launchAngle - groundToHoodAngle;
-
-    // public static final double flywheelRadius = 0.05; // m, 3.97 inch diameter
-    // public static final double rotationPerSecond = initialVelocity / flywheelRadius * adjustmentFactor;
-
-    /* Fixed Hood Shooter Calculation
-     * Untested, fixed major calculation mistake
-     */
-    public static final double launchAngle = 74.1; // degrees
-    public static final double range = 4.57; // m, 15 feet/4.57m
+    /* Fixed Hood Shooter Calculation */
+    public static final double launchAngle = 45.0; // degrees
+    public static final double range = FieldConstants.fieldLength / 2.0; // Expected: half-field (4.57m/15ft)
     public static final double maxHeight = range * Math.tan(Math.toRadians(launchAngle)) / 4.0; // m
     public static final double gravity = -9.8; // m/s^2
 
@@ -99,7 +75,7 @@ public final class Constants {
     public static final double destinedHoodAngle = 180.0 - launchAngle - hoodRampGearTopAngle; // degrees
     public static final double finalHoodAngle = destinedHoodAngle - initialHoodAngle; // degrees
 
-    public static final double adjustmentFactor = 2.25; // Used to adjust the rps
+    public static final double adjustmentFactor = 1.0; // Used to adjust the rps
     // public static final double fuelMass = 0.227; // kg
 
     // The calculation is ignoring friction and air resistance
@@ -107,7 +83,7 @@ public final class Constants {
     public static final double deltaTime = (-2 * initialVelocity * Math.sin(Math.toRadians(launchAngle))) / gravity; // s
 
     public static final double flywheelDiameter = 0.1; // m, 3.97 inch diameter
-    public static final double rotationPerSecond = initialVelocity / (Math.PI * flywheelDiameter) * adjustmentFactor;
+    public static final double rotationPerSecond = 40.0 * adjustmentFactor; //initialVelocity / (Math.PI * flywheelDiameter) * adjustmentFactor;
 
     public static final int SHOOTER_CURRENT_LIMIT = 40; // amps
     public static final int HOOD_CURRENT_LIMIT = 40; // made this up
@@ -135,9 +111,9 @@ public final class Constants {
     public static final double rollerSlow = 300.0;
     public static final double rollerOutake = -1000.0;
 
-    public static final double homeAngle = 83;
-    public static final double deployedAngle = -57;
-    public static final double startingPosAngle = 70;
+    public static final double homeAngle = -91;
+    public static final double deployedAngle = -220;
+    public static final double startingPosAngle = -86;
   }
 
   public static class SpindexerConstants {

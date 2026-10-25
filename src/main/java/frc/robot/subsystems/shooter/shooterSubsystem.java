@@ -211,11 +211,11 @@ public class shooterSubsystem extends SubsystemBase{
                 var params = shotCalculator.getInstance().getParameters();
                 // setHoodAngle(45);
                 // setShooterRPS(35);
-                //setHoodAngle(ShooterConstants.finalHoodAngle);
-                //setShooterRPS(ShooterConstants.rotationPerSecond);
-                setHoodAngle(params.hoodAngle());
-                setShooterRPS(params.flywheelSpeed());
-                //setFeederVoltage(state == ShooterStates.SHOOTING && feedEnabled ? 7.0 : 0.0);
+                // setHoodAngle(ShooterConstants.finalHoodAngle);
+                // setShooterRPS(ShooterConstants.rotationPerSecond);
+                // setHoodAngle(params.hoodAngle());
+                // setShooterRPS(params.flywheelSpeed());
+                // setFeederVoltage(state == ShooterStates.SHOOTING && feedEnabled ? 7.0 : 0.0);
             }
 
             case SHOOTING -> {
@@ -223,10 +223,10 @@ public class shooterSubsystem extends SubsystemBase{
                 var params = shotCalculator.getInstance().getParameters();
                 //setHoodAngle(25);
                 //setShooterRPS(30);
-                //setHoodAngle(ShooterConstants.finalHoodAngle);
-                //setShooterRPS(ShooterConstants.rotationPerSecond);
-                setHoodAngle(params.hoodAngle());
-                setShooterRPS(params.flywheelSpeed());
+                setHoodAngle(ShooterConstants.finalHoodAngle);
+                setShooterRPS(ShooterConstants.rotationPerSecond);
+                //setHoodAngle(params.hoodAngle());
+                //setShooterRPS(params.flywheelSpeed());
                 //setFeederVoltage(state == ShooterStates.SHOOTING && feedEnabled ? 7.0 : 0.0);
             }
 

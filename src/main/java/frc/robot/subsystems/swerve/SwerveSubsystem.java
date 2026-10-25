@@ -4,14 +4,7 @@
 
 package frc.robot.subsystems.swerve;
 
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.DriveConstants;
-import frc.robot.Constants.SwerveConstants;
-// import frc.robot.Constants.limelight; 
-import frc.robot.subsystems.SuperStructure;
+import static edu.wpi.first.units.Units.Meter;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,36 +13,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Filesystem;
-import edu.wpi.first.wpilibj.Timer;
-import swervelib.parser.SwerveControllerConfiguration;
-import swervelib.parser.SwerveDriveConfiguration;
-import swervelib.parser.SwerveParser;
-import swervelib.telemetry.SwerveDriveTelemetry;
-import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
-import swervelib.SwerveController;
-import swervelib.SwerveDrive;
-import swervelib.SwerveDriveTest;
-import swervelib.math.SwerveMath;
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.util.sendable.Sendable;
-import edu.wpi.first.util.sendable.SendableBuilder;
-
 import org.json.simple.parser.ParseException;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-
-import static edu.wpi.first.units.Units.Meter;
 
 import com.ctre.phoenix6.Utils;
-import com.ctre.phoenix6.swerve.SwerveModule;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.commands.PathfindingCommand;
@@ -60,12 +26,36 @@ import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 
-import frc.AlectronaLib.EstimatePose;
-import frc.AlectronaLib.AlectronaSwerveController;
-import frc.AlectronaLib.LimelightHelpers;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
+import frc.AlectronaLib.AlectronaSwerveController;
+import frc.AlectronaLib.EstimatePose;
+import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.SwerveConstants;
+import swervelib.SwerveController;
+import swervelib.SwerveDrive;
+import swervelib.SwerveDriveTest;
+import swervelib.math.SwerveMath;
+import swervelib.parser.SwerveControllerConfiguration;
+import swervelib.parser.SwerveDriveConfiguration;
+import swervelib.parser.SwerveParser;
+import swervelib.telemetry.SwerveDriveTelemetry;
+import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
 public class SwerveSubsystem extends SubsystemBase {
 
@@ -148,6 +138,8 @@ public class SwerveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     currentPose = this.getPose();
+    // keyword
+    SmartDashboard.putNumber("robot heading from swerve", currentPose.getRotation().getDegrees());
 
 
 
@@ -168,7 +160,7 @@ public class SwerveSubsystem extends SubsystemBase {
     //   updateVision();
     // }
 
-    SmartDashboard.putBoolean("Swerve/isRedAliance", isRedAlliance());
+    SmartDashboard.putBoolean("swerve/isRedAliance", isRedAlliance());
   }
 
     @Override
@@ -420,7 +412,7 @@ public class SwerveSubsystem extends SubsystemBase {
   //Reset odom to the given pose
   public void resetOdometry(Pose2d initialHolonomicPose){
       swerveDrive.resetOdometry(initialHolonomicPose);
-    }
+  }
 
 
   //Get current pose, as reported by odometry
@@ -435,7 +427,9 @@ public class SwerveSubsystem extends SubsystemBase {
 
   //Reset gyro angle to zero & reset odometry to same position, but facing toward 0
   public void zeroGyro() {
-    swerveDrive.zeroGyro();
+    Pose2d currentPose = swerveDrive.getPose();
+    // swerveDrive.zeroGyro();
+    swerveDrive.resetOdometry(new Pose2d(currentPose.getTranslation(), new Rotation2d(0))); 
   }
 
   private boolean isRedAlliance() {

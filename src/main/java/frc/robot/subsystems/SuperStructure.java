@@ -24,7 +24,7 @@ public class SuperStructure extends SubsystemBase {
 
     public static final double FLYWHEEL_TOLERANCE_RPS = 2.0;
     public static final double HOOD_TOLERANCE_DEGREES = 2.0;
-    public static final double HEADING_TOLERANCE_DEGREES = 3.0;
+    public static final double HEADING_TOLERANCE_DEGREES = 1.0; // 3.0
     private static final double READY_DEBOUNCE_SECONDS = 0.100;
 
     private final shooterSubsystem shooter;
@@ -94,7 +94,7 @@ public class SuperStructure extends SubsystemBase {
             null, xInput, yInput, this::getTargetHeading, null, true) 
             : Commands.none();
 
-        return Commands.parallel(readiness, shooterCommand, spindexerCommand, alignCommand)
+        return Commands.parallel(readiness, shooterCommand, spindexerCommand)//, alignCommand)
             .beforeStarting(() -> {
                 aimRequested = !shooting;
                 shootRequested = shooting;
