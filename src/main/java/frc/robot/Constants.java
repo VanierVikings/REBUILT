@@ -64,26 +64,19 @@ public final class Constants {
     public static final double kHoodI = 0.0;
     public static final double kHoodD = 0.0;
 
-    /* Fixed Hood Shooter Calculation */
-    public static final double launchAngle = 45.0; // degrees
-    public static final double range = FieldConstants.fieldLength / 2.0; // Expected: half-field (4.57m/15ft)
-    public static final double maxHeight = range * Math.tan(Math.toRadians(launchAngle)) / 4.0; // m
-    public static final double gravity = -9.8; // m/s^2
-
+    /* Fixed Hood Shooter Angle Calculation */
+    // Half-field (4.57m/15ft)
+    public static final double fullFieldLaunchAngle = 45.0; // degrees
+    public static final double halfFieldLaunchAngle = 60.8; // degrees
     public static final double initialHoodAngle = 14.3; // degrees, measured
     public static final double hoodRampGearTopAngle = 75; // degrees, measured
-    public static final double destinedHoodAngle = 180.0 - launchAngle - hoodRampGearTopAngle; // degrees
-    public static final double finalHoodAngle = destinedHoodAngle - initialHoodAngle; // degrees
 
-    public static final double adjustmentFactor = 1.0; // Used to adjust the rps
-    // public static final double fuelMass = 0.227; // kg
+    //public static final double destinedHoodAngle = 180.0 - launchAngle - hoodRampGearTopAngle; // degrees
+    public static final double fullFieldHoodAngle = 180.0 - fullFieldLaunchAngle - hoodRampGearTopAngle - initialHoodAngle; // degrees
+    public static final double halfFieldHoodAngle = 180.0 - halfFieldLaunchAngle - hoodRampGearTopAngle - initialHoodAngle; // degrees
 
-    // The calculation is ignoring friction and air resistance
-    public static final double initialVelocity = Math.sqrt((range * gravity) / -1 * Math.sin(Math.toRadians(2.0 * launchAngle))); // m/s
-    public static final double deltaTime = (-2 * initialVelocity * Math.sin(Math.toRadians(launchAngle))) / gravity; // s
-
-    public static final double flywheelDiameter = 0.1; // m, 3.97 inch diameter
-    public static final double rotationPerSecond = 40.0 * adjustmentFactor; //initialVelocity / (Math.PI * flywheelDiameter) * adjustmentFactor;
+    public static final double fullFieldRPS = 40.0;
+    public static final double halfFieldRPS = 30.0;
 
     public static final int SHOOTER_CURRENT_LIMIT = 40; // amps
     public static final int HOOD_CURRENT_LIMIT = 40; // made this up
@@ -111,9 +104,9 @@ public final class Constants {
     public static final double rollerSlow = 300.0;
     public static final double rollerOutake = -1000.0;
 
-    public static final double homeAngle = -91;
-    public static final double deployedAngle = -220;
-    public static final double startingPosAngle = -86;
+    public static final double homeAngle = 66;
+    public static final double deployedAngle = -60;
+    public static final double startingPosAngle = 75;
   }
 
   public static class SpindexerConstants {

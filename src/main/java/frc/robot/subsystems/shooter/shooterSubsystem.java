@@ -223,11 +223,17 @@ public class shooterSubsystem extends SubsystemBase{
                 var params = shotCalculator.getInstance().getParameters();
                 //setHoodAngle(25);
                 //setShooterRPS(30);
-                setHoodAngle(ShooterConstants.finalHoodAngle);
-                setShooterRPS(ShooterConstants.rotationPerSecond);
+                setHoodAngle(ShooterConstants.fullFieldHoodAngle);
+                setShooterRPS(ShooterConstants.fullFieldRPS);
                 //setHoodAngle(params.hoodAngle());
                 //setShooterRPS(params.flywheelSpeed());
                 //setFeederVoltage(state == ShooterStates.SHOOTING && feedEnabled ? 7.0 : 0.0);
+            }
+
+            case FEEDING -> {
+                startFeeder();
+                setHoodAngle(ShooterConstants.halfFieldHoodAngle);
+                setShooterRPS(ShooterConstants.halfFieldRPS);
             }
 
             case JAM -> {
@@ -269,15 +275,6 @@ public class shooterSubsystem extends SubsystemBase{
         double actualRPS = getFlywheelRPS();
         SmartDashboard.putString("Shooter/RequestedState", currentState.toString());
 
-        SmartDashboard.putNumber("Shooter/LaunchAngle", ShooterConstants.launchAngle);
-        SmartDashboard.putNumber("Shooter/FinalHoodAngle", ShooterConstants.finalHoodAngle);
-        SmartDashboard.putNumber("Shooter/TrajectoryRange", ShooterConstants.range);
-        SmartDashboard.putNumber("Shooter/TrajectoryMaxHeight", ShooterConstants.maxHeight);
-        SmartDashboard.putNumber("Shooter/TrajectoryTime", ShooterConstants.deltaTime);
-
-        SmartDashboard.putNumber("Shooter/InitialVelocity", ShooterConstants.initialVelocity);
-
-        SmartDashboard.putNumber("Shooter/FlywheelRPS", ShooterConstants.rotationPerSecond);
         SmartDashboard.putNumber("Shooter/FlywheelSetpointRPS", flywheelSetpointRPS);
         SmartDashboard.putNumber("Shooter/FlywheelActualRPS", actualRPS);
         SmartDashboard.putNumber("Shooter/FlywheelErrorRPS", flywheelSetpointRPS - actualRPS);

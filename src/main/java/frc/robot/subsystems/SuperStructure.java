@@ -15,7 +15,7 @@ import frc.robot.subsystems.swerve.SwerveSubsystem;
 /** Coordinates mechanism requests without scheduling child commands from execute loops. */
 public class SuperStructure extends SubsystemBase {
     public enum LedStates { RED_GR, BLUE_GR, Off }
-    public enum ShooterStates { HOME, AIMING, SHOOTING, TEST, IDLE, REZERO, JAM }
+    public enum ShooterStates { HOME, AIMING, SHOOTING, FEEDING, TEST, IDLE, REZERO, JAM }
     public enum CLimberStates { HOME, EXTENDED, RETRACTED, REZERO, TEST }
     public enum IntakePivotStates { PIVOT_START_POS, PIVOT_HOME, PIVOT_DEPLOYED, PIVOT_TRAVEL, PIVOT_AGITATING, PIVOT_TEST }
     public enum IntakeRollerStates { ROLLER_ACTIVE, ROLLER_OFF, ROLLER_SLOW, ROLLER_OUTTAKE, ROLLER_TEST }
@@ -60,15 +60,19 @@ public class SuperStructure extends SubsystemBase {
     }
 
     public Command aimCommand(DoubleSupplier xInput, DoubleSupplier yInput) {
-        return coordinatedShotCommand(false, xInput, yInput);
+        return coordinatedShotCommand(false, false, xInput, yInput);
     }
 
     public Command shootCommand(DoubleSupplier xInput, DoubleSupplier yInput) {
-        return coordinatedShotCommand(true, xInput, yInput);
+        return coordinatedShotCommand(true, false, xInput, yInput);
+    }
+
+    public Command feedCommand(DoubleSupplier xInput, DoubleSupplier yInput) {
+        return coordinatedShotCommand(true, true, xInput, yInput);
     }
 
     private Command coordinatedShotCommand(
-            boolean shooting, DoubleSupplier xInput, DoubleSupplier yInput) {
+            boolean shooting, boolean feeding, DoubleSupplier xInput, DoubleSupplier yInput) {
 
         Command readiness = Commands.run(() -> {
              boolean rawReady = shooter.shooterAtSpeed(FLYWHEEL_TOLERANCE_RPS)
@@ -81,7 +85,7 @@ public class SuperStructure extends SubsystemBase {
 
         Command shooterCommand = shooter.runEnd(
             () -> shooter.applyState(
-                shooting ? ShooterStates.SHOOTING : ShooterStates.AIMING,
+                shooting ? (feeding ? ShooterStates.FEEDING : ShooterStates.SHOOTING) : ShooterStates.AIMING,
                 feedEnabled),
             shooter::stopAndHome);
 
@@ -98,7 +102,7 @@ public class SuperStructure extends SubsystemBase {
             null, xInput, yInput, this::getTargetHeading, null, true) 
             : Commands.none();
 
-        return Commands.parallel(readiness, shooterCommand, spindexerCommand)//, alignCommand)
+        return Commands.parallel(readiness, shooterCommand, spindexerCommand) //alignCommand)
             .beforeStarting(() -> {
                 aimRequested = !shooting;
                 shootRequested = shooting;

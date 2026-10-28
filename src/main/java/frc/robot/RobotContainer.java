@@ -79,7 +79,8 @@ public class RobotContainer {
     // Configure the trigger bindings
     configureBindings();
     autoChooser = AutoBuilder.buildAutoChooser();
-    SmartDashboard.putData("Auto Choices", autoChooser);
+    //autoChooser.setDefaultOption("Test Auto", drivetrain.getAutonomousCommand("Test Auto"));
+    SmartDashboard.putData("Auto/AutoChoices", autoChooser);
   }
 
   
@@ -104,11 +105,12 @@ public class RobotContainer {
     // rightTrigger.whileTrue(shooting);
     
     driver.leftBumper().onTrue(m_SuperStructure.toggleIntakeCommand());
-    driver.x().onTrue(m_SuperStructure.intakeRollerUnjamCommand());
 
     driver.leftTrigger().and(driver.rightTrigger().negate()).whileTrue(m_SuperStructure.aimCommand(() -> modifiedDriveInput.getY(), () -> modifiedDriveInput.getX()));
+    driver.rightBumper().and(driver.rightTrigger().negate()).whileTrue(m_SuperStructure.feedCommand(() -> modifiedDriveInput.getY(), () -> modifiedDriveInput.getX()));
     driver.rightTrigger().whileTrue(m_SuperStructure.shootCommand(() -> modifiedDriveInput.getY(), () -> modifiedDriveInput.getX()));
 
+    driver.x().onTrue(m_SuperStructure.intakeRollerUnjamCommand());
     driver.y().onTrue(drivetrain.runOnce(drivetrain::zeroGyro));
 
      if (RobotBase.isSimulation()) {
@@ -138,7 +140,6 @@ public class RobotContainer {
         //       true
         //     )
         );
-
     }
   }
 

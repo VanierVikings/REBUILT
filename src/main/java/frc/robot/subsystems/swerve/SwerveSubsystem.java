@@ -138,19 +138,13 @@ public class SwerveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     currentPose = this.getPose();
-    // keyword
-    SmartDashboard.putNumber("robot heading from swerve", currentPose.getRotation().getDegrees());
-
-
 
     var currentState = new EstimatePose.RobotState(getFieldVelocity(), getPose());
     
-
     m_EstimatePose.update(currentState, (visionPose, timestamp, stdDevs) -> {
       swerveDrive.setVisionMeasurementStdDevs(stdDevs);
       swerveDrive.addVisionMeasurement(visionPose, timestamp);
     }); 
-
 
     // This method will be called once per scheduler run
     //  if (DriverStation.isAutonomous() || DriverStation.isDisabled()){
@@ -159,8 +153,7 @@ public class SwerveSubsystem extends SubsystemBase {
     // if (visionEnabled){
     //   updateVision();
     // }
-
-    SmartDashboard.putBoolean("swerve/isRedAliance", isRedAlliance());
+    SmartDashboard.putBoolean("Swerve/isRedAliance", isRedAlliance());
   }
 
     @Override
@@ -427,13 +420,12 @@ public class SwerveSubsystem extends SubsystemBase {
 
   //Reset gyro angle to zero & reset odometry to same position, but facing toward 0
   public void zeroGyro() {
-    Pose2d currentPose = swerveDrive.getPose();
-    // swerveDrive.zeroGyro();
-    swerveDrive.resetOdometry(new Pose2d(currentPose.getTranslation(), new Rotation2d(0))); 
+    swerveDrive.resetOdometry(new Pose2d(currentPose.getTranslation(), Rotation2d.fromDegrees(0)));
+    //swerveDrive.zeroGyro();
   }
 
   private boolean isRedAlliance() {
-    var alliance = DriverStation.getAlliance();
+    var alliance = DriverStation.getAlliance()  ;
     return alliance.isPresent() ? alliance.get() == DriverStation.Alliance.Red : false;
   }
 

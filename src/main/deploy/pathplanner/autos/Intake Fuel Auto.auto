@@ -7,13 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "test fwd path"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": null
+            "pathName": "Intake Fuel Path"
           }
         }
       ]
