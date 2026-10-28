@@ -83,6 +83,7 @@ public class intakeSubsystem extends SubsystemBase {
         var encoderConfig = new CANcoderConfiguration();
         encoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive; //subject to change
         encoderConfig.MagnetSensor.MagnetOffset = IntakeConstants.CANcoderOffset;
+        encoderConfig.MagnetSensor.withAbsoluteSensorDiscontinuityPoint(1);
         pivotEncoder.getConfigurator().apply(encoderConfig);
 
 
