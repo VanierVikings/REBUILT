@@ -11,11 +11,12 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.shooter.shooterSubsystem;
 import frc.robot.subsystems.shooter.shotCalculator;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
+import frc.robot.Constants.ShooterConstants;
 
 /** Coordinates mechanism requests without scheduling child commands from execute loops. */
 public class SuperStructure extends SubsystemBase {
     public enum LedStates { RED_GR, BLUE_GR, Off }
-    public enum ShooterStates { HOME, AIMING, SHOOTING, FEEDING, TEST, IDLE, REZERO, JAM }
+    public enum ShooterStates { HOME, AIMING, SHOOTING, AUTOSHOOTING, FEEDING, TEST, IDLE, REZERO, JAM }
     public enum CLimberStates { HOME, EXTENDED, RETRACTED, REZERO, TEST }
     public enum IntakePivotStates { PIVOT_START_POS, PIVOT_HOME, PIVOT_DEPLOYED, PIVOT_TRAVEL, PIVOT_AGITATING, PIVOT_TEST }
     public enum IntakeRollerStates { ROLLER_ACTIVE, ROLLER_OFF, ROLLER_SLOW, ROLLER_OUTTAKE, ROLLER_TEST }
@@ -60,19 +61,23 @@ public class SuperStructure extends SubsystemBase {
     }
 
     public Command aimCommand(DoubleSupplier xInput, DoubleSupplier yInput) {
-        return coordinatedShotCommand(false, false, xInput, yInput);
+        return coordinatedShotCommand(false, ShooterStates.AIMING, xInput, yInput);
     }
 
     public Command shootCommand(DoubleSupplier xInput, DoubleSupplier yInput) {
-        return coordinatedShotCommand(true, false, xInput, yInput);
+        return coordinatedShotCommand(true, ShooterStates.SHOOTING, xInput, yInput);
+    }
+
+    public Command autoShootCommand(){
+        return coordinatedShotCommand(true, ShooterStates.AUTOSHOOTING, null, null);
     }
 
     public Command feedCommand(DoubleSupplier xInput, DoubleSupplier yInput) {
-        return coordinatedShotCommand(true, true, xInput, yInput);
+        return coordinatedShotCommand(true, ShooterStates.FEEDING, xInput, yInput);
     }
 
-    private Command coordinatedShotCommand(
-            boolean shooting, boolean feeding, DoubleSupplier xInput, DoubleSupplier yInput) {
+    private Command coordinatedShotCommand(boolean shooting, ShooterStates shooterState,
+             DoubleSupplier xInput, DoubleSupplier yInput) {
 
         Command readiness = Commands.run(() -> {
              boolean rawReady = shooter.shooterAtSpeed(FLYWHEEL_TOLERANCE_RPS)
@@ -80,12 +85,12 @@ public class SuperStructure extends SubsystemBase {
                  && driveAtHeading();
             readyToFeed = readyDebouncer.calculate(rawReady);
 
-            feedEnabled = shooting && readyToFeed; 
+            //feedEnabled = shooting && readyToFeed; 
         }, this);
 
         Command shooterCommand = shooter.runEnd(
             () -> shooter.applyState(
-                shooting ? (feeding ? ShooterStates.FEEDING : ShooterStates.SHOOTING) : ShooterStates.AIMING,
+                shooterState, 
                 feedEnabled),
             shooter::stopAndHome);
 
@@ -102,7 +107,7 @@ public class SuperStructure extends SubsystemBase {
             null, xInput, yInput, this::getTargetHeading, null, true) 
             : Commands.none();
 
-        return Commands.parallel(readiness, shooterCommand, spindexerCommand) //alignCommand)
+        return Commands.parallel(readiness, shooterCommand, spindexerCommand) //, alignCommand)
             .beforeStarting(() -> {
                 aimRequested = !shooting;
                 shootRequested = shooting;
@@ -121,6 +126,10 @@ public class SuperStructure extends SubsystemBase {
             });
     }
 
+    public Command GetAutoShootingCommand() {      
+        return autoShootCommand();
+    }
+    
     private Rotation2d getTargetHeading() {
         return Rotation2d.fromRadians(
             shotCalculator.getInstance().getParameters().robotHeadingRadians());

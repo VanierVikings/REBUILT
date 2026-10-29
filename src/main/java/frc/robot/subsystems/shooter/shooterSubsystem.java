@@ -230,6 +230,12 @@ public class shooterSubsystem extends SubsystemBase{
                 //setFeederVoltage(state == ShooterStates.SHOOTING && feedEnabled ? 7.0 : 0.0);
             }
 
+            case AUTOSHOOTING -> {
+                startFeeder();
+                setHoodAngle(ShooterConstants.autoShootingLaunchAngle);
+                setShooterRPS(ShooterConstants.autoShootingRPS);
+            }
+
             case FEEDING -> {
                 startFeeder();
                 setHoodAngle(ShooterConstants.halfFieldHoodAngle);

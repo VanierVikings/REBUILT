@@ -420,8 +420,10 @@ public class SwerveSubsystem extends SubsystemBase {
 
   //Reset gyro angle to zero & reset odometry to same position, but facing toward 0
   public void zeroGyro() {
-    swerveDrive.resetOdometry(new Pose2d(currentPose.getTranslation(), Rotation2d.fromDegrees(0)));
-    //swerveDrive.zeroGyro();
+    Pose2d currentPose = this.getPose();
+    Pose2d resetPose = new Pose2d(currentPose.getTranslation(), new Rotation2d(0));
+    swerveDrive.resetOdometry(resetPose);
+    // swerveDrive.zeroGyro();
   }
 
   private boolean isRedAlliance() {
@@ -618,8 +620,8 @@ public Command SwerveControllerDrive(
   }
 
   public Rotation2d getLastHeldRotation() {
-        return lastHeldPosition;
-    }
+      return lastHeldPosition;
+  }
 
   public void setInverted(){
     invert = invert*-1;

@@ -7,6 +7,7 @@ package frc.robot;
 import java.io.File;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -21,6 +22,9 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.AlectronaLib.SwerveDriveInput;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.subsystems.SuperStructure;
+import frc.robot.subsystems.SuperStructure.DriveStates;
+import frc.robot.subsystems.SuperStructure.ShooterStates;
+import frc.robot.subsystems.SuperStructure.SpindexerStates;
 import frc.robot.subsystems.intakeSubsystem;
 import frc.robot.subsystems.spindexerSubsystem;
 import frc.robot.subsystems.shooter.shooterSubsystem;
@@ -73,13 +77,14 @@ public class RobotContainer {
  
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    // NamedCommands.registerCommand("aimAndSpinup", m_SuperStructure.aimingCommand(ShooterStates.AIMING, SpindexerStates.OFF, DriveStates.AIMING));
-    // NamedCommands.registerCommand("shootingCommand", m_SuperStructure.aimingCommand(ShooterStates.SHOOTING, SpindexerStates.FEED, DriveStates.AIMING));
+    NamedCommands.registerCommand("AutoShootingCommand", m_SuperStructure.GetAutoShootingCommand()); //m_SuperStructure.aimingCommand(ShooterStates.SHOOTING, SpindexerStates.FEED, DriveStates.AIMING));
+    NamedCommands.registerCommand("StopAutoShootingCommand", m_SuperStructure.aimCommand(null, null));
+
 
     // Configure the trigger bindings
     configureBindings();
-    autoChooser = AutoBuilder.buildAutoChooser();
-    //autoChooser.setDefaultOption("Test Auto", drivetrain.getAutonomousCommand("Test Auto"));
+    autoChooser = AutoBuilder.buildAutoChooser("Auto Score");
+    autoChooser.setDefaultOption("Test Auto", drivetrain.getAutonomousCommand("Test Auto"));
     SmartDashboard.putData("Auto/AutoChoices", autoChooser);
   }
 
