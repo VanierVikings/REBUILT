@@ -68,7 +68,7 @@ public final class Constants {
     // Half-field (4.57m/15ft)
     public static final double fullFieldLaunchAngle = 45.0; // degrees
     public static final double halfFieldLaunchAngle = 60.8; // degrees
-    public static final double autoShootingLaunchAngle = 73.2; // degrees
+    public static final double autoShootingLaunchAngle = 78; // degrees
 
     public static final double initialHoodAngle = 14.3; // degrees, measured
     public static final double hoodRampGearTopAngle = 75; // degrees, measured
@@ -79,7 +79,7 @@ public final class Constants {
 
     public static final double fullFieldRPS = 40.0;
     public static final double halfFieldRPS = 30.0;
-    public static final double autoShootingRPS = 35.0;
+    public static final double autoShootingRPS = 28.0;
 
     public static final int SHOOTER_CURRENT_LIMIT = 40; // amps
     public static final int HOOD_CURRENT_LIMIT = 40; // made this up

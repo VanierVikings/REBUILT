@@ -68,6 +68,10 @@ public class SuperStructure extends SubsystemBase {
         return coordinatedShotCommand(true, ShooterStates.SHOOTING, xInput, yInput);
     }
 
+    public Command stopShootCommand(){
+        return coordinatedShotCommand(false, ShooterStates.IDLE, null, null);
+    }
+
     public Command autoShootCommand(){
         return coordinatedShotCommand(true, ShooterStates.AUTOSHOOTING, null, null);
     }
@@ -128,6 +132,10 @@ public class SuperStructure extends SubsystemBase {
 
     public Command GetAutoShootingCommand() {      
         return autoShootCommand();
+    }
+
+    public Command GetStopAutoShootingCommand() {
+        return stopShootCommand();
     }
     
     private Rotation2d getTargetHeading() {

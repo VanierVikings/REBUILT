@@ -153,7 +153,7 @@ public class SwerveSubsystem extends SubsystemBase {
     // if (visionEnabled){
     //   updateVision();
     // }
-    SmartDashboard.putBoolean("Swerve/isRedAliance", isRedAlliance());
+    SmartDashboard.putBoolean("swerve/isRedAliance", isRedAlliance());
   }
 
     @Override
@@ -420,10 +420,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
   //Reset gyro angle to zero & reset odometry to same position, but facing toward 0
   public void zeroGyro() {
-    Pose2d currentPose = this.getPose();
-    Pose2d resetPose = new Pose2d(currentPose.getTranslation(), new Rotation2d(0));
-    swerveDrive.resetOdometry(resetPose);
-    // swerveDrive.zeroGyro();
+    swerveDrive.zeroGyro();
   }
 
   private boolean isRedAlliance() {

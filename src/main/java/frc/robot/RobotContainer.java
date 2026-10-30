@@ -9,6 +9,7 @@ import java.io.File;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
+import choreo.auto.AutoChooser;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -78,17 +79,16 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     NamedCommands.registerCommand("AutoShootingCommand", m_SuperStructure.GetAutoShootingCommand()); //m_SuperStructure.aimingCommand(ShooterStates.SHOOTING, SpindexerStates.FEED, DriveStates.AIMING));
-    NamedCommands.registerCommand("StopAutoShootingCommand", m_SuperStructure.aimCommand(null, null));
+    NamedCommands.registerCommand("StopAutoShootingCommand", m_SuperStructure.GetStopAutoShootingCommand());
 
 
     // Configure the trigger bindings
     configureBindings();
-    autoChooser = AutoBuilder.buildAutoChooser("Auto Score");
-    autoChooser.setDefaultOption("Test Auto", drivetrain.getAutonomousCommand("Test Auto"));
+    autoChooser = AutoBuilder.buildAutoChooser();
+    autoChooser.setDefaultOption("Auto Score", AutoBuilder.buildAuto("Auto Score"));
     SmartDashboard.putData("Auto/AutoChoices", autoChooser);
   }
 
-  
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
    * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
